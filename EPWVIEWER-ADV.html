@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Advanced EPW Climate Analysis Tool</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
   <style>
     :root {
       --primary: #2563eb;
@@ -47,6 +48,59 @@
       border-radius: 10px;
       margin-bottom: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .header-content {
+      flex: 1;
+    }
+    
+    .unit-toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .unit-toggle {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .unit-toggle button {
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin: 0;
+    }
+    
+    .unit-toggle button.active {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary-dark);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .unit-toggle button:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .unit-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.9rem;
+      font-weight: 500;
     }
     
     h2, h3 {
@@ -352,12 +406,375 @@
       margin-left: 5px;
     }
     
+    /* Design Recommendations Styles */
+    .recommendations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+    
+    .recommendation-card {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+      transition: box-shadow 0.2s ease;
+    }
+    
+    .recommendation-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .recommendation-card.priority-high {
+      border-left: 4px solid var(--danger);
+    }
+    
+    .recommendation-card.priority-medium {
+      border-left: 4px solid var(--warning);
+    }
+    
+    .recommendation-card.priority-low {
+      border-left: 4px solid var(--primary);
+    }
+    
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .rec-category {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .rec-priority {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .rec-priority.priority-high {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .rec-priority.priority-medium {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    .rec-priority.priority-low {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .recommendation-card h5 {
+      margin: 0 0 10px 0;
+      color: var(--text-dark);
+      font-size: 1.1rem;
+    }
+    
+    .recommendation-card p {
+      margin: 0;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    
+    /* Climate Summary Styles */
+    .climate-summary-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+    
+    .summary-section {
+      background: var(--light);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--gray-lighter);
+    }
+    
+    .summary-section h5 {
+      margin: 0 0 15px 0;
+      color: var(--text-dark);
+      font-size: 1.1rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 5px;
+    }
+    
+    .climate-zone-display {
+      text-align: center;
+    }
+    
+    .climate-zone-display strong {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    .climate-chars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .climate-primary, .climate-secondary {
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .climate-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .climate-secondary {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .design-priorities, .energy-implications {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    
+    .design-priorities li, .energy-implications li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-lighter);
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .design-priorities li:before, .energy-implications li:before {
+      content: '•';
+      color: var(--primary);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .design-priorities li:last-child, .energy-implications li:last-child {
+      border-bottom: none;
+    }
+    
+    /* Statistical Analysis Styles */
+    .stats-analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 15px;
+    }
+    
+    .analysis-section {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    
+    .analysis-section h5 {
+      margin: 0 0 15px 0;
+      color: var(--text-dark);
+      font-size: 1.1rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 5px;
+    }
+    
+    .stat-grid, .correlation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    
+    .stat-item, .corr-item {
+      padding: 10px;
+      background: var(--light);
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    .corr-value {
+      display: block;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    
+    .corr-value.strong {
+      color: var(--success);
+    }
+    
+    .corr-value.weak {
+      color: var(--warning);
+    }
+    
+    .corr-interpretation {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    
+    .corr-explanation {
+      font-size: 0.8rem;
+      color: var(--primary);
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    .regression-results {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 6px;
+    }
+    
+    .reg-model {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 6px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .reg-equation {
+      font-family: 'Courier New', monospace;
+      background: var(--light);
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    
+    .climate-context {
+      margin-top: 15px;
+      padding: 10px;
+      background: var(--light);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    
+    .traits-container {
+      margin-top: 15px;
+    }
+    
+    .trait-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    
+    .good-traits {
+      background: #f0f9f0;
+      border-left-color: #28a745;
+    }
+    
+    .bad-traits {
+      background: #fdf2f2;
+      border-left-color: #dc3545;
+    }
+    
+    .neutral-traits {
+      background: #f8f9fa;
+      border-left-color: #6c757d;
+    }
+    
+    .trait-section h6 {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .trait-section ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .trait-section li {
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .reg-rsquared {
+      text-align: center;
+    }
+    
+    .rsquared-interpretation {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+    
+    .seasonal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+    }
+    
+    .season-card {
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      font-weight: 500;
+    }
+    
+    .season-card.winter {
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+    }
+    
+    .season-card.spring {
+      background: linear-gradient(135deg, #10b981, #047857);
+    }
+    
+    .season-card.summer {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .season-card.autumn {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    
+    .season-card h6 {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+    }
+    
+    .season-card div {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+    
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
     
     @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .unit-toggle-container {
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+      }
+      
       .stats-grid {
         grid-template-columns: 1fr;
       }
@@ -382,8 +799,17 @@
 <body>
   <div class="container">
     <header>
-      <h2>Advanced EPW Climate Analysis Tool</h2>
-      <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
+      <div class="header-content">
+        <h2>Advanced EPW Climate Analysis Tool</h2>
+        <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
+      </div>
+      <div class="unit-toggle-container">
+        <span class="unit-label">Units:</span>
+        <div class="unit-toggle">
+          <button id="siButton" class="active">S.I.</button>
+          <button id="imperialButton">Imperial</button>
+        </div>
+      </div>
     </header>
 
     <div id="uploadSection">
@@ -451,19 +877,19 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value" id="avg-temp">-</div>
-              <div class="stat-label">Annual Average Temperature (°C)</div>
+              <div class="stat-label" id="avg-temp-label">Annual Average Temperature (°C)</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="max-temp">-</div>
-              <div class="stat-label">Maximum Temperature (°C)</div>
+              <div class="stat-label" id="max-temp-label">Maximum Temperature (°C)</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="min-temp">-</div>
-              <div class="stat-label">Minimum Temperature (°C)</div>
+              <div class="stat-label" id="min-temp-label">Minimum Temperature (°C)</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="temp-range">-</div>
-              <div class="stat-label">Annual Temperature Range (°C)</div>
+              <div class="stat-label" id="temp-range-label">Annual Temperature Range (°C)</div>
             </div>
           </div>
           
@@ -489,19 +915,15 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value" id="annual-solar">-</div>
-              <div class="stat-label">Annual Solar Radiation (kWh/m²)</div>
+              <div class="stat-label" id="annual-solar-label">Annual Solar Radiation (kWh/m²)</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="peak-solar">-</div>
-              <div class="stat-label">Peak Solar Radiation (W/m²)</div>
+              <div class="stat-label" id="peak-solar-label">Peak Solar Radiation (W/m²)</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="clear-days">-</div>
-              <div class="stat-label">Clear Days (Sky Cover < 30%)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="cloudy-days">-</div>
-              <div class="stat-label">Cloudy Days (Sky Cover > 70%)</div>
+              <div class="stat-value" id="solar-hours">-</div>
+              <div class="stat-label">Hours with Solar > 100 W/m²</div>
             </div>
           </div>
           
@@ -509,607 +931,653 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value" id="avg-wind">-</div>
-              <div class="stat-label">Average Wind Speed (m/s)</div>
+              <div class="stat-label" id="avg-wind-label">Average Wind Speed (m/s)</div>
             </div>
             <div class="stat-card">
               <div class="stat-value" id="max-wind">-</div>
-              <div class="stat-label">Maximum Wind Speed (m/s)</div>
+              <div class="stat-label" id="max-wind-label">Maximum Wind Speed (m/s)</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="calm-hours">-</div>
-              <div class="stat-label">Calm Hours (< 0.5 m/s)</div>
+              <div class="stat-value" id="prevailing-wind">-</div>
+              <div class="stat-label">Prevailing Wind Direction</div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div class="chart-wrapper">
-        <canvas id="monthlyTempChart"></canvas>
       </div>
     </div>
 
     <div id="hdd-cdd" class="tab-content card">
-      <div class="controls-group">
-        <div class="two-column">
-          <div>
-            <label for="hdd-base">Heating Degree Day Base Temperature (°C):</label>
-            <input type="number" id="hdd-base" value="18.3" step="0.1">
-            <span class="tooltip">
-              <i class="info-icon">ⓘ</i>
-              <span class="tooltip-text">Standard base is 18.3°C (65°F) but can be adjusted based on building type</span>
-            </span>
+      <div class="two-column">
+        <div class="card">
+          <h4>Heating Degree Days (HDD)</h4>
+          <div class="controls-group">
+            <label for="hddBase">Base Temperature:</label>
+            <input type="number" id="hddBase" value="18" step="0.5">
+            <span id="hdd-base-unit">°C</span>
           </div>
-          <div>
-            <label for="cdd-base">Cooling Degree Day Base Temperature (°C):</label>
-            <input type="number" id="cdd-base" value="18.3" step="0.1">
-            <span class="tooltip">
-              <i class="info-icon">ⓘ</i>
-              <span class="tooltip-text">Standard base is 18.3°C (65°F) but can be adjusted based on building type</span>
-            </span>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="annual-hdd">-</div>
+              <div class="stat-label" id="annual-hdd-label">Annual HDD</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="monthly-hdd-max">-</div>
+              <div class="stat-label">Peak Monthly HDD</div>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="hddChart"></canvas>
           </div>
         </div>
-        <button id="calculate-degree-days" class="secondary" disabled>Calculate Degree Days</button>
-      </div>
-      
-      <div class="stats-grid">
-        <div class="stat-card highlight">
-          <div class="stat-value" id="annual-hdd">-</div>
-          <div class="stat-label">Annual Heating Degree Days</div>
-        </div>
-        <div class="stat-card highlight">
-          <div class="stat-value" id="annual-cdd">-</div>
-          <div class="stat-label">Annual Cooling Degree Days</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="hdd-ratio">-</div>
-          <div class="stat-label">HDD/CDD Ratio</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="heating-days">-</div>
-          <div class="stat-label">Heating Days</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="cooling-days">-</div>
-          <div class="stat-label">Cooling Days</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="neutral-days">-</div>
-          <div class="stat-label">Neutral Days</div>
+        
+        <div class="card">
+          <h4>Cooling Degree Days (CDD)</h4>
+          <div class="controls-group">
+            <label for="cddBase">Base Temperature:</label>
+            <input type="number" id="cddBase" value="18" step="0.5">
+            <span id="cdd-base-unit">°C</span>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="annual-cdd">-</div>
+              <div class="stat-label" id="annual-cdd-label">Annual CDD</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="monthly-cdd-max">-</div>
+              <div class="stat-label">Peak Monthly CDD</div>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="cddChart"></canvas>
+          </div>
         </div>
       </div>
-      
-      <div class="chart-wrapper">
-        <canvas id="degreeChart"></canvas>
-      </div>
-      
-      <table id="monthly-degree-days">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>HDD</th>
-            <th>CDD</th>
-            <th>Dominant Mode</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Will be populated by JavaScript -->
-        </tbody>
-      </table>
     </div>
 
     <div id="advanced" class="tab-content card">
       <div class="two-column">
-        <div>
-          <h4>Thermal Comfort Analysis</h4>
+        <div class="card">
+          <h4>Thermal Comfort Metrics</h4>
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-value" id="comfort-hours">-</div>
-              <div class="stat-label">Comfort Hours (ASHRAE 55)</div>
+              <div class="stat-label">Hours in Comfort Zone</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="discomfort-hot">-</div>
-              <div class="stat-label">Hot Discomfort Hours</div>
+              <div class="stat-value" id="overheating-hours">-</div>
+              <div class="stat-label">Overheating Hours</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="discomfort-cold">-</div>
-              <div class="stat-label">Cold Discomfort Hours</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="adaptive-comfort">-</div>
-              <div class="stat-label">Adaptive Comfort Hours</div>
-            </div>
-          </div>
-          
-          <h4>Passive Design Potential</h4>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-value" id="natural-vent-potential">-</div>
-              <div class="stat-label">Natural Ventilation Potential (%)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="passive-solar-potential">-</div>
-              <div class="stat-label">Passive Solar Potential (%)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="evaporative-cooling">-</div>
-              <div class="stat-label">Evaporative Cooling Potential (%)</div>
+              <div class="stat-value" id="underheating-hours">-</div>
+              <div class="stat-label">Underheating Hours</div>
             </div>
           </div>
         </div>
         
-        <div>
-          <h4>Renewable Energy Potential</h4>
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-value" id="solar-potential">-</div>
-              <div class="stat-label">PV Generation Potential (kWh/kWp)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-value" id="wind-potential">-</div>
-              <div class="stat-label">Wind Energy Potential</div>
-            </div>
-          </div>
-          
-          <h4>Climate Change Resilience</h4>
+        <div class="card">
+          <h4>Extreme Weather Events</h4>
           <div class="stats-grid">
             <div class="stat-card warning">
-              <div class="stat-value" id="hot-extreme-days">-</div>
-              <div class="stat-label">Extreme Hot Days (>35°C)</div>
+              <div class="stat-value" id="extreme-heat-days">-</div>
+              <div class="stat-label" id="extreme-heat-label">Days > 35°C</div>
             </div>
             <div class="stat-card warning">
-              <div class="stat-value" id="cold-extreme-days">-</div>
-              <div class="stat-label">Extreme Cold Days (<0°C)</div>
+              <div class="stat-value" id="extreme-cold-days">-</div>
+              <div class="stat-label" id="extreme-cold-label">Days < 0°C</div>
             </div>
-            <div class="stat-card warning">
-              <div class="stat-value" id="heat-wave-events">-</div>
-              <div class="stat-label">Heat Wave Events</div>
+            <div class="stat-card highlight">
+              <div class="stat-value" id="precipitation-days">-</div>
+              <div class="stat-label">Days with Precipitation</div>
             </div>
           </div>
         </div>
       </div>
       
-      <h4>Climate Indices</h4>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" id="cooling-potential-index">-</div>
-          <div class="stat-label">Cooling Potential Index</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="humidity-index">-</div>
-          <div class="stat-label">Humidity Index</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="aridity-index">-</div>
-          <div class="stat-label">Aridity Index</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="diurnal-temp-range">-</div>
-          <div class="stat-label">Avg. Diurnal Temp Range (°C)</div>
+      <div class="card">
+        <h4>Monthly Climate Summary</h4>
+        <table id="monthly-summary">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th id="monthly-avg-temp-header">Avg Temp (°C)</th>
+              <th id="monthly-solar-header">Solar (kWh/m²)</th>
+              <th>Humidity (%)</th>
+              <th id="monthly-wind-header">Wind (m/s)</th>
+            </tr>
+          </thead>
+          <tbody id="monthly-summary-body">
+            <!-- Monthly data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <h4>Design Recommendations</h4>
+        <div id="design-recommendations">
+          <!-- Design recommendations will be populated here -->
         </div>
       </div>
       
-      <div class="chart-wrapper">
-        <canvas id="climateIndicesChart"></canvas>
+      <div class="card">
+        <h4>Statistical Analysis</h4>
+        <div id="statistical-analysis">
+          <!-- Statistical analysis will be populated here -->
+        </div>
+      </div>
+      
+      <div class="card">
+        <h4>Climate Analysis Summary</h4>
+        <div id="climate-summary">
+          <!-- Climate analysis summary will be populated here -->
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="loading">
+  <div class="loading" id="loading">
     <div class="spinner"></div>
   </div>
 
   <script>
     // Global variables
-    let chart, histogramChart, monthlyChart, degreeChart, climateIndicesChart;
-    let allData = {};
-    let labels = [];
-    let originalLines = [];
-    let currentParameter = null;
-    let dailyView = false;
-    let monthlyView = false;
-    let weatherLocation = { city: "", country: "", latitude: 0, longitude: 0, elevation: 0, timeZone: "" };
-
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const parameterNames = [
-      "Dry Bulb Temp (°C)", "Dew Point Temp (°C)", "Relative Humidity (%)", "Atmospheric Station Pressure (Pa)",
-      "Extraterrestrial Horizontal Radiation (Wh/m²)", "Extraterrestrial Direct Normal Radiation (Wh/m²)",
-      "Horizontal Infrared Radiation Intensity from Sky (Wh/m²)", "Global Horizontal Radiation (Wh/m²)",
-      "Direct Normal Radiation (Wh/m²)", "Diffuse Horizontal Radiation (Wh/m²)", "Global Horizontal Illuminance (lux)",
-      "Direct Normal Illuminance (lux)", "Diffuse Horizontal Illuminance (lux)", "Zenith Luminance (Cd/m²)",
-      "Wind Direction (°)", "Wind Speed (m/s)", "Total Sky Cover (tenths)", "Opaque Sky Cover (tenths)",
-      "Visibility (km)", "Ceiling Height (m)", "Present Weather Observation", "Present Weather Codes",
-      "Precipitable Water (mm)", "Aerosol Optical Depth (thousandths)", "Snow Depth (cm)", "Days Since Last Snowfall",
-      "Albedo", "Liquid Precipitation Depth (mm)", "Liquid Precipitation Quantity (hour)"
-    ];
-    const visibleIndices = Array.from({ length: parameterNames.length }, (_, i) => i + 6);
-
-    // DOM Elements
-    const fileInput = document.getElementById('fileInput');
-    const dropZone = document.getElementById('uploadSection');
-    const parameterSelect = document.getElementById('parameterSelect');
-    const weatherFileInfo = document.getElementById('weatherFileInfo');
-    const downloadSelectedBtn = document.getElementById('downloadSelectedCSV');
-    const downloadAllBtn = document.getElementById('downloadAllCSV');
-    const downloadBinBtn = document.getElementById('downloadBinCSV');
-    const downloadReportBtn = document.getElementById('downloadReport');
-    const resetZoomBtn = document.getElementById('resetZoom');
-    const toggleDailyBtn = document.getElementById('toggleDaily');
-    const toggleMonthlyBtn = document.getElementById('toggleMonthly');
-    const binCountSlider = document.getElementById('binCount');
-    const binCountValue = document.getElementById('binCountValue');
-    const loadingIndicator = document.querySelector('.loading');
-    const calculateDegreeDaysBtn = document.getElementById('calculate-degree-days');
-    const hddBaseInput = document.getElementById('hdd-base');
-    const cddBaseInput = document.getElementById('cdd-base');
-    const toggleComfortZoneBtn = document.getElementById('toggleComfortZone');
-    const toggleHumidityLinesBtn = document.getElementById('toggleHumidityLines');
-
-    // Tab functionality
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const tabId = tab.getAttribute('data-tab');
-        
-        // Update active tab
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        // Update active content
-        tabContents.forEach(content => {
-          content.classList.remove('active');
-        });
-        document.getElementById(tabId).classList.add('active');
-        
-        // Refresh charts if needed
-        if (tabId === 'histogram' && histogramChart && currentParameter) {
-          updateHistogram(currentParameter);
-        } else if (tabId === 'psychro' && allData['Dry Bulb Temp (°C)']) {
-          drawPsychrometricChart();
-        } else if (tabId === 'climate' && allData['Dry Bulb Temp (°C)']) {
-          updateClimateAnalysis();
-        } else if (tabId === 'hdd-cdd' && allData['Dry Bulb Temp (°C)']) {
-          calculateDegreeDays();
-        } else if (tabId === 'advanced' && allData['Dry Bulb Temp (°C)']) {
-          updateAdvancedMetrics();
-        }
-      });
-    });
-
-    // File drag and drop handlers
-    dropZone.addEventListener('dragover', e => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        handleFileUpload(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInput.addEventListener('change', e => {
-      if (e.target.files.length) {
-        handleFileUpload(e.target.files[0]);
-      }
-    });
-
-    // Parameter selection handler
-    parameterSelect.addEventListener('change', () => {
-      const selectedParameter = parameterSelect.value;
-      if (selectedParameter && allData[selectedParameter]) {
-        currentParameter = selectedParameter;
-        updateCharts(selectedParameter);
-      }
-    });
-
-    // Button handlers
-    downloadSelectedBtn.addEventListener('click', () => {
-      if (currentParameter) {
-        downloadCSV(currentParameter);
-      }
-    });
-
-    downloadAllBtn.addEventListener('click', () => {
-      downloadAllCSV();
-    });
-
-    downloadBinBtn.addEventListener('click', () => {
-      if (currentParameter) {
-        downloadBinCSV(currentParameter);
-      }
-    });
-
-    downloadReportBtn.addEventListener('click', () => {
-      downloadClimateReport();
-    });
-
-    resetZoomBtn.addEventListener('click', () => {
-      if (chart) {
-        chart.resetZoom();
-      }
-    });
-
-    toggleDailyBtn.addEventListener('click', () => {
-      dailyView = !dailyView;
-      monthlyView = false;
-      if (currentParameter) {
-        updateCharts(currentParameter);
-      }
-      toggleDailyBtn.textContent = dailyView ? 'Show Hourly' : 'Show Daily';
-      toggleMonthlyBtn.textContent = 'Toggle Monthly View';
-    });
-
-    toggleMonthlyBtn.addEventListener('click', () => {
-      monthlyView = !monthlyView;
-      dailyView = false;
-      if (currentParameter) {
-        updateCharts(currentParameter);
-      }
-      toggleMonthlyBtn.textContent = monthlyView ? 'Show Hourly' : 'Show Monthly';
-      toggleDailyBtn.textContent = 'Toggle Daily/Hourly';
-    });
-
-    binCountSlider.addEventListener('input', () => {
-      binCountValue.textContent = binCountSlider.value;
-      if (currentParameter) {
-        updateHistogram(currentParameter);
-      }
-    });
-
-    calculateDegreeDaysBtn.addEventListener('click', () => {
-      calculateDegreeDays();
-    });
-
+    let weatherData = null;
+    let currentParameter = 'Dry Bulb Temperature';
+    let weatherChart = null;
+    let histogramChart = null;
+    let hddChart = null;
+    let cddChart = null;
+    let psychroChart = null;
+    let currentUnits = 'SI'; // 'SI' or 'Imperial'
     let showComfortZone = true;
-    toggleComfortZoneBtn.addEventListener('click', () => {
-      showComfortZone = !showComfortZone;
-      drawPsychrometricChart();
-    });
-
     let showHumidityLines = true;
-    toggleHumidityLinesBtn.addEventListener('click', () => {
-      showHumidityLines = !showHumidityLines;
-      drawPsychrometricChart();
-    });
+    
+    // Unit conversion functions
+    const unitConversions = {
+      temperature: {
+        toImperial: (celsius) => celsius * 9/5 + 32,
+        toSI: (fahrenheit) => (fahrenheit - 32) * 5/9
+      },
+      solarRadiation: {
+        toImperial: (wm2) => wm2 * 0.316998, // W/m² to Btu/h·ft²
+        toSI: (btuhft2) => btuhft2 / 0.316998
+      },
+      windSpeed: {
+        toImperial: (ms) => ms * 2.237, // m/s to mph
+        toSI: (mph) => mph / 2.237
+      },
+      pressure: {
+        toImperial: (pa) => pa * 0.0002953, // Pa to inHg
+        toSI: (inhg) => inhg / 0.0002953
+      }
+    };
 
-    // Main file processing function
-    function handleFileUpload(file) {
-      loadingIndicator.style.display = 'flex';
-      
-      const reader = new FileReader();
-      
-      reader.onload = function(e) {
-        try {
-          const content = e.target.result;
-          originalLines = content.split('\n');
-          
-          // Extract location data from header
-          parseLocationData(originalLines);
-          
-          // Process data
-          processEPWData(originalLines);
-          
-          // Enable UI elements
-          parameterSelect.disabled = false;
-          downloadSelectedBtn.disabled = false;
-          downloadAllBtn.disabled = false;
-          downloadBinBtn.disabled = false;
-          downloadReportBtn.disabled = false;
-          calculateDegreeDaysBtn.disabled = false;
-          
-          // Select first parameter by default
-          if (parameterSelect.options.length > 0) {
-            parameterSelect.selectedIndex = 0;
-            currentParameter = parameterSelect.value;
-            updateCharts(currentParameter);
-          }
-          
-          // Update all analysis tabs
-          updateClimateAnalysis();
-          calculateDegreeDays();
-          updateAdvancedMetrics();
-          
-          // Draw psychrometric chart if data is available
-          if (allData['Dry Bulb Temp (°C)'] && allData['Relative Humidity (%)']) {
-            drawPsychrometricChart();
-          }
-          
-        } catch (error) {
-          console.error('Error processing file:', error);
-          alert('Error processing the EPW file. Please check the file format.');
-        } finally {
-          loadingIndicator.style.display = 'none';
-        }
-      };
-      
-      reader.onerror = function() {
-        alert('Error reading the file');
-        loadingIndicator.style.display = 'none';
-      };
-      
-      reader.readAsText(file);
-    }
+    // Unit labels
+    const unitLabels = {
+      SI: {
+        temperature: '°C',
+        solarRadiation: 'W/m²',
+        solarRadiationAnnual: 'kWh/m²',
+        windSpeed: 'm/s',
+        pressure: 'Pa'
+      },
+      Imperial: {
+        temperature: '°F',
+        solarRadiation: 'Btu/h·ft²',
+        solarRadiationAnnual: 'kBtu/ft²',
+        windSpeed: 'mph',
+        pressure: 'inHg'
+      }
+    };
 
-    // Parse location data from EPW header
-    function parseLocationData(lines) {
-      const locationLine = lines.find(line => line.trim().startsWith('LOCATION'));
-      
-      if (locationLine) {
-        const locationParts = locationLine.split(',').map(part => part.trim());
-        
-        if (locationParts.length >= 7) {
-          weatherLocation = {
-            city: locationParts[1],
-            country: locationParts[3],
-            latitude: parseFloat(locationParts[6]),
-            longitude: parseFloat(locationParts[7]),
-            elevation: parseFloat(locationParts[8]),
-            timeZone: locationParts[9]
-          };
-          
-          weatherFileInfo.textContent = `Weather File: ${weatherLocation.city}, ${weatherLocation.country} (Lat: ${weatherLocation.latitude.toFixed(2)}°, Long: ${weatherLocation.longitude.toFixed(2)}°, Elev: ${weatherLocation.elevation}m)`;
-        } else {
-          weatherFileInfo.textContent = `Weather File: ${locationParts[1] || 'Unknown Location'}`;
-        }
-      } else {
-        weatherFileInfo.textContent = 'Weather File: Unknown Location';
+    // Load user preference from localStorage
+    function loadUnitPreference() {
+      const savedUnits = localStorage.getItem('epw-units');
+      if (savedUnits && (savedUnits === 'SI' || savedUnits === 'Imperial')) {
+        currentUnits = savedUnits;
+        updateUnitToggleUI();
       }
     }
 
-    // Process EPW data
-    function processEPWData(lines) {
-      // Clear existing data
-      allData = {};
-      labels = [];
+    // Save user preference to localStorage
+    function saveUnitPreference() {
+      localStorage.setItem('epw-units', currentUnits);
+    }
+
+    // Update unit toggle UI
+    function updateUnitToggleUI() {
+      const siButton = document.getElementById('siButton');
+      const imperialButton = document.getElementById('imperialButton');
       
-      // Initialize parameter select
-      parameterSelect.innerHTML = '';
+      if (currentUnits === 'SI') {
+        siButton.classList.add('active');
+        imperialButton.classList.remove('active');
+      } else {
+        siButton.classList.remove('active');
+        imperialButton.classList.add('active');
+      }
+    }
+
+    // Convert value based on parameter type and current units
+    function convertValue(value, parameterType, fromUnits = null) {
+      if (fromUnits === null) {
+        fromUnits = currentUnits === 'SI' ? 'Imperial' : 'SI';
+      }
       
-      // Skip header lines (usually 8 lines in EPW files)
-      const dataLines = lines.slice(8);
+      if (currentUnits === fromUnits) return value;
       
-      // Initialize data arrays for each parameter
-      parameterNames.forEach(param => {
-        allData[param] = [];
-      });
+      const conversions = unitConversions[parameterType];
+      if (!conversions) return value;
       
-      // Process each data line
-      dataLines.forEach((line, index) => {
-        if (!line.trim()) return;
-        
-        const values = line.split(',');
-        if (values.length < 35) return; // EPW has at least 35 values per line
-        
-        const month = parseInt(values[1]);
-        const day = parseInt(values[2]);
-        const hour = parseInt(values[3]);
-        
-        // Create time label
-        const timeLabel = `${monthNames[month-1]} ${day}, ${hour}:00`;
-        labels.push(timeLabel);
-        
-        // Extract parameter values
-        parameterNames.forEach((param, i) => {
-          const valueIndex = i + 6; // Parameters start at index 6
-          let value = parseFloat(values[valueIndex]);
-          
-          // Handle missing values (usually 9999)
-          if (value === 9999 || isNaN(value)) {
-            value = null;
+      if (currentUnits === 'Imperial') {
+        return conversions.toImperial(value);
+      } else {
+        return conversions.toSI(value);
+      }
+    }
+
+    // Format value with appropriate units
+    function formatValueWithUnits(value, parameterType, precision = 1) {
+      const labels = unitLabels[currentUnits];
+      const unit = labels[parameterType] || '';
+      return `${value.toFixed(precision)} ${unit}`;
+    }
+
+    // Update all unit labels in the interface
+    function updateUnitLabels() {
+      const labels = unitLabels[currentUnits];
+      
+      // Temperature labels
+      document.getElementById('avg-temp-label').textContent = `Annual Average Temperature (${labels.temperature})`;
+      document.getElementById('max-temp-label').textContent = `Maximum Temperature (${labels.temperature})`;
+      document.getElementById('min-temp-label').textContent = `Minimum Temperature (${labels.temperature})`;
+      document.getElementById('temp-range-label').textContent = `Annual Temperature Range (${labels.temperature})`;
+      
+      // Solar radiation labels
+      document.getElementById('annual-solar-label').textContent = `Annual Solar Radiation (${labels.solarRadiationAnnual})`;
+      document.getElementById('peak-solar-label').textContent = `Peak Solar Radiation (${labels.solarRadiation})`;
+      
+      // Wind speed labels
+      document.getElementById('avg-wind-label').textContent = `Average Wind Speed (${labels.windSpeed})`;
+      document.getElementById('max-wind-label').textContent = `Maximum Wind Speed (${labels.windSpeed})`;
+      
+      // HDD/CDD base temperature units
+      document.getElementById('hdd-base-unit').textContent = labels.temperature;
+      document.getElementById('cdd-base-unit').textContent = labels.temperature;
+      
+      // Monthly summary table headers
+      document.getElementById('monthly-avg-temp-header').textContent = `Avg Temp (${labels.temperature})`;
+      document.getElementById('monthly-solar-header').textContent = `Solar (${labels.solarRadiationAnnual})`;
+      document.getElementById('monthly-wind-header').textContent = `Wind (${labels.windSpeed})`;
+      
+      // Extreme weather labels
+      const extremeHeatTemp = currentUnits === 'SI' ? '35°C' : '95°F';
+      const extremeColdTemp = currentUnits === 'SI' ? '0°C' : '32°F';
+      document.getElementById('extreme-heat-label').textContent = `Days > ${extremeHeatTemp}`;
+      document.getElementById('extreme-cold-label').textContent = `Days < ${extremeColdTemp}`;
+    }
+
+    // EPW parameter definitions with unit types
+    const epwParameters = {
+      'Dry Bulb Temperature': { index: 6, unit: 'temperature' },
+      'Dew Point Temperature': { index: 7, unit: 'temperature' },
+      'Relative Humidity': { index: 8, unit: null },
+      'Atmospheric Station Pressure': { index: 9, unit: 'pressure' },
+      'Extraterrestrial Horizontal Radiation': { index: 10, unit: 'solarRadiation' },
+      'Extraterrestrial Direct Normal Radiation': { index: 11, unit: 'solarRadiation' },
+      'Horizontal Infrared Radiation': { index: 12, unit: 'solarRadiation' },
+      'Global Horizontal Radiation': { index: 13, unit: 'solarRadiation' },
+      'Direct Normal Radiation': { index: 14, unit: 'solarRadiation' },
+      'Diffuse Horizontal Radiation': { index: 15, unit: 'solarRadiation' },
+      'Global Horizontal Illuminance': { index: 16, unit: null },
+      'Direct Normal Illuminance': { index: 17, unit: null },
+      'Diffuse Horizontal Illuminance': { index: 18, unit: null },
+      'Zenith Luminance': { index: 19, unit: null },
+      'Wind Direction': { index: 20, unit: null },
+      'Wind Speed': { index: 21, unit: 'windSpeed' },
+      'Total Sky Cover': { index: 22, unit: null },
+      'Opaque Sky Cover': { index: 23, unit: null },
+      'Visibility': { index: 24, unit: null },
+      'Ceiling Height': { index: 25, unit: null },
+      'Present Weather Observation': { index: 26, unit: null },
+      'Present Weather Codes': { index: 27, unit: null },
+      'Precipitable Water': { index: 28, unit: null },
+      'Aerosol Optical Depth': { index: 29, unit: null },
+      'Snow Depth': { index: 30, unit: null },
+      'Days Since Last Snowfall': { index: 31, unit: null },
+      'Albedo': { index: 32, unit: null },
+      'Liquid Precipitation Depth': { index: 33, unit: null },
+      'Liquid Precipitation Quantity': { index: 34, unit: null }
+    };
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUnitPreference();
+      updateUnitLabels();
+      setupEventListeners();
+      populateParameterSelect();
+    });
+
+    function setupEventListeners() {
+      // Unit toggle buttons
+      document.getElementById('siButton').addEventListener('click', function() {
+        if (currentUnits !== 'SI') {
+          currentUnits = 'SI';
+          saveUnitPreference();
+          updateUnitToggleUI();
+          updateUnitLabels();
+          if (weatherData) {
+            updateAllDisplays();
           }
-          
-          allData[param].push(value);
+        }
+      });
+
+      document.getElementById('imperialButton').addEventListener('click', function() {
+        if (currentUnits !== 'Imperial') {
+          currentUnits = 'Imperial';
+          saveUnitPreference();
+          updateUnitToggleUI();
+          updateUnitLabels();
+          if (weatherData) {
+            updateAllDisplays();
+          }
+        }
+      });
+
+      // File upload
+      const fileInput = document.getElementById('fileInput');
+      const uploadSection = document.getElementById('uploadSection');
+
+      fileInput.addEventListener('change', handleFileSelect);
+
+      // Drag and drop
+      uploadSection.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadSection.classList.add('dragover');
+      });
+
+      uploadSection.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadSection.classList.remove('dragover');
+      });
+
+      uploadSection.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadSection.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      });
+
+      // Parameter selection
+      document.getElementById('parameterSelect').addEventListener('change', function() {
+        currentParameter = this.value;
+        updateCharts();
+      });
+
+      // Tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabName = this.dataset.tab;
+          switchTab(tabName);
         });
       });
+
+      // Chart controls
+      document.getElementById('resetZoom').addEventListener('click', resetZoom);
+      document.getElementById('toggleDaily').addEventListener('click', toggleDaily);
+      document.getElementById('toggleMonthly').addEventListener('click', toggleMonthly);
+      document.getElementById('toggleComfortZone').addEventListener('click', toggleComfortZone);
+      document.getElementById('toggleHumidityLines').addEventListener('click', toggleHumidityLines);
+
+      // Histogram controls
+      const binCountSlider = document.getElementById('binCount');
+      const binCountValue = document.getElementById('binCountValue');
+      binCountSlider.addEventListener('input', function() {
+        binCountValue.textContent = this.value;
+        updateHistogram();
+      });
+
+      // HDD/CDD controls
+      document.getElementById('hddBase').addEventListener('input', updateHDDCDD);
+      document.getElementById('cddBase').addEventListener('input', updateHDDCDD);
+
+      // Download buttons
+      document.getElementById('downloadSelectedCSV').addEventListener('click', downloadSelectedCSV);
+      document.getElementById('downloadAllCSV').addEventListener('click', downloadAllCSV);
+      document.getElementById('downloadBinCSV').addEventListener('click', downloadBinCSV);
+      document.getElementById('downloadReport').addEventListener('click', downloadReport);
+    }
+
+    function populateParameterSelect() {
+      const select = document.getElementById('parameterSelect');
+      select.innerHTML = '';
       
-      // Populate parameter select
-      parameterNames.forEach(param => {
+      Object.keys(epwParameters).forEach(param => {
         const option = document.createElement('option');
         option.value = param;
         option.textContent = param;
-        parameterSelect.appendChild(option);
+        select.appendChild(option);
       });
+      
+      select.value = currentParameter;
     }
 
-    // Update all charts with selected parameter
-    function updateCharts(parameter) {
-      updateTimeSeriesChart(parameter);
-      updateHistogram(parameter);
-      updateAnalysis(parameter);
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        handleFile(file);
+      }
     }
 
-    // Update time series chart
-    function updateTimeSeriesChart(parameter) {
+    function handleFile(file) {
+      if (!file.name.toLowerCase().endsWith('.epw')) {
+        alert('Please select a valid EPW file.');
+        return;
+      }
+
+      showLoading();
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          parseEPWFile(e.target.result, file.name);
+        } catch (error) {
+          alert('Error parsing EPW file: ' + error.message);
+          hideLoading();
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseEPWFile(content, filename) {
+      const lines = content.split('\n');
+      
+      // Parse header information
+      const locationLine = lines[0].split(',');
+      const location = {
+        city: locationLine[1],
+        state: locationLine[2],
+        country: locationLine[3],
+        latitude: parseFloat(locationLine[6]),
+        longitude: parseFloat(locationLine[7]),
+        timezone: parseFloat(locationLine[8]),
+        elevation: parseFloat(locationLine[9])
+      };
+
+      // Parse weather data (skip header lines)
+      const dataLines = lines.slice(8).filter(line => line.trim() && line.split(',').length > 30);
+      
+      const data = dataLines.map(line => {
+        const values = line.split(',');
+        return {
+          month: parseInt(values[1]),
+          day: parseInt(values[2]),
+          hour: parseInt(values[3]),
+          minute: parseInt(values[4]),
+          dryBulbTemp: parseFloat(values[6]) || 0,
+          dewPointTemp: parseFloat(values[7]) || 0,
+          relativeHumidity: parseFloat(values[8]) || 0,
+          atmosphericPressure: parseFloat(values[9]) || 0,
+          extraterrestrialHorizontalRadiation: parseFloat(values[10]) || 0,
+          extraterrestrialDirectNormalRadiation: parseFloat(values[11]) || 0,
+          horizontalInfraredRadiation: parseFloat(values[12]) || 0,
+          globalHorizontalRadiation: parseFloat(values[13]) || 0,
+          directNormalRadiation: parseFloat(values[14]) || 0,
+          diffuseHorizontalRadiation: parseFloat(values[15]) || 0,
+          globalHorizontalIlluminance: parseFloat(values[16]) || 0,
+          directNormalIlluminance: parseFloat(values[17]) || 0,
+          diffuseHorizontalIlluminance: parseFloat(values[18]) || 0,
+          zenithLuminance: parseFloat(values[19]) || 0,
+          windDirection: parseFloat(values[20]) || 0,
+          windSpeed: parseFloat(values[21]) || 0,
+          totalSkyCover: parseFloat(values[22]) || 0,
+          opaqueSkyCover: parseFloat(values[23]) || 0,
+          visibility: parseFloat(values[24]) || 0,
+          ceilingHeight: parseFloat(values[25]) || 0,
+          presentWeatherObservation: parseInt(values[26]) || 0,
+          presentWeatherCodes: parseInt(values[27]) || 0,
+          precipitableWater: parseFloat(values[28]) || 0,
+          aerosolOpticalDepth: parseFloat(values[29]) || 0,
+          snowDepth: parseFloat(values[30]) || 0,
+          daysSinceLastSnowfall: parseFloat(values[31]) || 0,
+          albedo: parseFloat(values[32]) || 0,
+          liquidPrecipitationDepth: parseFloat(values[33]) || 0,
+          liquidPrecipitationQuantity: parseFloat(values[34]) || 0
+        };
+      });
+
+      weatherData = {
+        location: location,
+        data: data,
+        filename: filename
+      };
+
+      // Update UI
+      document.getElementById('weatherFileInfo').textContent = 
+        `Weather File: ${filename} - ${location.city}, ${location.state}, ${location.country}`;
+      
+      // Enable controls
+      document.getElementById('parameterSelect').disabled = false;
+      document.getElementById('downloadSelectedCSV').disabled = false;
+      document.getElementById('downloadAllCSV').disabled = false;
+      document.getElementById('downloadBinCSV').disabled = false;
+      document.getElementById('downloadReport').disabled = false;
+
+      updateAllDisplays();
+      hideLoading();
+    }
+
+    function updateAllDisplays() {
+      updateCharts();
+      updateClimateAnalysis();
+      updateHDDCDD();
+      updateAdvancedMetrics();
+      updatePsychrometricChart();
+    }
+
+    function updateCharts() {
+      if (!weatherData) return;
+      
+      updateTimeSeriesChart();
+      updateHistogram();
+    }
+
+    function updateTimeSeriesChart() {
       const ctx = document.getElementById('weatherChart').getContext('2d');
       
-      // Prepare data based on view mode
-      let chartData, chartLabels;
-      
-      if (monthlyView) {
-        // Monthly averages
-        const monthlyData = calculateMonthlyAverages(parameter);
-        chartData = monthlyData.values;
-        chartLabels = monthlyData.labels;
-      } else if (dailyView) {
-        // Daily averages
-        const dailyData = calculateDailyAverages(parameter);
-        chartData = dailyData.values;
-        chartLabels = dailyData.labels;
-      } else {
-        // Hourly data (original)
-        chartData = allData[parameter];
-        chartLabels = labels;
+      if (weatherChart) {
+        weatherChart.destroy();
       }
+
+      const paramInfo = epwParameters[currentParameter];
+      if (!paramInfo) return;
+
+      // Create monthly aggregate data for cleaner display
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       
-      // Destroy existing chart if it exists
-      if (chart) {
-        chart.destroy();
-      }
+      // Create hourly labels with proper month markers
+      const labels = [];
+      const rawData = getParameterData(currentParameter);
+      const data = [];
       
-      // Create new chart
-      chart = new Chart(ctx, {
+      weatherData.data.forEach((d, i) => {
+        // Create date and time string for each hour
+        const dateStr = `${monthNames[d.month - 1]} ${d.day} ${d.hour}:00`;
+        labels.push(dateStr);
+        
+        let value = rawData[i];
+        if (paramInfo.unit) {
+          value = convertValue(value, paramInfo.unit, 'SI');
+        }
+        data.push(value);
+      });
+
+      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
+
+      weatherChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: chartLabels,
+          labels: labels,
           datasets: [{
-            label: parameter,
-            data: chartData,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            borderWidth: 2,
-            pointRadius: monthlyView ? 4 : (dailyView ? 2 : 0),
-            pointHoverRadius: 6,
-            fill: true,
+            label: `${currentParameter} ${unitLabel}`,
+            data: data,
+            borderColor: 'rgb(37, 99, 235)',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderWidth: 1,
+            pointRadius: 0,
             tension: 0.1
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            zoom: {
-              pan: {
-                enabled: true,
-                mode: 'x'
-              },
-              zoom: {
-                wheel: {
-                  enabled: true
-                },
-                pinch: {
-                  enabled: true
-                },
-                mode: 'x'
-              }
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false
-            }
-          },
           scales: {
             x: {
+              title: {
+                display: true,
+                text: 'Time (Months)'
+              },
               ticks: {
-                maxRotation: 45,
-                minRotation: 45,
-                autoSkip: true,
-                maxTicksLimit: monthlyView ? 12 : (dailyView ? 31 : 24)
+                maxTicksLimit: 12,
+                callback: function(value, index, values) {
+                  const label = this.getLabelForValue(value);
+                  // Only show first day of each month to avoid overcrowding
+                  if (label && (label.includes(' 1') || index % Math.floor(values.length / 12) === 0)) {
+                    return label.split(' ')[0]; // Just show month name
+                  }
+                  return '';
+                }
               }
             },
             y: {
               title: {
                 display: true,
-                text: parameter
+                text: `${currentParameter} (${unitLabel})`
+              }
+            }
+          },
+          plugins: {
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true,
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+              },
+              pan: {
+                enabled: true,
+                mode: 'x',
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${currentParameter}: ${context.parsed.y.toFixed(2)} ${unitLabel}`;
+                }
               }
             }
           }
@@ -1117,777 +1585,454 @@
       });
     }
 
-    // Update histogram
-    function updateHistogram(parameter) {
+    function updateHistogram() {
       const ctx = document.getElementById('histogramChart').getContext('2d');
-      const values = allData[parameter].filter(val => val !== null);
       
-      if (values.length === 0) return;
-      
-      // Calculate histogram bins
-      const binCount = parseInt(binCountSlider.value);
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const binWidth = (max - min) / binCount;
-      
-      const bins = Array(binCount).fill(0);
-      const binLabels = [];
-      
-      // Create bin labels
-      for (let i = 0; i < binCount; i++) {
-        const binStart = min + i * binWidth;
-        const binEnd = binStart + binWidth;
-        binLabels.push(`${binStart.toFixed(1)} - ${binEnd.toFixed(1)}`);
-      }
-      
-      // Count values in each bin
-      values.forEach(value => {
-        const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
-        bins[binIndex]++;
-      });
-      
-      // Destroy existing chart if it exists
       if (histogramChart) {
         histogramChart.destroy();
       }
+
+      const paramInfo = epwParameters[currentParameter];
+      if (!paramInfo) return;
+
+      let data = getParameterData(currentParameter);
       
-      // Create new histogram chart
+      // Convert units if necessary
+      if (paramInfo.unit) {
+        data = data.map(value => convertValue(value, paramInfo.unit, 'SI'));
+      }
+
+      const binCount = parseInt(document.getElementById('binCount').value);
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const binSize = (max - min) / binCount;
+      
+      const bins = new Array(binCount).fill(0);
+      const binLabels = [];
+      
+      for (let i = 0; i < binCount; i++) {
+        const binStart = min + i * binSize;
+        const binEnd = min + (i + 1) * binSize;
+        binLabels.push(`${binStart.toFixed(1)}-${binEnd.toFixed(1)}`);
+      }
+      
+      data.forEach(value => {
+        const binIndex = Math.min(Math.floor((value - min) / binSize), binCount - 1);
+        bins[binIndex]++;
+      });
+
+      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
+
       histogramChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: binLabels,
           datasets: [{
-            label: `Frequency Distribution of ${parameter}`,
+            label: 'Frequency',
             data: bins,
-            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.6)',
+            borderColor: 'rgb(37, 99, 235)',
             borderWidth: 1
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: `Histogram of ${parameter}`
-            }
-          },
           scales: {
             x: {
               title: {
                 display: true,
-                text: parameter
-              },
-              ticks: {
-                maxRotation: 45,
-                minRotation: 45
+                text: `${currentParameter} (${unitLabel})`
               }
             },
             y: {
               title: {
                 display: true,
                 text: 'Frequency'
-              },
-              beginAtZero: true
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Frequency: ${context.parsed.y}`;
+                }
+              }
             }
           }
         }
       });
     }
 
-    // Update analysis section
-    function updateAnalysis(parameter) {
-      const values = allData[parameter].filter(val => val !== null);
-      
-      if (values.length === 0) return;
-      
-      // Calculate statistics
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
-      
-      // Calculate median
-      const sortedValues = [...values].sort((a, b) => a - b);
-      const median = sortedValues.length % 2 === 0 
-        ? (sortedValues[sortedValues.length / 2 - 1] + sortedValues[sortedValues.length / 2]) / 2
-        : sortedValues[Math.floor(sortedValues.length / 2)];
-    }
+    function updatePsychrometricChart() {
+      if (!weatherData) return;
 
-    // Calculate daily averages
-    function calculateDailyAverages(parameter) {
-      const values = allData[parameter];
-      const dailyValues = [];
-      const dailyLabels = [];
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
       
-      // EPW files have 8760 hours (365 days * 24 hours)
-      const daysInYear = 365;
-      
-      for (let day = 0; day < daysInYear; day++) {
-        const dayValues = [];
-        for (let hour = 0; hour < 24; hour++) {
-          const index = day * 24 + hour;
-          if (index < values.length && values[index] !== null) {
-            dayValues.push(values[index]);
-          }
-        }
-        
-        if (dayValues.length > 0) {
-          const dayAvg = dayValues.reduce((sum, val) => sum + val, 0) / dayValues.length;
-          dailyValues.push(dayAvg);
-          
-          // Create day label from the first hour of the day
-          const firstHourIndex = day * 24;
-          if (firstHourIndex < labels.length) {
-            const dateParts = labels[firstHourIndex].split(',')[0]; // "Month Day"
-            dailyLabels.push(dateParts);
-          } else {
-            dailyLabels.push(`Day ${day + 1}`);
-          }
-        }
-      }
-      
-      return { values: dailyValues, labels: dailyLabels };
-    }
-
-    // Calculate monthly averages
-    function calculateMonthlyAverages(parameter) {
-      const values = allData[parameter];
-      const monthlyValues = Array(12).fill(0);
-      const monthCounts = Array(12).fill(0);
-      
-      // Process each data point
-      values.forEach((value, index) => {
-        if (value === null) return;
-        
-        // Extract month from label (format: "Month Day, Hour:00")
-        const labelParts = labels[index].split(' ');
-        const monthStr = labelParts[0];
-        const monthIndex = monthNames.indexOf(monthStr);
-        
-        if (monthIndex !== -1) {
-          monthlyValues[monthIndex] += value;
-          monthCounts[monthIndex]++;
-        }
-      });
-      
-      // Calculate averages
-      const monthlyAverages = monthlyValues.map((sum, i) => 
-        monthCounts[i] > 0 ? sum / monthCounts[i] : 0
+      // Convert temperature to current units
+      const temperatures = dryBulbData.map(temp => 
+        convertValue(temp, 'temperature', 'SI')
       );
       
-      return { values: monthlyAverages, labels: monthNames };
-    }
+      // Calculate absolute humidity from relative humidity and temperature
+      const absoluteHumidity = temperatures.map((temp, i) => {
+        const rh = relativeHumidityData[i];
+        // Convert back to Celsius for calculation if needed
+        const tempC = currentUnits === 'Imperial' ? convertValue(temp, 'temperature', 'Imperial') : temp;
+        return calculateAbsoluteHumidity(tempC, rh);
+      });
 
-    // Draw psychrometric chart
-    function drawPsychrometricChart() {
-      // Get temperature and humidity data
-      const temperatures = allData['Dry Bulb Temp (°C)'];
-      const humidities = allData['Relative Humidity (%)'];
-      
-      if (!temperatures || !humidities) return;
-      
-      // Create data points
-      const points = [];
-      for (let i = 0; i < temperatures.length; i++) {
-        if (temperatures[i] !== null && humidities[i] !== null) {
-          points.push({
-            temperature: temperatures[i],
-            humidity: humidities[i]
-          });
-        }
-      }
-      
-      // Count occurrences of each temperature-humidity combination
-      const pointCounts = {};
-      points.forEach(point => {
-        const key = `${point.temperature.toFixed(1)},${point.humidity.toFixed(1)}`;
-        pointCounts[key] = (pointCounts[key] || 0) + 1;
-      });
-      
-      // Create scatter plot data
-      const scatterData = [];
-      const sizes = [];
-      const colors = [];
-      
-      Object.keys(pointCounts).forEach(key => {
-        const [temp, hum] = key.split(',').map(Number);
-        scatterData.push({ x: temp, y: hum });
-        
-        // Size based on count (logarithmic scale for better visualization)
-        const count = pointCounts[key];
-        sizes.push(Math.max(5, Math.min(20, 5 * Math.log10(count + 1))));
-        
-        // Color based on temperature
-        const normalizedTemp = (temp + 10) / 50; // Normalize temp from -10 to 40°C
-        const hue = (1 - normalizedTemp) * 240; // Blue (cold) to Red (hot)
-        colors.push(`hsl(${hue}, 100%, 50%)`);
-      });
-      
-      // Create plot data
-      const data = [{
-        x: scatterData.map(p => p.x),
-        y: scatterData.map(p => p.y),
+      const trace = {
+        x: temperatures,
+        y: absoluteHumidity,
         mode: 'markers',
         type: 'scatter',
         marker: {
-          size: sizes,
-          color: colors,
-          opacity: 0.7
+          size: 3,
+          color: relativeHumidityData,
+          colorscale: 'Viridis',
+          colorbar: {
+            title: 'Relative Humidity (%)'
+          }
         },
-        hovertemplate: 'Temperature: %{x}°C<br>Humidity: %{y}%<extra></extra>'
-      }];
-      
-      // Add ASHRAE comfort zone if enabled
+        name: 'Weather Data'
+      };
+
+      const traces = [trace];
+
+      // Add comfort zone if enabled
       if (showComfortZone) {
-        // ASHRAE Standard 55 comfort zone (simplified)
-        data.push({
-          x: [20, 26, 26, 20, 20],
-          y: [30, 30, 70, 70, 30],
-          fill: 'toself',
-          fillcolor: 'rgba(76, 175, 80, 0.2)',
-          line: { color: 'rgba(76, 175, 80, 0.8)' },
-          name: 'ASHRAE Comfort Zone',
-          hoverinfo: 'name'
-        });
+        const comfortZone = getComfortZone();
+        traces.push(comfortZone);
       }
-      
+
       // Add humidity lines if enabled
       if (showHumidityLines) {
-        // Add absolute humidity lines (g/kg)
-        const absoluteHumidityLines = [5, 10, 15, 20];
-        
-        absoluteHumidityLines.forEach(g => {
-          const linePoints = [];
-          for (let t = -10; t <= 40; t += 5) {
-            // Simplified conversion from g/kg to RH%
-            // This is an approximation - a real psychrometric chart would use proper equations
-            const rh = g * 100 / (0.5 * Math.exp(0.06 * t + 2.5));
-            if (rh > 0 && rh <= 100) {
-              linePoints.push({ x: t, y: rh });
-            }
-          }
-          
-          if (linePoints.length > 1) {
-            data.push({
-              x: linePoints.map(p => p.x),
-              y: linePoints.map(p => p.y),
-              mode: 'lines',
-              line: { 
-                color: 'rgba(128, 128, 128, 0.5)',
-                dash: 'dot'
-              },
-              name: `${g} g/kg`,
-              hoverinfo: 'name'
-            });
-          }
-        });
+        const humidityLines = getHumidityLines();
+        traces.push(...humidityLines);
       }
+
+      const tempUnit = unitLabels[currentUnits].temperature;
       
-      // Create psychrometric chart
-      Plotly.newPlot('chart', data, {
-        title: 'Psychrometric Chart (Temperature vs. Relative Humidity)',
+      const layout = {
+        title: 'Psychrometric Chart',
         xaxis: {
-          title: 'Dry Bulb Temperature (°C)',
-          range: [-10, 40]
+          title: `Dry Bulb Temperature (${tempUnit})`,
+          range: [Math.min(...temperatures) - 2, Math.max(...temperatures) + 2]
         },
         yaxis: {
-          title: 'Relative Humidity (%)',
-          range: [0, 100]
+          title: 'Absolute Humidity (g/kg)',
+          range: [0, Math.max(...absoluteHumidity) + 2]
         },
-        showlegend: true,
-        legend: {
-          x: 0.01,
-          y: 0.99,
-          bgcolor: 'rgba(255, 255, 255, 0.7)'
-        }
-      });
+        showlegend: true
+      };
+
+      Plotly.newPlot('chart', traces, layout);
     }
 
-    // Update climate analysis
+    function calculateAbsoluteHumidity(tempC, relativeHumidity) {
+      // Calculate saturation vapor pressure using Magnus formula
+      const saturationVaporPressure = 6.112 * Math.exp((17.67 * tempC) / (tempC + 243.5));
+      
+      // Calculate actual vapor pressure
+      const actualVaporPressure = (relativeHumidity / 100) * saturationVaporPressure;
+      
+      // Calculate absolute humidity (g/kg)
+      const absoluteHumidity = (621.97 * actualVaporPressure) / (1013.25 - actualVaporPressure);
+      
+      return Math.max(0, absoluteHumidity);
+    }
+
+    function getComfortZone() {
+      // Define comfort zone boundaries based on ASHRAE Standard 55
+      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;
+      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;
+      const comfortHumidityMin = 30;
+      const comfortHumidityMax = 70;
+      
+      // Convert humidity limits to absolute humidity at comfort temperatures
+      const tempC_min = currentUnits === 'SI' ? comfortTempMin : convertValue(comfortTempMin, 'temperature', 'Imperial');
+      const tempC_max = currentUnits === 'SI' ? comfortTempMax : convertValue(comfortTempMax, 'temperature', 'Imperial');
+      
+      const ahMin_min = calculateAbsoluteHumidity(tempC_min, comfortHumidityMin);
+      const ahMax_min = calculateAbsoluteHumidity(tempC_min, comfortHumidityMax);
+      const ahMin_max = calculateAbsoluteHumidity(tempC_max, comfortHumidityMin);
+      const ahMax_max = calculateAbsoluteHumidity(tempC_max, comfortHumidityMax);
+      
+      return {
+        x: [comfortTempMin, comfortTempMax, comfortTempMax, comfortTempMin, comfortTempMin],
+        y: [ahMin_min, ahMin_max, ahMax_max, ahMax_min, ahMin_min],
+        fill: 'toself',
+        fillcolor: 'rgba(0, 255, 0, 0.1)',
+        line: { color: 'green', width: 2 },
+        mode: 'lines',
+        name: 'Comfort Zone',
+        type: 'scatter'
+      };
+    }
+
+    function getHumidityLines() {
+      const lines = [];
+      const tempRange = currentUnits === 'SI' ? 
+        { min: -10, max: 50 } : 
+        { min: 14, max: 122 };
+      
+      const rhLevels = [20, 40, 60, 80, 100];
+      
+      rhLevels.forEach(rh => {
+        const temps = [];
+        const humidities = [];
+        
+        for (let temp = tempRange.min; temp <= tempRange.max; temp += 2) {
+          const tempC = currentUnits === 'SI' ? temp : convertValue(temp, 'temperature', 'Imperial');
+          const ah = calculateAbsoluteHumidity(tempC, rh);
+          temps.push(temp);
+          humidities.push(ah);
+        }
+        
+        lines.push({
+          x: temps,
+          y: humidities,
+          mode: 'lines',
+          line: { color: 'rgba(0, 0, 255, 0.3)', width: 1 },
+          name: `${rh}% RH`,
+          type: 'scatter'
+        });
+      });
+      
+      return lines;
+    }
+
     function updateClimateAnalysis() {
-      const temperatures = allData['Dry Bulb Temp (°C)'].filter(val => val !== null);
-      const humidities = allData['Relative Humidity (%)'].filter(val => val !== null);
-      const windSpeeds = allData['Wind Speed (m/s)'].filter(val => val !== null);
-      const skyCover = allData['Total Sky Cover (tenths)'].filter(val => val !== null);
-      const globalRadiation = allData['Global Horizontal Radiation (Wh/m²)'].filter(val => val !== null);
-      
-      if (temperatures.length === 0) return;
-      
-      // Temperature analysis
-      const avgTemp = temperatures.reduce((sum, val) => sum + val, 0) / temperatures.length;
+      if (!weatherData) return;
+
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      const windDirectionData = getParameterData('Wind Direction');
+
+      // Convert temperature data
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
+      const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
+
+      // Temperature statistics
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const maxTemp = Math.max(...temperatures);
       const minTemp = Math.min(...temperatures);
       const tempRange = maxTemp - minTemp;
-      
-      document.getElementById('avg-temp').textContent = avgTemp.toFixed(1);
-      document.getElementById('max-temp').textContent = maxTemp.toFixed(1);
-      document.getElementById('min-temp').textContent = minTemp.toFixed(1);
-      document.getElementById('temp-range').textContent = tempRange.toFixed(1);
-      
-      // Humidity analysis
-      const avgRH = humidities.reduce((sum, val) => sum + val, 0) / humidities.length;
-      const highHumidityHours = humidities.filter(val => val > 70).length;
-      const lowHumidityHours = humidities.filter(val => val < 30).length;
-      
-      document.getElementById('avg-rh').textContent = avgRH.toFixed(1);
+
+      document.getElementById('avg-temp').textContent = formatValueWithUnits(avgTemp, 'temperature');
+      document.getElementById('max-temp').textContent = formatValueWithUnits(maxTemp, 'temperature');
+      document.getElementById('min-temp').textContent = formatValueWithUnits(minTemp, 'temperature');
+      document.getElementById('temp-range').textContent = formatValueWithUnits(tempRange, 'temperature');
+
+      // Humidity statistics
+      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
+      const highHumidityHours = relativeHumidityData.filter(rh => rh > 70).length;
+      const lowHumidityHours = relativeHumidityData.filter(rh => rh < 30).length;
+
+      document.getElementById('avg-rh').textContent = `${avgRH.toFixed(1)}%`;
       document.getElementById('high-humidity-hours').textContent = highHumidityHours;
       document.getElementById('low-humidity-hours').textContent = lowHumidityHours;
+
+      // Solar radiation statistics
+      const annualSolar = solarRadiation.reduce((a, b) => a + b, 0) / 1000; // Convert to kWh/m² or kBtu/ft²
+      const peakSolar = Math.max(...solarRadiation);
+      const solarThreshold = currentUnits === 'SI' ? 100 : 31.7; // 100 W/m² = ~31.7 Btu/h·ft²
+      const solarHours = solarRadiation.filter(rad => rad > solarThreshold).length;
+
+      const solarAnnualUnit = currentUnits === 'SI' ? 'kWh/m²' : 'kBtu/ft²';
+      const annualSolarConverted = currentUnits === 'SI' ? annualSolar : annualSolar * 0.316998;
       
-      // Solar radiation analysis
-      const annualSolar = globalRadiation.reduce((sum, val) => sum + val, 0) / 1000; // Convert to kWh/m²
-      const peakSolar = Math.max(...globalRadiation);
-      
-      // Count clear and cloudy days
-      const dailySkyCover = calculateDailyAverages('Total Sky Cover (tenths)').values;
-      const clearDays = dailySkyCover.filter(val => val < 3).length;
-      const cloudyDays = dailySkyCover.filter(val => val > 7).length;
-      
-      document.getElementById('annual-solar').textContent = annualSolar.toFixed(0);
-      document.getElementById('peak-solar').textContent = peakSolar.toFixed(0);
-      document.getElementById('clear-days').textContent = clearDays;
-      document.getElementById('cloudy-days').textContent = cloudyDays;
-      
-      // Wind analysis
-      const avgWind = windSpeeds.reduce((sum, val) => sum + val, 0) / windSpeeds.length;
+      document.getElementById('annual-solar').textContent = formatValueWithUnits(annualSolarConverted, 'solarRadiationAnnual');
+      document.getElementById('peak-solar').textContent = formatValueWithUnits(peakSolar, 'solarRadiation');
+      document.getElementById('solar-hours').textContent = solarHours;
+
+      // Wind statistics
+      const avgWind = windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length;
       const maxWind = Math.max(...windSpeeds);
-      const calmHours = windSpeeds.filter(val => val < 0.5).length;
-      
-      document.getElementById('avg-wind').textContent = avgWind.toFixed(1);
-      document.getElementById('max-wind').textContent = maxWind.toFixed(1);
-      document.getElementById('calm-hours').textContent = calmHours;
-      
-      // Determine ASHRAE climate zone
-      determineClimateZone(temperatures);
-      
-      // Update monthly temperature chart
-      updateMonthlyTemperatureChart();
+      const prevailingWind = calculatePrevailingWindDirection(windDirectionData);
+
+      document.getElementById('avg-wind').textContent = formatValueWithUnits(avgWind, 'windSpeed');
+      document.getElementById('max-wind').textContent = formatValueWithUnits(maxWind, 'windSpeed');
+      document.getElementById('prevailing-wind').textContent = prevailingWind;
+
+      // Climate zone analysis
+      updateClimateZone(avgTemp, tempRange, relativeHumidityData);
     }
 
-    // Determine ASHRAE climate zone
-    function determineClimateZone(temperatures) {
-      // Calculate HDD and CDD (base 18.3°C/65°F)
-      const hdd = calculateHDD(temperatures, 18.3);
-      const cdd = calculateCDD(temperatures, 18.3);
+    function calculatePrevailingWindDirection(windDirections) {
+      const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 
+                         'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      const bins = new Array(16).fill(0);
       
-      // Get monthly average temperatures
-      const monthlyTemps = calculateMonthlyAverages('Dry Bulb Temp (°C)').values;
-      const hotMonthAvg = Math.max(...monthlyTemps);
-      const coldMonthAvg = Math.min(...monthlyTemps);
+      windDirections.forEach(dir => {
+        const binIndex = Math.round(dir / 22.5) % 16;
+        bins[binIndex]++;
+      });
       
-      // Determine climate zone number (1-8)
-      let zoneNumber;
-      if (hdd >= 7000) zoneNumber = 8;
-      else if (hdd >= 5400) zoneNumber = 7;
-      else if (hdd >= 3900) zoneNumber = 6;
-      else if (hdd >= 2700) zoneNumber = 5;
-      else if (hdd >= 1500) zoneNumber = 4;
-      else if (hdd >= 900) zoneNumber = 3;
-      else if (cdd >= 6000) zoneNumber = 1;
-      else zoneNumber = 2;
+      const maxIndex = bins.indexOf(Math.max(...bins));
+      return directions[maxIndex];
+    }
+
+    function updateClimateZone(avgTemp, tempRange, relativeHumidityData) {
+      // Convert to Celsius for climate zone calculation
+      const avgTempC = currentUnits === 'SI' ? avgTemp : convertValue(avgTemp, 'temperature', 'Imperial');
+      const tempRangeC = currentUnits === 'SI' ? tempRange : tempRange * 5/9; // Range conversion is different
+      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
       
-      // Determine climate zone letter (A-C)
-      let zoneLetter;
-      if (cdd >= 4500) zoneLetter = 'A';
-      else if (cdd >= 2500) zoneLetter = 'B';
-      else zoneLetter = 'C';
+      // Use the original correct climate zone determination
+      let zone = 'Unknown';
+      let description = 'Climate zone could not be determined.';
       
-      // Special cases for zones 1-3
-      if (zoneNumber <= 3) {
-        if (zoneNumber === 1) zoneLetter = 'A';
-        else if (zoneNumber === 2) {
-          if (cdd >= 3500) zoneLetter = 'A';
-          else zoneLetter = 'B';
-        } else if (zoneNumber === 3) {
-          if (cdd >= 2500) zoneLetter = 'A';
-          else if (cdd >= 1500) zoneLetter = 'B';
-          else zoneLetter = 'C';
+      if (avgTempC >= 18) {
+        if (tempRangeC < 20) {
+          zone = '1A - Very Hot Humid';
+          description = 'Very hot and humid climate with minimal temperature variation.';
+        } else {
+          zone = '2A - Hot Humid';
+          description = 'Hot and humid climate with moderate temperature variation.';
         }
+      } else if (avgTempC >= 13) {
+        zone = '3A - Warm Humid';
+        description = 'Warm climate with significant humidity levels.';
+      } else if (avgTempC >= 10) {
+        zone = '4A - Mixed Humid';
+        description = 'Mixed climate requiring both heating and cooling.';
+      } else if (avgTempC >= 7) {
+        zone = '5A - Cool Humid';
+        description = 'Cool climate with heating dominant but some cooling required.';
+      } else {
+        zone = '6A - Cold Humid';
+        description = 'Cold climate with heating dominant year-round.';
       }
       
-      // Determine moisture regime
-      let moistureRegime;
-      const avgTemp = temperatures.reduce((sum, val) => sum + val, 0) / temperatures.length;
-      const annualRH = allData['Relative Humidity (%)'].filter(val => val !== null)
-        .reduce((sum, val) => sum + val, 0) / allData['Relative Humidity (%)'].filter(val => val !== null).length;
-      
-      if (annualRH < 50) moistureRegime = 'Dry';
-      else if (annualRH > 70) moistureRegime = 'Humid';
-      else moistureRegime = 'Marine';
-      
-      // Set climate zone
-      const climateZone = `${zoneNumber}${zoneLetter}`;
-      document.getElementById('ashrae-zone').textContent = `ASHRAE Climate Zone: ${climateZone}`;
-      
-      // Set zone description
-      let zoneDescription = '';
-      
-      switch (zoneNumber) {
-        case 1:
-          zoneDescription = 'Very Hot - Humid';
-          break;
-        case 2:
-          zoneDescription = zoneLetter === 'A' ? 'Hot - Humid' : 'Hot - Dry';
-          break;
-        case 3:
-          zoneDescription = zoneLetter === 'A' ? 'Warm - Humid' : (zoneLetter === 'B' ? 'Warm - Dry' : 'Warm - Marine');
-          break;
-        case 4:
-          zoneDescription = zoneLetter === 'A' ? 'Mixed - Humid' : (zoneLetter === 'B' ? 'Mixed - Dry' : 'Mixed - Marine');
-          break;
-        case 5:
-          zoneDescription = zoneLetter === 'A' ? 'Cool - Humid' : (zoneLetter === 'B' ? 'Cool - Dry' : 'Cool - Marine');
-          break;
-        case 6:
-          zoneDescription = zoneLetter === 'A' ? 'Cold - Humid' : (zoneLetter === 'B' ? 'Cold - Dry' : 'Cold - Marine');
-          break;
-        case 7:
-          zoneDescription = 'Very Cold';
-          break;
-        case 8:
-          zoneDescription = 'Subarctic/Arctic';
-          break;
-      }
-      
-      document.getElementById('zone-description').innerHTML = `
-        <p><strong>${zoneDescription}</strong></p>
-        <p>Heating Degree Days (Base 18.3°C): ${hdd.toFixed(0)}</p>
-        <p>Cooling Degree Days (Base 18.3°C): ${cdd.toFixed(0)}</p>
-        <p>Hottest Month Average: ${hotMonthAvg.toFixed(1)}°C</p>
-        <p>Coldest Month Average: ${coldMonthAvg.toFixed(1)}°C</p>
-        <p>Moisture Regime: ${moistureRegime}</p>
-      `;
+      document.getElementById('ashrae-zone').textContent = `ASHRAE Climate Zone: ${zone}`;
+      document.getElementById('zone-description').textContent = description;
       
       // Add climate badges
       const badgesContainer = document.getElementById('climate-badges');
       badgesContainer.innerHTML = '';
       
-      // Add characteristic badges based on climate zone
       const badges = [];
+      if (avgTempC > 20) badges.push({ text: 'Hot', class: 'badge-danger' });
+      else if (avgTempC > 15) badges.push({ text: 'Warm', class: 'badge-warning' });
+      else if (avgTempC > 5) badges.push({ text: 'Cool', class: 'badge-primary' });
+      else badges.push({ text: 'Cold', class: 'badge-secondary' });
       
-      if (zoneNumber <= 2) badges.push({ text: 'Cooling Dominated', class: 'badge-danger' });
-      if (zoneNumber >= 6) badges.push({ text: 'Heating Dominated', class: 'badge-primary' });
-      if (zoneNumber >= 3 && zoneNumber <= 5) badges.push({ text: 'Mixed Heating/Cooling', class: 'badge-secondary' });
+      if (avgRH > 70) badges.push({ text: 'High Humidity', class: 'badge-accent' });
+      else if (avgRH > 50) badges.push({ text: 'Moderate Humidity', class: 'badge-primary' });
+      else badges.push({ text: 'Low Humidity', class: 'badge-success' });
       
-      if (zoneLetter === 'A') badges.push({ text: 'High Humidity', class: 'badge-warning' });
-      if (zoneLetter === 'B') badges.push({ text: 'Low Humidity', class: 'badge-secondary' });
-      if (zoneLetter === 'C') badges.push({ text: 'Marine Influence', class: 'badge-accent' });
+      if (tempRangeC > 30) badges.push({ text: 'High Variation', class: 'badge-warning' });
+      else if (tempRangeC > 20) badges.push({ text: 'Moderate Variation', class: 'badge-secondary' });
+      else badges.push({ text: 'Low Variation', class: 'badge-success' });
       
-      // Add design strategy badges
-      if (zoneNumber <= 3) badges.push({ text: 'Shading Critical', class: 'badge-warning' });
-      if (zoneNumber >= 5) badges.push({ text: 'Insulation Critical', class: 'badge-primary' });
-      if (zoneLetter === 'A') badges.push({ text: 'Dehumidification Needed', class: 'badge-warning' });
-      if (zoneLetter === 'B') badges.push({ text: 'Evaporative Cooling Potential', class: 'badge-success' });
-      
-      // Render badges
       badges.forEach(badge => {
-        const badgeElement = document.createElement('span');
-        badgeElement.className = `badge ${badge.class}`;
-        badgeElement.textContent = badge.text;
-        badgesContainer.appendChild(badgeElement);
+        const span = document.createElement('span');
+        span.className = `badge ${badge.class}`;
+        span.textContent = badge.text;
+        badgesContainer.appendChild(span);
       });
     }
 
-    // Update monthly temperature chart
-    function updateMonthlyTemperatureChart() {
-      const ctx = document.getElementById('monthlyTempChart').getContext('2d');
+    function updateHDDCDD() {
+      if (!weatherData) return;
+
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
       
-      // Get monthly temperature data
-      const monthlyAvgTemp = calculateMonthlyAverages('Dry Bulb Temp (°C)').values;
-      const monthlyMaxTemp = [];
-      const monthlyMinTemp = [];
+      // Get base temperatures (convert to SI for calculation if needed)
+      let hddBase = parseFloat(document.getElementById('hddBase').value);
+      let cddBase = parseFloat(document.getElementById('cddBase').value);
       
-      // Calculate monthly min/max
+      if (currentUnits === 'Imperial') {
+        hddBase = convertValue(hddBase, 'temperature', 'Imperial');
+        cddBase = convertValue(cddBase, 'temperature', 'Imperial');
+      }
+
+      // Calculate daily average temperatures
+      const dailyTemps = [];
+      for (let day = 0; day < 365; day++) {
+        const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
+        const avgTemp = dayTemps.reduce((a, b) => a + b, 0) / dayTemps.length;
+        dailyTemps.push(avgTemp);
+      }
+
+      // Calculate HDD and CDD
+      const hddDaily = dailyTemps.map(temp => Math.max(0, hddBase - temp));
+      const cddDaily = dailyTemps.map(temp => Math.max(0, temp - cddBase));
+      
+      const annualHDD = hddDaily.reduce((a, b) => a + b, 0);
+      const annualCDD = cddDaily.reduce((a, b) => a + b, 0);
+
+      // Calculate monthly HDD/CDD
+      const monthlyHDD = new Array(12).fill(0);
+      const monthlyCDD = new Array(12).fill(0);
+      const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      
+      let dayIndex = 0;
       for (let month = 0; month < 12; month++) {
-        const monthTemps = [];
-        
-        // Extract temperatures for this month
-        allData['Dry Bulb Temp (°C)'].forEach((temp, index) => {
-          if (temp === null) return;
-          
-          const labelParts = labels[index].split(' ');
-          const monthStr = labelParts[0];
-          const monthIndex = monthNames.indexOf(monthStr);
-          
-          if (monthIndex === month) {
-            monthTemps.push(temp);
-          }
-        });
-        
-        monthlyMaxTemp.push(Math.max(...monthTemps));
-        monthlyMinTemp.push(Math.min(...monthTemps));
+        for (let day = 0; day < daysInMonth[month]; day++) {
+          monthlyHDD[month] += hddDaily[dayIndex];
+          monthlyCDD[month] += cddDaily[dayIndex];
+          dayIndex++;
+        }
       }
-      
-      // Destroy existing chart if it exists
-      if (monthlyChart) {
-        monthlyChart.destroy();
-      }
-      
-      // Create new chart
-      monthlyChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: monthNames,
-          datasets: [
-            {
-              label: 'Average Temperature',
-              data: monthlyAvgTemp,
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1
-            },
-            {
-              label: 'Maximum Temperature',
-              data: monthlyMaxTemp,
-              borderColor: '#ef4444',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1
-            },
-            {
-              label: 'Minimum Temperature',
-              data: monthlyMinTemp,
-              borderColor: '#0ea5e9',
-              backgroundColor: 'rgba(14, 165, 233, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Monthly Temperature Profile'
-            }
-          },
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: 'Temperature (°C)'
-              }
-            }
-          }
-        }
-      });
-    }
 
-    // Calculate Heating Degree Days
-    function calculateHDD(temperatures, baseTemp) {
-      let hdd = 0;
-      
-      // Calculate daily average temperatures
-      const dailyTemps = calculateDailyAverages('Dry Bulb Temp (°C)').values;
-      
-      // Calculate HDD for each day
-      dailyTemps.forEach(avgTemp => {
-        if (avgTemp < baseTemp) {
-          hdd += (baseTemp - avgTemp);
-        }
-      });
-      
-      return hdd;
-    }
+      const maxMonthlyHDD = Math.max(...monthlyHDD);
+      const maxMonthlyCDD = Math.max(...monthlyCDD);
 
-    // Calculate Cooling Degree Days
-    function calculateCDD(temperatures, baseTemp) {
-      let cdd = 0;
-      
-      // Calculate daily average temperatures
-      const dailyTemps = calculateDailyAverages('Dry Bulb Temp (°C)').values;
-      
-      // Calculate CDD for each day
-      dailyTemps.forEach(avgTemp => {
-        if (avgTemp > baseTemp) {
-          cdd += (avgTemp - baseTemp);
-        }
-      });
-      
-      return cdd;
-    }
-
-    // Calculate degree days
-    function calculateDegreeDays() {
-      const temperatures = allData['Dry Bulb Temp (°C)'].filter(val => val !== null);
-      if (temperatures.length === 0) return;
-      
-      // Get base temperatures
-      const hddBase = parseFloat(hddBaseInput.value);
-      const cddBase = parseFloat(cddBaseInput.value);
-      
-      // Calculate annual HDD and CDD
-      const annualHDD = calculateHDD(temperatures, hddBase);
-      const annualCDD = calculateCDD(temperatures, cddBase);
-      const hddCddRatio = annualHDD / (annualCDD || 1);
-      
       // Update display
+      const tempUnit = unitLabels[currentUnits].temperature;
       document.getElementById('annual-hdd').textContent = annualHDD.toFixed(0);
       document.getElementById('annual-cdd').textContent = annualCDD.toFixed(0);
-      document.getElementById('hdd-ratio').textContent = hddCddRatio.toFixed(1);
+      document.getElementById('monthly-hdd-max').textContent = maxMonthlyHDD.toFixed(0);
+      document.getElementById('monthly-cdd-max').textContent = maxMonthlyCDD.toFixed(0);
       
-      // Calculate monthly HDD and CDD
-      const monthlyHDD = [];
-      const monthlyCDD = [];
-      const monthlyDominantMode = [];
-      
-      for (let month = 0; month < 12; month++) {
-        const monthTemps = [];
-        
-        // Extract temperatures for this month
-        allData['Dry Bulb Temp (°C)'].forEach((temp, index) => {
-          if (temp === null) return;
-          
-          const labelParts = labels[index].split(' ');
-          const monthStr = labelParts[0];
-          const monthIndex = monthNames.indexOf(monthStr);
-          
-          if (monthIndex === month) {
-            monthTemps.push(temp);
-          }
-        });
-        
-        // Calculate daily averages for this month
-        const dailyAvgs = [];
-        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const hoursPerDay = 24;
-        
-        for (let day = 0; day < daysInMonth[month]; day++) {
-          const dayTemps = monthTemps.slice(day * hoursPerDay, (day + 1) * hoursPerDay);
-          if (dayTemps.length > 0) {
-            const dayAvg = dayTemps.reduce((sum, val) => sum + val, 0) / dayTemps.length;
-            dailyAvgs.push(dayAvg);
-          }
-        }
-        
-        // Calculate HDD and CDD for this month
-        let monthHDD = 0;
-        let monthCDD = 0;
-        
-        dailyAvgs.forEach(avgTemp => {
-          if (avgTemp < hddBase) {
-            monthHDD += (hddBase - avgTemp);
-          }
-          if (avgTemp > cddBase) {
-            monthCDD += (avgTemp - cddBase);
-          }
-        });
-        
-        monthlyHDD.push(monthHDD);
-        monthlyCDD.push(monthCDD);
-        
-        // Determine dominant mode
-        if (monthHDD > monthCDD) {
-          monthlyDominantMode.push('Heating');
-        } else if (monthCDD > monthHDD) {
-          monthlyDominantMode.push('Cooling');
-        } else {
-          monthlyDominantMode.push('Neutral');
-        }
-      }
-      
-      // Count heating, cooling, and neutral days
-      const heatingDays = monthlyDominantMode.filter(mode => mode === 'Heating').length * 30; // Approximation
-      const coolingDays = monthlyDominantMode.filter(mode => mode === 'Cooling').length * 30; // Approximation
-      const neutralDays = 365 - heatingDays - coolingDays;
-      
-      document.getElementById('heating-days').textContent = heatingDays;
-      document.getElementById('cooling-days').textContent = coolingDays;
-      document.getElementById('neutral-days').textContent = neutralDays;
-      
-      // Update monthly degree days table
-      const tableBody = document.querySelector('#monthly-degree-days tbody');
-      tableBody.innerHTML = '';
-      
-      monthNames.forEach((month, index) => {
-        const row = document.createElement('tr');
-        
-        const monthCell = document.createElement('td');
-        monthCell.textContent = month;
-        
-        const hddCell = document.createElement('td');
-        hddCell.textContent = monthlyHDD[index].toFixed(0);
-        
-        const cddCell = document.createElement('td');
-        cddCell.textContent = monthlyCDD[index].toFixed(0);
-        
-        const modeCell = document.createElement('td');
-        modeCell.textContent = monthlyDominantMode[index];
-        
-        // Color-code the dominant mode
-        if (monthlyDominantMode[index] === 'Heating') {
-          modeCell.style.color = '#3b82f6';
-        } else if (monthlyDominantMode[index] === 'Cooling') {
-          modeCell.style.color = '#ef4444';
-        }
-        
-        row.appendChild(monthCell);
-        row.appendChild(hddCell);
-        row.appendChild(cddCell);
-        row.appendChild(modeCell);
-        
-        tableBody.appendChild(row);
-      });
-      
-      // Update degree days chart
-      updateDegreeDaysChart(monthlyHDD, monthlyCDD);
+      document.getElementById('annual-hdd-label').textContent = `Annual HDD (base ${formatValueWithUnits(currentUnits === 'SI' ? hddBase : convertValue(hddBase, 'temperature', 'SI'), 'temperature')})`;
+      document.getElementById('annual-cdd-label').textContent = `Annual CDD (base ${formatValueWithUnits(currentUnits === 'SI' ? cddBase : convertValue(cddBase, 'temperature', 'SI'), 'temperature')})`;
+
+      // Update charts
+      updateHDDChart(monthlyHDD);
+      updateCDDChart(monthlyCDD);
     }
 
-    // Update degree days chart
-    function updateDegreeDaysChart(monthlyHDD, monthlyCDD) {
-      const ctx = document.getElementById('degreeChart').getContext('2d');
+    function updateHDDChart(monthlyHDD) {
+      const ctx = document.getElementById('hddChart').getContext('2d');
       
-      // Destroy existing chart if it exists
-      if (degreeChart) {
-        degreeChart.destroy();
+      if (hddChart) {
+        hddChart.destroy();
       }
-      
-      // Create new chart
-      degreeChart = new Chart(ctx, {
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      hddChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: monthNames,
-          datasets: [
-            {
-              label: 'Heating Degree Days',
-              data: monthlyHDD,
-              backgroundColor: 'rgba(59, 130, 246, 0.7)',
-              borderColor: '#3b82f6',
-              borderWidth: 1
-            },
-            {
-              label: 'Cooling Degree Days',
-              data: monthlyCDD,
-              backgroundColor: 'rgba(239, 68, 68, 0.7)',
-              borderColor: '#ef4444',
-              borderWidth: 1
-            }
-          ]
+          labels: months,
+          datasets: [{
+            label: 'Monthly HDD',
+            data: monthlyHDD,
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Monthly Heating and Cooling Degree Days'
-            }
-          },
           scales: {
-            x: {
-              stacked: false
-            },
             y: {
-              stacked: false,
+              beginAtZero: true,
               title: {
                 display: true,
-                text: 'Degree Days'
+                text: 'Heating Degree Days'
               }
             }
           }
@@ -1895,591 +2040,1250 @@
       });
     }
 
-    // Update advanced metrics
-    function updateAdvancedMetrics() {
-      const temperatures = allData['Dry Bulb Temp (°C)'].filter(val => val !== null);
-      const humidities = allData['Relative Humidity (%)'].filter(val => val !== null);
-      const windSpeeds = allData['Wind Speed (m/s)'].filter(val => val !== null);
-      const globalRadiation = allData['Global Horizontal Radiation (Wh/m²)'].filter(val => val !== null);
+    function updateCDDChart(monthlyCDD) {
+      const ctx = document.getElementById('cddChart').getContext('2d');
       
-      if (temperatures.length === 0) return;
-      
-      // Thermal comfort analysis
-      let comfortHours = 0;
-      let hotDiscomfortHours = 0;
-      let coldDiscomfortHours = 0;
-      let adaptiveComfortHours = 0;
-      
-      // Calculate comfort hours (simplified ASHRAE 55 approach)
-      for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const rh = allData['Relative Humidity (%)'][i];
-        
-        if (temp === null || rh === null) continue;
-        
-        // Basic comfort zone: 20-26°C and 30-70% RH
-        if (temp >= 20 && temp <= 26 && rh >= 30 && rh <= 70) {
-          comfortHours++;
-        } else if (temp > 26) {
-          hotDiscomfortHours++;
-        } else if (temp < 20) {
-          coldDiscomfortHours++;
-        }
-        
-        // Adaptive comfort model (simplified)
-        const monthIndex = Math.floor(i / (24 * 30)); // Approximate month
-        const monthlyAvgTemp = calculateMonthlyAverages('Dry Bulb Temp (°C)').values[monthIndex];
-        const adaptiveLowerLimit = 0.31 * monthlyAvgTemp + 14.3;
-        const adaptiveUpperLimit = 0.31 * monthlyAvgTemp + 21.3;
-        
-        if (temp >= adaptiveLowerLimit && temp <= adaptiveUpperLimit) {
-          adaptiveComfortHours++;
-        }
+      if (cddChart) {
+        cddChart.destroy();
       }
-      
-      document.getElementById('comfort-hours').textContent = comfortHours;
-      document.getElementById('discomfort-hot').textContent = hotDiscomfortHours;
-      document.getElementById('discomfort-cold').textContent = coldDiscomfortHours;
-      document.getElementById('adaptive-comfort').textContent = adaptiveComfortHours;
-      
-      // Passive design potential
-      // Natural ventilation potential: hours when outdoor temp is 18-26°C
-      const naturalVentHours = temperatures.filter(temp => temp >= 18 && temp <= 26).length;
-      const naturalVentPotential = (naturalVentHours / temperatures.length * 100).toFixed(1);
-      
-      // Passive solar potential: hours when radiation > 200 W/m² and temp < 20°C
-      let passiveSolarHours = 0;
-      for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const radiation = allData['Global Horizontal Radiation (Wh/m²)'][i];
-        
-        if (temp === null || radiation === null) continue;
-        
-        if (temp < 20 && radiation > 200) {
-          passiveSolarHours++;
-        }
-      }
-      const passiveSolarPotential = (passiveSolarHours / temperatures.length * 100).toFixed(1);
-      
-      // Evaporative cooling potential: hours when temp > 24°C and RH < 60%
-      let evapCoolingHours = 0;
-      for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const rh = allData['Relative Humidity (%)'][i];
-        
-        if (temp === null || rh === null) continue;
-        
-        if (temp > 24 && rh < 60) {
-          evapCoolingHours++;
-        }
-      }
-      const evapCoolingPotential = (evapCoolingHours / temperatures.length * 100).toFixed(1);
-      
-      document.getElementById('natural-vent-potential').textContent = naturalVentPotential;
-      document.getElementById('passive-solar-potential').textContent = passiveSolarPotential;
-      document.getElementById('evaporative-cooling').textContent = evapCoolingPotential;
-      
-      // Renewable energy potential
-      // PV generation potential (simplified)
-      const annualSolar = globalRadiation.reduce((sum, val) => sum + val, 0) / 1000; // kWh/m²
-      const pvPotential = (annualSolar * 0.15).toFixed(0); // Assuming 15% efficiency
-      
-      // Wind energy potential (simplified)
-      const cubeWindSpeeds = windSpeeds.map(speed => Math.pow(speed, 3));
-      const avgCubeWindSpeed = cubeWindSpeeds.reduce((sum, val) => sum + val, 0) / cubeWindSpeeds.length;
-      const windPotential = (avgCubeWindSpeed / 100).toFixed(2);
-      
-      document.getElementById('solar-potential').textContent = pvPotential;
-      document.getElementById('wind-potential').textContent = windPotential;
-      
-      // Climate change resilience
-      const hotExtremeDays = new Set();
-      const coldExtremeDays = new Set();
-      let heatWaveEvents = 0;
-      let consecutiveHotDays = 0;
-      
-      // Calculate daily max temperatures
-      const dailyMaxTemps = [];
-      const daysInYear = 365;
-      
-      for (let day = 0; day < daysInYear; day++) {
-        const dayTemps = [];
-        for (let hour = 0; hour < 24; hour++) {
-          const index = day * 24 + hour;
-          if (index < temperatures.length && temperatures[index] !== null) {
-            dayTemps.push(temperatures[index]);
-          }
-        }
-        
-        if (dayTemps.length > 0) {
-          const dayMax = Math.max(...dayTemps);
-          dailyMaxTemps.push(dayMax);
-          
-          // Check for extreme days
-          if (dayMax > 35) {
-            hotExtremeDays.add(day);
-            consecutiveHotDays++;
-            
-            // Check for heat wave (3+ consecutive days above 35°C)
-            if (consecutiveHotDays >= 3 && consecutiveHotDays % 3 === 0) {
-              heatWaveEvents++;
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      cddChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: months,
+          datasets: [{
+            label: 'Monthly CDD',
+            data: monthlyCDD,
+            backgroundColor: 'rgba(220, 38, 38, 0.6)',
+            borderColor: 'rgb(220, 38, 38)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Cooling Degree Days'
+              }
             }
-          } else {
-            consecutiveHotDays = 0;
-          }
-          
-          if (dayMax < 0) {
-            coldExtremeDays.add(day);
           }
         }
-      }
-      
-      document.getElementById('hot-extreme-days').textContent = hotExtremeDays.size;
-      document.getElementById('cold-extreme-days').textContent = coldExtremeDays.size;
-      document.getElementById('heat-wave-events').textContent = heatWaveEvents;
-      
-      // Climate indices
-      // Cooling Potential Index: ratio of hours below 20°C to hours above 26°C
-      const coolHours = temperatures.filter(temp => temp < 20).length;
-      const hotHours = temperatures.filter(temp => temp > 26).length;
-      const coolingPotentialIndex = (coolHours / (hotHours || 1)).toFixed(2);
-      
-      // Humidity Index: ratio of hours with RH>70% to hours with RH<30%
-      const highHumidityHours = humidities.filter(rh => rh > 70).length;
-      const lowHumidityHours = humidities.filter(rh => rh < 30).length;
-      const humidityIndex = (highHumidityHours / (lowHumidityHours || 1)).toFixed(2);
-      
-      // Aridity Index (simplified)
-      const avgTemp = temperatures.reduce((sum, val) => sum + val, 0) / temperatures.length;
-      const avgRH = humidities.reduce((sum, val) => sum + val, 0) / humidities.length;
-      const aridityIndex = (avgTemp / (avgRH / 10 || 1)).toFixed(2);
-      
-      // Diurnal temperature range
-      const dailyMinTemps = [];
-      for (let day = 0; day < daysInYear; day++) {
-        const dayTemps = [];
-        for (let hour = 0; hour < 24; hour++) {
-          const index = day * 24 + hour;
-          if (index < temperatures.length && temperatures[index] !== null) {
-            dayTemps.push(temperatures[index]);
-          }
-        }
-        
-        if (dayTemps.length > 0) {
-          dailyMinTemps.push(Math.min(...dayTemps));
-        }
-      }
-      
-      const diurnalRanges = dailyMaxTemps.map((max, i) => max - dailyMinTemps[i]);
-      const avgDiurnalRange = diurnalRanges.reduce((sum, val) => sum + val, 0) / diurnalRanges.length;
-      
-      document.getElementById('cooling-potential-index').textContent = coolingPotentialIndex;
-      document.getElementById('humidity-index').textContent = humidityIndex;
-      document.getElementById('aridity-index').textContent = aridityIndex;
-      document.getElementById('diurnal-temp-range').textContent = avgDiurnalRange.toFixed(1);
-      
-      // Update climate indices chart
-      updateClimateIndicesChart();
+      });
     }
 
-    // Update climate indices chart
-    function updateClimateIndicesChart() {
-      const ctx = document.getElementById('climateIndicesChart').getContext('2d');
+    function updateAdvancedMetrics() {
+      if (!weatherData) return;
+
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const precipitationData = getParameterData('Liquid Precipitation Depth');
       
-      // Calculate monthly indices
-      const monthlyIndices = [];
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
       
+      // Thermal comfort analysis (simplified)
+      const comfortMin = currentUnits === 'SI' ? 20 : 68;
+      const comfortMax = currentUnits === 'SI' ? 26 : 79;
+      
+      const comfortHours = temperatures.filter(temp => temp >= comfortMin && temp <= comfortMax).length;
+      const overheatingHours = temperatures.filter(temp => temp > comfortMax).length;
+      const underheatingHours = temperatures.filter(temp => temp < comfortMin).length;
+
+      // Extreme weather events
+      const extremeHeatThreshold = currentUnits === 'SI' ? 35 : 95;
+      const extremeColdThreshold = currentUnits === 'SI' ? 0 : 32;
+      
+      // Calculate daily max temperatures for extreme day counts
+      const dailyMaxTemps = [];
+      for (let day = 0; day < 365; day++) {
+        const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
+        const maxTemp = Math.max(...dayTemps);
+        dailyMaxTemps.push(maxTemp);
+      }
+      
+      const extremeHeatDays = dailyMaxTemps.filter(temp => temp > extremeHeatThreshold).length;
+      const extremeColdDays = dailyMaxTemps.filter(temp => temp < extremeColdThreshold).length;
+      const precipitationDays = precipitationData.filter(precip => precip > 0).length / 24; // Convert hours to days
+
+      // Update display
+      document.getElementById('comfort-hours').textContent = comfortHours;
+      document.getElementById('overheating-hours').textContent = overheatingHours;
+      document.getElementById('underheating-hours').textContent = underheatingHours;
+      document.getElementById('extreme-heat-days').textContent = extremeHeatDays;
+      document.getElementById('extreme-cold-days').textContent = extremeColdDays;
+      document.getElementById('precipitation-days').textContent = Math.round(precipitationDays);
+
+      // Update monthly summary table
+      updateMonthlySummary();
+      
+      // Update design recommendations, statistical analysis, and climate summary
+      updateDesignRecommendations();
+      updateStatisticalAnalysis();
+      updateClimateSummary();
+    }
+
+    function updateMonthlySummary() {
+      const tbody = document.getElementById('monthly-summary-body');
+      tbody.innerHTML = '';
+      
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const windSpeedData = getParameterData('Wind Speed');
+      
+      // Convert data to current units
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
+      const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
+      
+      let hourIndex = 0;
       for (let month = 0; month < 12; month++) {
-        const monthTemps = [];
-        const monthRH = [];
+        const hoursInMonth = daysInMonth[month] * 24;
         
         // Extract data for this month
-        allData['Dry Bulb Temp (°C)'].forEach((temp, index) => {
-          if (temp === null) return;
-          
-          const labelParts = labels[index].split(' ');
-          const monthStr = labelParts[0];
-          const monthIndex = monthNames.indexOf(monthStr);
-          
-          if (monthIndex === month) {
-            monthTemps.push(temp);
-            monthRH.push(allData['Relative Humidity (%)'][index]);
-          }
+        const monthTemps = temperatures.slice(hourIndex, hourIndex + hoursInMonth);
+        const monthSolar = solarRadiation.slice(hourIndex, hourIndex + hoursInMonth);
+        const monthHumidity = relativeHumidityData.slice(hourIndex, hourIndex + hoursInMonth);
+        const monthWind = windSpeeds.slice(hourIndex, hourIndex + hoursInMonth);
+        
+        // Calculate averages
+        const avgTemp = monthTemps.reduce((a, b) => a + b, 0) / monthTemps.length;
+        const avgSolar = (monthSolar.reduce((a, b) => a + b, 0) / 1000) * hoursInMonth / 1000; // Convert to kWh/m² or kBtu/ft²
+        const avgHumidity = monthHumidity.reduce((a, b) => a + b, 0) / monthHumidity.length;
+        const avgWind = monthWind.reduce((a, b) => a + b, 0) / monthWind.length;
+        
+        // Convert solar radiation for annual units
+        const avgSolarConverted = currentUnits === 'SI' ? avgSolar : avgSolar * 0.316998;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${months[month]}</td>
+          <td>${formatValueWithUnits(avgTemp, 'temperature')}</td>
+          <td>${formatValueWithUnits(avgSolarConverted, 'solarRadiationAnnual')}</td>
+          <td>${avgHumidity.toFixed(1)}%</td>
+          <td>${formatValueWithUnits(avgWind, 'windSpeed')}</td>
+        `;
+        tbody.appendChild(row);
+        
+        hourIndex += hoursInMonth;
+      }
+    }
+
+    function updateDesignRecommendations() {
+      if (!weatherData) return;
+      
+      const container = document.getElementById('design-recommendations');
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
+      const avgSolar = globalHorizontalRadiation.reduce((a, b) => a + b, 0) / globalHorizontalRadiation.length;
+      const avgWind = windSpeedData.reduce((a, b) => a + b, 0) / windSpeedData.length;
+      
+      // Generate design recommendations based on climate data
+      const recommendations = [];
+      
+      // Climate zone determination for context
+      const tempRangeC = Math.max(...temperatures) - Math.min(...temperatures);
+      const climateZone = determineClimateZone(avgTemp, 0, 0, avgRH);
+      
+      // Building envelope recommendations
+      if (avgTemp > 25) {
+        recommendations.push({
+          category: 'Building Envelope',
+          priority: 'High',
+          title: 'Enhanced Insulation & Thermal Mass',
+          description: 'Use high R-value insulation (R-30+ walls, R-49+ roof) and thermal mass materials to reduce cooling loads in this hot climate.'
         });
-        
-        // Calculate indices
-        const coolHours = monthTemps.filter(temp => temp < 20).length;
-        const hotHours = monthTemps.filter(temp => temp > 26).length;
-        const coolingPotentialIndex = coolHours / (hotHours || 1);
-        
-        const highHumidityHours = monthRH.filter(rh => rh > 70).length;
-        const lowHumidityHours = monthRH.filter(rh => rh < 30).length;
-        const humidityIndex = highHumidityHours / (lowHumidityHours || 1);
-        
-        const avgTemp = monthTemps.reduce((sum, val) => sum + val, 0) / monthTemps.length;
-        const avgRH = monthRH.reduce((sum, val) => sum + val, 0) / monthRH.length;
-        const aridityIndex = avgTemp / (avgRH / 10 || 1);
-        
-        monthlyIndices.push({
-          coolingPotential: coolingPotentialIndex,
-          humidity: humidityIndex,
-          aridity: aridityIndex
+      } else if (avgTemp < 10) {
+        recommendations.push({
+          category: 'Building Envelope',
+          priority: 'High',
+          title: 'Superior Insulation & Air Sealing',
+          description: 'Implement continuous insulation (R-40+ walls, R-60+ roof) and rigorous air sealing to minimize heating loads.'
         });
       }
       
-      // Destroy existing chart if it exists
-      if (climateIndicesChart) {
-        climateIndicesChart.destroy();
+      // HVAC recommendations
+      if (avgRH > 70) {
+        recommendations.push({
+          category: 'HVAC Systems',
+          priority: 'High',
+          title: 'Dehumidification Systems',
+          description: 'Install dedicated outdoor air systems (DOAS) with dehumidification capabilities to manage high humidity levels effectively.'
+        });
+      } else if (avgRH < 30) {
+        recommendations.push({
+          category: 'HVAC Systems',
+          priority: 'Medium',
+          title: 'Humidification Systems',
+          description: 'Consider humidification systems during dry periods to maintain occupant comfort and prevent static electricity issues.'
+        });
       }
       
-      // Create new chart
-      climateIndicesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: monthNames,
-          datasets: [
-            {
-              label: 'Cooling Potential Index',
-              data: monthlyIndices.map(m => m.coolingPotential),
-              borderColor: '#3b82f6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1,
-              yAxisID: 'y'
-            },
-            {
-              label: 'Humidity Index',
-              data: monthlyIndices.map(m => m.humidity),
-              borderColor: '#14b8a6',
-              backgroundColor: 'rgba(20, 184, 166, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1,
-              yAxisID: 'y'
-            },
-            {
-              label: 'Aridity Index',
-              data: monthlyIndices.map(m => m.aridity),
-              borderColor: '#f59e0b',
-              backgroundColor: 'rgba(245, 158, 11, 0.1)',
-              borderWidth: 2,
-              fill: false,
-              tension: 0.1,
-              yAxisID: 'y'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Monthly Climate Indices'
-            }
-          },
-          scales: {
-            y: {
-              title: {
-                display: true,
-                text: 'Index Value'
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // Download selected parameter as CSV
-    function downloadCSV(parameter) {
-      const values = allData[parameter];
-      let csvContent = 'Time,' + parameter + '\n';
+      // Solar and renewable energy
+      if (avgSolar > 400) {
+        recommendations.push({
+          category: 'Renewable Energy',
+          priority: 'High',
+          title: 'Solar PV Integration',
+          description: 'Excellent solar resource available. Consider rooftop or ground-mounted PV systems with battery storage for energy independence.'
+        });
+      }
       
-      values.forEach((value, index) => {
-        csvContent += labels[index] + ',' + (value !== null ? value : '') + '\n';
+      // Natural ventilation
+      if (avgWind > 3 && avgTemp < 25) {
+        recommendations.push({
+          category: 'Natural Ventilation',
+          priority: 'Medium',
+          title: 'Wind-Driven Ventilation',
+          description: 'Favorable wind conditions support natural ventilation strategies. Design operable windows and stack ventilation systems.'
+        });
+      }
+      
+      // Water management
+      const precipitationData = getParameterData('Liquid Precipitation Depth');
+      const annualPrecip = precipitationData.reduce((a, b) => a + b, 0);
+      
+      if (annualPrecip > 1000) {
+        recommendations.push({
+          category: 'Water Management',
+          priority: 'High',
+          title: 'Stormwater Management',
+          description: 'High precipitation levels require robust drainage systems, green roofs, and permeable paving to manage runoff.'
+        });
+      } else if (annualPrecip < 300) {
+        recommendations.push({
+          category: 'Water Management',
+          priority: 'High',
+          title: 'Water Conservation',
+          description: 'Low precipitation requires water conservation measures: rainwater harvesting, xeriscaping, and efficient irrigation systems.'
+        });
+      }
+      
+      // Daylighting
+      recommendations.push({
+        category: 'Daylighting',
+        priority: 'Medium',
+        title: 'Optimized Daylight Design',
+        description: 'Design south-facing windows with appropriate overhangs. Use high-performance glazing and consider automated shading systems.'
       });
       
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = parameter.replace(/[^\w\s]/gi, '') + '.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Render recommendations
+      let html = '<div class="recommendations-grid">';
+      recommendations.forEach(rec => {
+        const priorityClass = rec.priority.toLowerCase();
+        html += `
+          <div class="recommendation-card priority-${priorityClass}">
+            <div class="rec-header">
+              <span class="rec-category">${rec.category}</span>
+              <span class="rec-priority priority-${priorityClass}">${rec.priority}</span>
+            </div>
+            <h5>${rec.title}</h5>
+            <p>${rec.description}</p>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      container.innerHTML = html;
     }
 
-    // Download all parameters as CSV
+    function updateStatisticalAnalysis() {
+      if (!weatherData) return;
+      
+      const container = document.getElementById('statistical-analysis');
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const humidity = relativeHumidityData;
+      const solar = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
+      const wind = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
+      
+      // Calculate basic statistics
+      function calculateStats(data) {
+        const sorted = [...data].sort((a, b) => a - b);
+        const mean = data.reduce((a, b) => a + b, 0) / data.length;
+        const variance = data.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / data.length;
+        const stdDev = Math.sqrt(variance);
+        const median = sorted[Math.floor(sorted.length / 2)];
+        const q1 = sorted[Math.floor(sorted.length * 0.25)];
+        const q3 = sorted[Math.floor(sorted.length * 0.75)];
+        const min = Math.min(...data);
+        const max = Math.max(...data);
+        const range = max - min;
+        
+        return { mean, median, stdDev, min, max, range, q1, q3, variance };
+      }
+      
+      // Calculate correlation between temperature and humidity
+      function calculateCorrelation(x, y) {
+        const n = x.length;
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+        const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+        const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
+        
+        const numerator = n * sumXY - sumX * sumY;
+        const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+        
+        return denominator === 0 ? 0 : numerator / denominator;
+      }
+      
+      // Calculate linear regression (temperature vs solar radiation)
+      function calculateRegression(x, y) {
+        const n = x.length;
+        const sumX = x.reduce((a, b) => a + b, 0);
+        const sumY = y.reduce((a, b) => a + b, 0);
+        const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+        const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+        
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+        
+        // Calculate R-squared
+        const meanY = sumY / n;
+        const totalSumSquares = y.reduce((sum, yi) => sum + Math.pow(yi - meanY, 2), 0);
+        const residualSumSquares = y.reduce((sum, yi, i) => {
+          const predicted = slope * x[i] + intercept;
+          return sum + Math.pow(yi - predicted, 2);
+        }, 0);
+        const rSquared = 1 - (residualSumSquares / totalSumSquares);
+        
+        return { slope, intercept, rSquared };
+      }
+      
+      const tempStats = calculateStats(temperatures);
+      const humidityStats = calculateStats(humidity);
+      const solarStats = calculateStats(solar);
+      const windStats = calculateStats(wind);
+      
+      // Climate science correlations
+      const tempHumidityCorr = calculateCorrelation(temperatures, humidity);
+      const tempSolarCorr = calculateCorrelation(temperatures, solar);
+      const solarWindCorr = calculateCorrelation(solar, wind);
+      const humidityWindCorr = calculateCorrelation(humidity, wind);
+      
+      // Climate-relevant regressions
+      const solarTempRegression = calculateRegression(solar, temperatures);
+      const tempHumidityRegression = calculateRegression(temperatures, humidity);
+      
+      // Seasonal analysis
+      const seasonalData = { winter: [], spring: [], summer: [], autumn: [] };
+      temperatures.forEach((temp, i) => {
+        const month = weatherData.data[i].month;
+        if (month === 12 || month <= 2) seasonalData.winter.push(temp);
+        else if (month >= 3 && month <= 5) seasonalData.spring.push(temp);
+        else if (month >= 6 && month <= 8) seasonalData.summer.push(temp);
+        else seasonalData.autumn.push(temp);
+      });
+      
+      const seasonalStats = {
+        winter: calculateStats(seasonalData.winter),
+        spring: calculateStats(seasonalData.spring),
+        summer: calculateStats(seasonalData.summer),
+        autumn: calculateStats(seasonalData.autumn)
+      };
+      
+      const html = `
+        <div class="stats-analysis-grid">
+          <div class="analysis-section">
+            <h5>Temperature Statistics</h5>
+            <div class="stat-grid">
+              <div class="stat-item">
+                <strong>Mean:</strong> ${formatValueWithUnits(tempStats.mean, 'temperature')}
+              </div>
+              <div class="stat-item">
+                <strong>Std Dev:</strong> ${formatValueWithUnits(tempStats.stdDev, 'temperature')}
+              </div>
+              <div class="stat-item">
+                <strong>Range:</strong> ${formatValueWithUnits(tempStats.range, 'temperature')}
+              </div>
+              <div class="stat-item">
+                <strong>Median:</strong> ${formatValueWithUnits(tempStats.median, 'temperature')}
+              </div>
+            </div>
+          </div>
+          
+          <div class="analysis-section">
+            <h5>Climate Variable Correlations</h5>
+            <div class="correlation-grid">
+              <div class="corr-item">
+                <strong>Temperature-Humidity:</strong> 
+                <span class="corr-value ${Math.abs(tempHumidityCorr) > 0.3 ? 'strong' : 'weak'}">
+                  ${tempHumidityCorr.toFixed(3)}
+                </span>
+                <div class="corr-explanation">Clausius-Clapeyron relationship</div>
+              </div>
+              <div class="corr-item">
+                <strong>Temperature-Solar:</strong> 
+                <span class="corr-value ${Math.abs(tempSolarCorr) > 0.3 ? 'strong' : 'weak'}">
+                  ${tempSolarCorr.toFixed(3)}
+                </span>
+                <div class="corr-explanation">Radiative forcing</div>
+              </div>
+              <div class="corr-item">
+                <strong>Solar-Wind:</strong> 
+                <span class="corr-value ${Math.abs(solarWindCorr) > 0.3 ? 'strong' : 'weak'}">
+                  ${solarWindCorr.toFixed(3)}
+                </span>
+                <div class="corr-explanation">Thermal circulation</div>
+              </div>
+              <div class="corr-item">
+                <strong>Humidity-Wind:</strong> 
+                <span class="corr-value ${Math.abs(humidityWindCorr) > 0.3 ? 'strong' : 'weak'}">
+                  ${humidityWindCorr.toFixed(3)}
+                </span>
+                <div class="corr-explanation">Advection patterns</div>
+              </div>
+            </div>
+            <div class="corr-interpretation">
+              <p><em>These correlations reflect fundamental atmospheric physics principles</em></p>
+            </div>
+          </div>
+          
+          <div class="analysis-section">
+            <h5>Climate Regression Models</h5>
+            <div class="regression-results">
+              <div class="reg-model">
+                <div class="reg-equation">
+                  <strong>Solar-Temperature Model:</strong><br>
+                  T = ${solarTempRegression.slope.toFixed(4)} × Solar + ${solarTempRegression.intercept.toFixed(2)}°C
+                </div>
+                <div class="reg-rsquared">
+                  <strong>R² = ${solarTempRegression.rSquared.toFixed(3)}</strong>
+                  <span class="rsquared-interpretation">
+                    (${(solarTempRegression.rSquared * 100).toFixed(1)}% of temperature variance explained by solar radiation)
+                  </span>
+                </div>
+              </div>
+              
+              <div class="reg-model">
+                <div class="reg-equation">
+                  <strong>Temperature-Humidity Model:</strong><br>
+                  RH = ${tempHumidityRegression.slope.toFixed(4)} × T + ${tempHumidityRegression.intercept.toFixed(1)}%
+                </div>
+                <div class="reg-rsquared">
+                  <strong>R² = ${tempHumidityRegression.rSquared.toFixed(3)}</strong>
+                  <span class="rsquared-interpretation">
+                    (${(tempHumidityRegression.rSquared * 100).toFixed(1)}% of humidity variance explained by temperature)
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="climate-context">
+              <p><em>These models reflect atmospheric thermodynamics and are used in climate modeling worldwide</em></p>
+            </div>
+          </div>
+          
+          <div class="analysis-section">
+            <h5>Climate Assessment</h5>
+            <div class="climate-assessment">
+              ${generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr)}
+            </div>
+          </div>
+          
+          <div class="analysis-section seasonal-section">
+            <h5>Seasonal Temperature Analysis</h5>
+            <div class="seasonal-grid">
+              <div class="season-card winter">
+                <h6>Winter</h6>
+                <div>Mean: ${formatValueWithUnits(seasonalStats.winter.mean, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.winter.range, 'temperature')}</div>
+              </div>
+              <div class="season-card spring">
+                <h6>Spring</h6>
+                <div>Mean: ${formatValueWithUnits(seasonalStats.spring.mean, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.spring.range, 'temperature')}</div>
+              </div>
+              <div class="season-card summer">
+                <h6>Summer</h6>
+                <div>Mean: ${formatValueWithUnits(seasonalStats.summer.mean, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.summer.range, 'temperature')}</div>
+              </div>
+              <div class="season-card autumn">
+                <h6>Autumn</h6>
+                <div>Mean: ${formatValueWithUnits(seasonalStats.autumn.mean, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.autumn.range, 'temperature')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    }
+
+    function updateClimateSummary() {
+      if (!weatherData) return;
+      
+      const container = document.getElementById('climate-summary');
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      const maxTemp = Math.max(...temperatures);
+      const minTemp = Math.min(...temperatures);
+      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
+      const avgSolar = globalHorizontalRadiation.reduce((a, b) => a + b, 0) / globalHorizontalRadiation.length;
+      const avgWind = windSpeedData.reduce((a, b) => a + b, 0) / windSpeedData.length;
+      
+      // Climate zone determination
+      const climateZone = determineClimateZone(avgTemp, 0, 0, avgRH);
+      
+      // Climate characteristics
+      let primaryClimate = '';
+      let secondaryClimate = '';
+      let designPriorities = [];
+      
+      if (avgTemp > 25) {
+        primaryClimate = 'Hot Climate';
+        designPriorities.push('Cooling dominates energy use');
+        designPriorities.push('Solar heat gain control critical');
+      } else if (avgTemp > 15) {
+        primaryClimate = 'Temperate Climate';
+        designPriorities.push('Mixed heating and cooling loads');
+        designPriorities.push('Shoulder season optimization important');
+      } else {
+        primaryClimate = 'Cool Climate';
+        designPriorities.push('Heating dominates energy use');
+        designPriorities.push('Solar heat gain beneficial in winter');
+      }
+      
+      if (avgRH > 70) {
+        secondaryClimate = 'High Humidity';
+        designPriorities.push('Moisture control essential');
+        designPriorities.push('Mold and mildew prevention required');
+      } else if (avgRH < 40) {
+        secondaryClimate = 'Low Humidity';
+        designPriorities.push('Static electricity control needed');
+        designPriorities.push('Material shrinkage considerations');
+      } else {
+        secondaryClimate = 'Moderate Humidity';
+        designPriorities.push('Standard moisture control adequate');
+      }
+      
+      // Energy implications
+      let energyImplications = [];
+      
+      if (maxTemp > 35) {
+        energyImplications.push('Peak cooling loads require robust HVAC sizing');
+      }
+      if (minTemp < 0) {
+        energyImplications.push('Freeze protection systems necessary');
+      }
+      if (avgSolar > 500) {
+        energyImplications.push('High solar potential for renewable energy');
+      }
+      if (avgWind > 4) {
+        energyImplications.push('Wind energy potential worth investigating');
+      }
+      
+      const html = `
+        <div class="climate-summary-content">
+          <div class="summary-section">
+            <h5>Climate Classification</h5>
+            <div class="climate-zone-display">
+              <strong>${climateZone.zone}</strong>
+              <p>${climateZone.description}</p>
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <h5>Climate Characteristics</h5>
+            <div class="climate-chars">
+              <span class="climate-primary">${primaryClimate}</span>
+              <span class="climate-secondary">${secondaryClimate}</span>
+            </div>
+          </div>
+          
+          <div class="summary-section">
+            <h5>Design Priorities</h5>
+            <ul class="design-priorities">
+              ${designPriorities.map(priority => `<li>${priority}</li>`).join('')}
+            </ul>
+          </div>
+          
+          <div class="summary-section">
+            <h5>Energy Implications</h5>
+            <ul class="energy-implications">
+              ${energyImplications.map(implication => `<li>${implication}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    }
+
+    function getParameterData(parameterName) {
+      if (!weatherData) return [];
+      
+      const paramInfo = epwParameters[parameterName];
+      if (!paramInfo) return [];
+      
+      // Map parameter names to data properties
+      const parameterMap = {
+        'Dry Bulb Temperature': 'dryBulbTemp',
+        'Dew Point Temperature': 'dewPointTemp',
+        'Relative Humidity': 'relativeHumidity',
+        'Atmospheric Station Pressure': 'atmosphericPressure',
+        'Extraterrestrial Horizontal Radiation': 'extraterrestrialHorizontalRadiation',
+        'Extraterrestrial Direct Normal Radiation': 'extraterrestrialDirectNormalRadiation',
+        'Horizontal Infrared Radiation': 'horizontalInfraredRadiation',
+        'Global Horizontal Radiation': 'globalHorizontalRadiation',
+        'Direct Normal Radiation': 'directNormalRadiation',
+        'Diffuse Horizontal Radiation': 'diffuseHorizontalRadiation',
+        'Global Horizontal Illuminance': 'globalHorizontalIlluminance',
+        'Direct Normal Illuminance': 'directNormalIlluminance',
+        'Diffuse Horizontal Illuminance': 'diffuseHorizontalIlluminance',
+        'Zenith Luminance': 'zenithLuminance',
+        'Wind Direction': 'windDirection',
+        'Wind Speed': 'windSpeed',
+        'Total Sky Cover': 'totalSkyCover',
+        'Opaque Sky Cover': 'opaqueSkyCover',
+        'Visibility': 'visibility',
+        'Ceiling Height': 'ceilingHeight',
+        'Present Weather Observation': 'presentWeatherObservation',
+        'Present Weather Codes': 'presentWeatherCodes',
+        'Precipitable Water': 'precipitableWater',
+        'Aerosol Optical Depth': 'aerosolOpticalDepth',
+        'Snow Depth': 'snowDepth',
+        'Days Since Last Snowfall': 'daysSinceLastSnowfall',
+        'Albedo': 'albedo',
+        'Liquid Precipitation Depth': 'liquidPrecipitationDepth',
+        'Liquid Precipitation Quantity': 'liquidPrecipitationQuantity'
+      };
+      
+      const property = parameterMap[parameterName];
+      if (!property) return [];
+      
+      return weatherData.data.map(d => d[property]);
+    }
+
+    // Chart control functions
+    function resetZoom() {
+      if (weatherChart) {
+        weatherChart.resetZoom();
+      }
+    }
+
+    function toggleDaily() {
+      // Implementation would aggregate daily data
+      alert('Daily aggregation feature to be implemented');
+    }
+
+    function toggleMonthly() {
+      // Implementation would aggregate monthly data
+      alert('Monthly aggregation feature to be implemented');
+    }
+
+    function toggleComfortZone() {
+      showComfortZone = !showComfortZone;
+      updatePsychrometricChart();
+    }
+
+    function toggleHumidityLines() {
+      showHumidityLines = !showHumidityLines;
+      updatePsychrometricChart();
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabName).classList.add('active');
+      
+      // Add active class to clicked tab
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      
+      // Update charts if needed
+      if (tabName === 'psychro' && weatherData) {
+        setTimeout(() => updatePsychrometricChart(), 100);
+      }
+    }
+
+    // Download functions
+    function downloadSelectedCSV() {
+      if (!weatherData) return;
+      
+      const data = getParameterData(currentParameter);
+      const paramInfo = epwParameters[currentParameter];
+      
+      // Convert data if needed
+      let convertedData = data;
+      if (paramInfo.unit) {
+        convertedData = data.map(value => convertValue(value, paramInfo.unit, 'SI'));
+      }
+      
+      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
+      
+      let csv = `DateTime,${currentParameter} (${unitLabel})\n`;
+      
+      convertedData.forEach((value, index) => {
+        const d = weatherData.data[index];
+        const dateTime = `${d.month}/${d.day} ${d.hour}:${d.minute.toString().padStart(2, '0')}`;
+        csv += `${dateTime},${value.toFixed(3)}\n`;
+      });
+      
+      downloadCSVFile(csv, `${currentParameter}_${currentUnits}.csv`);
+    }
+
     function downloadAllCSV() {
-      let csvContent = 'Time,' + parameterNames.join(',') + '\n';
+      if (!weatherData) return;
       
-      for (let i = 0; i < labels.length; i++) {
-        let row = labels[i];
-        parameterNames.forEach(param => {
-          const value = allData[param][i];
-          row += ',' + (value !== null ? value : '');
+      let csv = 'DateTime';
+      
+      // Add headers for all parameters
+      Object.keys(epwParameters).forEach(param => {
+        const paramInfo = epwParameters[param];
+        const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
+        csv += `,${param} (${unitLabel})`;
+      });
+      csv += '\n';
+      
+      // Add data rows
+      weatherData.data.forEach((d, index) => {
+        const dateTime = `${d.month}/${d.day} ${d.hour}:${d.minute.toString().padStart(2, '0')}`;
+        csv += dateTime;
+        
+        Object.keys(epwParameters).forEach(param => {
+          const paramInfo = epwParameters[param];
+          const data = getParameterData(param);
+          let value = data[index];
+          
+          // Convert units if necessary
+          if (paramInfo.unit) {
+            value = convertValue(value, paramInfo.unit, 'SI');
+          }
+          
+          csv += `,${value.toFixed(3)}`;
         });
-        csvContent += row + '\n';
-      }
+        csv += '\n';
+      });
       
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'all_weather_data.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadCSVFile(csv, `all_parameters_${currentUnits}.csv`);
     }
 
-    // Download histogram bins as CSV
-    function downloadBinCSV(parameter) {
-      const values = allData[parameter].filter(val => val !== null);
+    function downloadBinCSV() {
+      if (!weatherData) return;
       
-      if (values.length === 0) return;
+      const paramInfo = epwParameters[currentParameter];
+      let data = getParameterData(currentParameter);
       
-      // Calculate histogram bins
-      const binCount = parseInt(binCountSlider.value);
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const binWidth = (max - min) / binCount;
+      // Convert units if necessary
+      if (paramInfo.unit) {
+        data = data.map(value => convertValue(value, paramInfo.unit, 'SI'));
+      }
       
-      const bins = Array(binCount).fill(0);
+      const binCount = parseInt(document.getElementById('binCount').value);
+      const min = Math.min(...data);
+      const max = Math.max(...data);
+      const binSize = (max - min) / binCount;
+      
+      const bins = new Array(binCount).fill(0);
       const binRanges = [];
       
-      // Create bin ranges and count values
       for (let i = 0; i < binCount; i++) {
-        const binStart = min + i * binWidth;
-        const binEnd = binStart + binWidth;
-        binRanges.push({ start: binStart, end: binEnd });
+        const binStart = min + i * binSize;
+        const binEnd = min + (i + 1) * binSize;
+        binRanges.push(`${binStart.toFixed(2)}-${binEnd.toFixed(2)}`);
       }
       
-      values.forEach(value => {
-        const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
+      data.forEach(value => {
+        const binIndex = Math.min(Math.floor((value - min) / binSize), binCount - 1);
         bins[binIndex]++;
       });
       
-      // Create CSV content
-      let csvContent = 'Bin Range,Count,Percentage\n';
-      const totalCount = values.length;
+      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
       
-      bins.forEach((count, i) => {
-        const range = `${binRanges[i].start.toFixed(2)} - ${binRanges[i].end.toFixed(2)}`;
-        const percentage = (count / totalCount * 100).toFixed(2);
-        csvContent += `${range},${count},${percentage}%\n`;
+      let csv = `Bin Range (${unitLabel}),Frequency\n`;
+      binRanges.forEach((range, index) => {
+        csv += `${range},${bins[index]}\n`;
       });
       
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = parameter.replace(/[^\w\s]/gi, '') + '_histogram.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadCSVFile(csv, `${currentParameter}_bins_${currentUnits}.csv`);
     }
 
-    // Download full climate analysis report
-    function downloadClimateReport() {
-      // Get location info
-      const location = weatherLocation.city + ', ' + weatherLocation.country;
+    function downloadReport() {
+      if (!weatherData) return;
       
-      // Get climate zone
-      const climateZoneElement = document.getElementById('ashrae-zone');
-      const climateZone = climateZoneElement.textContent.replace('ASHRAE Climate Zone: ', '');
+      const report = generateClimateReport();
+      downloadTextFile(report, `climate_analysis_report_${currentUnits}.txt`);
+    }
+
+    function generateClimateReport() {
+      const location = weatherData.location;
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      const windDirectionData = getParameterData('Wind Direction');
       
-      // Get temperature data
-      const temperatures = allData['Dry Bulb Temp (°C)'].filter(val => val !== null);
-      const avgTemp = temperatures.reduce((sum, val) => sum + val, 0) / temperatures.length;
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
+      const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
+      
+      const tempUnit = unitLabels[currentUnits].temperature;
+      const windUnit = unitLabels[currentUnits].windSpeed;
+      const solarUnit = unitLabels[currentUnits].solarRadiation;
+      
+      let report = `CLIMATE ANALYSIS REPORT\n`;
+      report += `Generated: ${new Date().toLocaleString()}\n`;
+      report += `Units: ${currentUnits === 'SI' ? 'S.I. (Metric)' : 'Imperial'}\n\n`;
+      
+      report += `LOCATION INFORMATION\n`;
+      report += `File: ${weatherData.filename}\n`;
+      report += `City: ${location.city}\n`;
+      report += `State/Province: ${location.state}\n`;
+      report += `Country: ${location.country}\n`;
+      report += `Latitude: ${location.latitude.toFixed(2)}°\n`;
+      report += `Longitude: ${location.longitude.toFixed(2)}°\n`;
+      report += `Elevation: ${location.elevation.toFixed(0)} m\n`;
+      report += `Time Zone: UTC${location.timezone >= 0 ? '+' : ''}${location.timezone}\n\n`;
+      
+      // Temperature Statistics
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const maxTemp = Math.max(...temperatures);
       const minTemp = Math.min(...temperatures);
+      const extremeHeatThreshold = currentUnits === 'SI' ? 35 : 95;
+      const extremeColdThreshold = currentUnits === 'SI' ? 0 : 32;
+      const extremeHeatDays = temperatures.filter(t => t > extremeHeatThreshold).length / 24;
+      const extremeColdDays = temperatures.filter(t => t < extremeColdThreshold).length / 24;
       
-      // Get HDD/CDD
-      const hddBase = parseFloat(hddBaseInput.value);
-      const cddBase = parseFloat(cddBaseInput.value);
-      const annualHDD = calculateHDD(temperatures, hddBase);
-      const annualCDD = calculateCDD(temperatures, cddBase);
+      report += `TEMPERATURE ANALYSIS\n`;
+      report += `Annual Average: ${avgTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Maximum: ${maxTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Minimum: ${minTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Range: ${(maxTemp - minTemp).toFixed(1)} ${tempUnit}\n`;
+      report += `Extreme Heat Days (>${extremeHeatThreshold}${tempUnit}): ${extremeHeatDays.toFixed(0)}\n`;
+      report += `Extreme Cold Days (<${extremeColdThreshold}${tempUnit}): ${extremeColdDays.toFixed(0)}\n\n`;
       
-      // Create report content
-      let reportContent = `# Climate Analysis Report for ${location}\n\n`;
-      reportContent += `## Location Information\n`;
-      reportContent += `- City: ${weatherLocation.city}\n`;
-      reportContent += `- Country: ${weatherLocation.country}\n`;
-      reportContent += `- Latitude: ${weatherLocation.latitude.toFixed(2)}°\n`;
-      reportContent += `- Longitude: ${weatherLocation.longitude.toFixed(2)}°\n`;
-      reportContent += `- Elevation: ${weatherLocation.elevation}m\n\n`;
+      // Humidity Analysis
+      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
+      const highHumidityHours = relativeHumidityData.filter(rh => rh > 70).length;
+      const lowHumidityHours = relativeHumidityData.filter(rh => rh < 30).length;
       
-      reportContent += `## Climate Classification\n`;
-      reportContent += `- ASHRAE Climate Zone: ${climateZone}\n`;
-      reportContent += `- Heating Degree Days (${hddBase}°C base): ${annualHDD.toFixed(0)}\n`;
-      reportContent += `- Cooling Degree Days (${cddBase}°C base): ${annualCDD.toFixed(0)}\n\n`;
+      report += `HUMIDITY ANALYSIS\n`;
+      report += `Annual Average RH: ${avgRH.toFixed(1)}%\n`;
+      report += `Hours > 70% RH: ${highHumidityHours}\n`;
+      report += `Hours < 30% RH: ${lowHumidityHours}\n\n`;
       
-      reportContent += `## Temperature Summary\n`;
-      reportContent += `- Annual Average Temperature: ${avgTemp.toFixed(1)}°C\n`;
-      reportContent += `- Maximum Temperature: ${maxTemp.toFixed(1)}°C\n`;
-      reportContent += `- Minimum Temperature: ${minTemp.toFixed(1)}°C\n`;
-      reportContent += `- Annual Temperature Range: ${(maxTemp - minTemp).toFixed(1)}°C\n\n`;
+      // Solar Radiation Analysis
+      const annualSolar = solarRadiation.reduce((a, b) => a + b, 0) / 1000; // Convert to kWh/m²
+      const maxSolar = Math.max(...solarRadiation);
+      const solarHours = solarRadiation.filter(s => s > (currentUnits === 'SI' ? 100 : 31.7)).length;
       
-      reportContent += `## Monthly Temperature Averages (°C)\n`;
-      const monthlyTemps = calculateMonthlyAverages('Dry Bulb Temp (°C)').values;
-      monthNames.forEach((month, i) => {
-        reportContent += `- ${month}: ${monthlyTemps[i].toFixed(1)}°C\n`;
+      report += `SOLAR RADIATION ANALYSIS\n`;
+      report += `Annual Solar Radiation: ${annualSolar.toFixed(0)} ${unitLabels[currentUnits].solarRadiationAnnual}\n`;
+      report += `Peak Solar Radiation: ${maxSolar.toFixed(0)} ${solarUnit}\n`;
+      report += `Hours with Significant Solar (>100 W/m²): ${solarHours}\n\n`;
+      
+      // Wind Analysis
+      const avgWind = windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length;
+      const maxWind = Math.max(...windSpeeds);
+      
+      // Prevailing wind direction
+      const windDirectionFreq = {};
+      const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      windDirectionData.forEach(dir => {
+        const dirIndex = Math.round(dir / 22.5) % 16;
+        const dirName = directions[dirIndex];
+        windDirectionFreq[dirName] = (windDirectionFreq[dirName] || 0) + 1;
       });
-      reportContent += '\n';
+      const prevailingWind = Object.keys(windDirectionFreq).reduce((a, b) => windDirectionFreq[a] > windDirectionFreq[b] ? a : b);
       
-      reportContent += `## Humidity Summary\n`;
-      const humidities = allData['Relative Humidity (%)'].filter(val => val !== null);
-      const avgRH = humidities.reduce((sum, val) => sum + val, 0) / humidities.length;
-      reportContent += `- Annual Average Relative Humidity: ${avgRH.toFixed(1)}%\n`;
-      reportContent += `- Hours > 70% RH: ${humidities.filter(val => val > 70).length}\n`;
-      reportContent += `- Hours < 30% RH: ${humidities.filter(val => val < 30).length}\n\n`;
+      report += `WIND ANALYSIS\n`;
+      report += `Average Wind Speed: ${avgWind.toFixed(1)} ${windUnit}\n`;
+      report += `Maximum Wind Speed: ${maxWind.toFixed(1)} ${windUnit}\n`;
+      report += `Prevailing Wind Direction: ${prevailingWind}\n\n`;
       
-      reportContent += `## Solar Radiation Summary\n`;
-      const globalRadiation = allData['Global Horizontal Radiation (Wh/m²)'].filter(val => val !== null);
-      const annualSolar = globalRadiation.reduce((sum, val) => sum + val, 0) / 1000;
-      reportContent += `- Annual Solar Radiation: ${annualSolar.toFixed(0)} kWh/m²\n`;
-      reportContent += `- Peak Solar Radiation: ${Math.max(...globalRadiation).toFixed(0)} W/m²\n\n`;
+      // Climate Zone Classification
+      report += `CLIMATE CLASSIFICATION\n`;
+      const climateZone = determineClimateZone(avgTemp, extremeHeatDays, extremeColdDays, avgRH);
+      report += `ASHRAE Climate Zone: ${climateZone.zone}\n`;
+      report += `Description: ${climateZone.description}\n\n`;
       
-      reportContent += `## Wind Summary\n`;
-      const windSpeeds = allData['Wind Speed (m/s)'].filter(val => val !== null);
-      const avgWind = windSpeeds.reduce((sum, val) => sum + val, 0) / windSpeeds.length;
-      reportContent += `- Annual Average Wind Speed: ${avgWind.toFixed(1)} m/s\n`;
-      reportContent += `- Maximum Wind Speed: ${Math.max(...windSpeeds).toFixed(1)} m/s\n\n`;
+      // DESIGN CONSIDERATIONS AND RECOMMENDATIONS
+      report += `DESIGN CONSIDERATIONS AND RECOMMENDATIONS\n`;
+      report += `================================================================\n\n`;
       
-      reportContent += `## Monthly HDD/CDD Values\n`;
-      reportContent += `Month,HDD (${hddBase}°C),CDD (${cddBase}°C)\n`;
-      
-      // Calculate monthly HDD and CDD
-      for (let month = 0; month < 12; month++) {
-        const monthTemps = [];
-        
-        // Extract temperatures for this month
-        allData['Dry Bulb Temp (°C)'].forEach((temp, index) => {
-          if (temp === null) return;
-          
-          const labelParts = labels[index].split(' ');
-          const monthStr = labelParts[0];
-          const monthIndex = monthNames.indexOf(monthStr);
-          
-          if (monthIndex === month) {
-            monthTemps.push(temp);
-          }
-        });
-        
-        // Calculate daily averages for this month
-        const dailyAvgs = [];
-        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const hoursPerDay = 24;
-        
-        for (let day = 0; day < daysInMonth[month]; day++) {
-          const dayTemps = monthTemps.slice(day * hoursPerDay, (day + 1) * hoursPerDay);
-          if (dayTemps.length > 0) {
-            const dayAvg = dayTemps.reduce((sum, val) => sum + val, 0) / dayTemps.length;
-            dailyAvgs.push(dayAvg);
-          }
-        }
-        
-        // Calculate HDD and CDD for this month
-        let monthHDD = 0;
-        let monthCDD = 0;
-        
-        dailyAvgs.forEach(avgTemp => {
-          if (avgTemp < hddBase) {
-            monthHDD += (hddBase - avgTemp);
-          }
-          if (avgTemp > cddBase) {
-            monthCDD += (avgTemp - cddBase);
-          }
-        });
-        
-        reportContent += `${monthNames[month]},${monthHDD.toFixed(0)},${monthCDD.toFixed(0)}\n`;
-      }
-      
-      reportContent += '\n## Design Recommendations\n';
-      
-      // Add design recommendations based on climate zone
-      const zoneNumber = parseInt(climateZone.charAt(0));
-      const zoneLetter = climateZone.charAt(1);
-      
-      if (zoneNumber <= 2) {
-        reportContent += '- Prioritize cooling strategies\n';
-        reportContent += '- Provide effective solar shading\n';
-        reportContent += '- Consider high thermal mass with night ventilation\n';
-      } else if (zoneNumber >= 6) {
-        reportContent += '- Prioritize heating strategies\n';
-        reportContent += '- Maximize insulation levels\n';
-        reportContent += '- Optimize solar heat gain in winter\n';
-        reportContent += '- Minimize infiltration\n';
+      // Building Orientation
+      report += `BUILDING ORIENTATION:\n`;
+      if (location.latitude > 0) {
+        report += `• South-facing orientation recommended for solar gain in Northern Hemisphere\n`;
       } else {
-        reportContent += '- Balance heating and cooling strategies\n';
-        reportContent += '- Consider seasonal control strategies\n';
-        reportContent += '- Optimize building envelope for both seasons\n';
+        report += `• North-facing orientation recommended for solar gain in Southern Hemisphere\n`;
+      }
+      report += `• Consider prevailing wind direction (${prevailingWind}) for natural ventilation\n`;
+      report += `• Main glazing should face away from extreme weather directions\n\n`;
+      
+      // Heating Considerations
+      report += `HEATING DESIGN:\n`;
+      if (extremeColdDays > 30) {
+        report += `• High heating demand expected (${extremeColdDays.toFixed(0)} extreme cold days)\n`;
+        report += `• Consider high-efficiency heating systems and superior insulation\n`;
+        report += `• Thermal mass strategies recommended for temperature stabilization\n`;
+      } else if (extremeColdDays > 7) {
+        report += `• Moderate heating requirements (${extremeColdDays.toFixed(0)} cold days)\n`;
+        report += `• Standard insulation levels appropriate\n`;
+      } else {
+        report += `• Minimal heating requirements (${extremeColdDays.toFixed(0)} cold days)\n`;
+        report += `• Focus on cooling strategies instead\n`;
+      }
+      report += `\n`;
+      
+      // Cooling Considerations
+      report += `COOLING DESIGN:\n`;
+      if (extremeHeatDays > 30) {
+        report += `• High cooling demand expected (${extremeHeatDays.toFixed(0)} extreme heat days)\n`;
+        report += `• Consider high-efficiency cooling systems and superior solar control\n`;
+        report += `• External shading devices essential\n`;
+        report += `• Light-colored roof and wall materials recommended\n`;
+      } else if (extremeHeatDays > 7) {
+        report += `• Moderate cooling requirements (${extremeHeatDays.toFixed(0)} hot days)\n`;
+        report += `• Natural ventilation strategies may be sufficient with mechanical backup\n`;
+      } else {
+        report += `• Low cooling requirements (${extremeHeatDays.toFixed(0)} hot days)\n`;
+        report += `• Natural ventilation and passive cooling strategies recommended\n`;
+      }
+      report += `\n`;
+      
+      // Moisture Management
+      report += `MOISTURE MANAGEMENT:\n`;
+      if (avgRH > 70) {
+        report += `• High humidity climate (${avgRH.toFixed(1)}% average RH)\n`;
+        report += `• Vapor barriers and moisture control critical\n`;
+        report += `• Mold and mildew prevention strategies essential\n`;
+        report += `• Dehumidification systems may be required\n`;
+      } else if (avgRH < 30) {
+        report += `• Low humidity climate (${avgRH.toFixed(1)}% average RH)\n`;
+        report += `• Humidification systems may be beneficial\n`;
+        report += `• Static electricity control measures recommended\n`;
+      } else {
+        report += `• Moderate humidity levels (${avgRH.toFixed(1)}% average RH)\n`;
+        report += `• Standard moisture management practices adequate\n`;
+      }
+      if (highHumidityHours > 2000) {
+        report += `• ${highHumidityHours} hours of high humidity (>70% RH) annually\n`;
+        report += `• Enhanced ventilation and moisture removal recommended\n`;
+      }
+      report += `\n`;
+      
+      // Solar Design
+      report += `SOLAR DESIGN STRATEGIES:\n`;
+      if (annualSolar > (currentUnits === 'SI' ? 1500 : 472)) {
+        report += `• Excellent solar potential (${annualSolar.toFixed(0)} ${unitLabels[currentUnits].solarRadiationAnnual} annually)\n`;
+        report += `• Solar panels and solar water heating highly recommended\n`;
+        report += `• Daylighting strategies should include glare control\n`;
+      } else if (annualSolar > (currentUnits === 'SI' ? 800 : 252)) {
+        report += `• Good solar potential (${annualSolar.toFixed(0)} ${unitLabels[currentUnits].solarRadiationAnnual} annually)\n`;
+        report += `• Solar systems viable with proper sizing\n`;
+      } else {
+        report += `• Limited solar potential (${annualSolar.toFixed(0)} ${unitLabels[currentUnits].solarRadiationAnnual} annually)\n`;
+        report += `• Focus on maximizing available solar gain\n`;
+      }
+      report += `• ${solarHours} hours of significant solar radiation annually\n\n`;
+      
+      // Wind Design
+      report += `WIND DESIGN CONSIDERATIONS:\n`;
+      if (avgWind > (currentUnits === 'SI' ? 5 : 11.2)) {
+        report += `• High wind speeds (${avgWind.toFixed(1)} ${windUnit} average)\n`;
+        report += `• Wind-resistant construction required\n`;
+        report += `• Natural ventilation potential excellent\n`;
+        report += `• Wind energy generation may be viable\n`;
+      } else if (avgWind > (currentUnits === 'SI' ? 2 : 4.5)) {
+        report += `• Moderate wind speeds (${avgWind.toFixed(1)} ${windUnit} average)\n`;
+        report += `• Good natural ventilation potential\n`;
+      } else {
+        report += `• Low wind speeds (${avgWind.toFixed(1)} ${windUnit} average)\n`;
+        report += `• Mechanical ventilation may be necessary\n`;
+      }
+      report += `• Maximum wind speed: ${maxWind.toFixed(1)} ${windUnit}\n\n`;
+      
+      // Material Recommendations
+      report += `MATERIAL RECOMMENDATIONS:\n`;
+      if (extremeHeatDays > 20) {
+        report += `• Light-colored, reflective materials for exterior surfaces\n`;
+        report += `• High thermal mass materials for temperature moderation\n`;
+      }
+      if (extremeColdDays > 20) {
+        report += `• High-performance insulation materials essential\n`;
+        report += `• Thermal bridge prevention critical\n`;
+      }
+      if (avgRH > 70) {
+        report += `• Moisture-resistant materials required\n`;
+        report += `• Avoid materials prone to mold and rot\n`;
+      }
+      if (maxWind > (currentUnits === 'SI' ? 15 : 33.6)) {
+        report += `• High wind-load rated materials and connections\n`;
+        report += `• Impact-resistant glazing recommended\n`;
+      }
+      report += `\n`;
+      
+      // Energy Efficiency Recommendations
+      report += `ENERGY EFFICIENCY PRIORITIES:\n`;
+      const heatingLoad = extremeColdDays * 24;
+      const coolingLoad = extremeHeatDays * 24;
+      
+      if (heatingLoad > coolingLoad) {
+        report += `• Priority: Heating efficiency (${extremeColdDays.toFixed(0)} heating days vs ${extremeHeatDays.toFixed(0)} cooling days)\n`;
+        report += `• Focus on insulation, air sealing, and efficient heating systems\n`;
+      } else if (coolingLoad > heatingLoad) {
+        report += `• Priority: Cooling efficiency (${extremeHeatDays.toFixed(0)} cooling days vs ${extremeColdDays.toFixed(0)} heating days)\n`;
+        report += `• Focus on solar control, natural ventilation, and efficient cooling\n`;
+      } else {
+        report += `• Balanced heating and cooling requirements\n`;
+        report += `• Comprehensive efficiency strategies recommended\n`;
       }
       
-      if (zoneLetter === 'A') {
-        reportContent += '- Provide dehumidification\n';
-        reportContent += '- Design for moisture control\n';
-        reportContent += '- Consider vapor barriers carefully\n';
-      } else if (zoneLetter === 'B') {
-        reportContent += '- Consider evaporative cooling strategies\n';
-        reportContent += '- Design for large diurnal temperature swings\n';
-        reportContent += '- Utilize thermal mass\n';
+      if (annualSolar > (currentUnits === 'SI' ? 1200 : 378)) {
+        report += `• Solar energy systems highly recommended\n`;
       }
       
-      reportContent += '\n## Passive Design Potential\n';
+      report += `\nThis analysis is based on typical meteorological year data and should be \n`;
+      report += `supplemented with local building codes, standards, and professional design expertise.\n`;
       
-      // Natural ventilation potential
-      const naturalVentHours = temperatures.filter(temp => temp >= 18 && temp <= 26).length;
-      const naturalVentPotential = (naturalVentHours / temperatures.length * 100).toFixed(1);
-      reportContent += `- Natural Ventilation Potential: ${naturalVentPotential}%\n`;
+      return report;
+    }
+    
+    function determineClimateZone(avgTemp, hotDays, coldDays, avgRH) {
+      // Use the same climate zone determination logic as the UI
+      const tempC = currentUnits === 'SI' ? avgTemp : convertValue(avgTemp, 'temperature', 'Imperial');
       
-      // Passive solar potential
-      let passiveSolarHours = 0;
-      for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const radiation = allData['Global Horizontal Radiation (Wh/m²)'][i];
-        
-        if (temp === null || radiation === null) continue;
-        
-        if (temp < 20 && radiation > 200) {
-          passiveSolarHours++;
+      // Calculate temperature range from the weather data for consistency
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const maxTemp = Math.max(...temperatures);
+      const minTemp = Math.min(...temperatures);
+      const tempRangeC = maxTemp - minTemp;
+      
+      if (tempC >= 18) {
+        if (tempRangeC < 20) {
+          return { zone: '1A - Very Hot Humid', description: 'Very hot and humid climate with minimal temperature variation.' };
+        } else {
+          return { zone: '2A - Hot Humid', description: 'Hot and humid climate with moderate temperature variation.' };
         }
+      } else if (tempC >= 13) {
+        return { zone: '3A - Warm Humid', description: 'Warm climate with significant humidity levels.' };
+      } else if (tempC >= 10) {
+        return { zone: '4A - Mixed Humid', description: 'Mixed climate requiring both heating and cooling.' };
+      } else if (tempC >= 7) {
+        return { zone: '5A - Cool Humid', description: 'Cool climate with heating dominant but some cooling required.' };
+      } else {
+        return { zone: '6A - Cold Humid', description: 'Cold climate with heating dominant year-round.' };
       }
-      const passiveSolarPotential = (passiveSolarHours / temperatures.length * 100).toFixed(1);
-      reportContent += `- Passive Solar Heating Potential: ${passiveSolarPotential}%\n`;
-      
-      // Evaporative cooling potential
-      let evapCoolingHours = 0;
-      for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const rh = allData['Relative Humidity (%)'][i];
-        
-        if (temp === null || rh === null) continue;
-        
-        if (temp > 24 && rh < 60) {
-          evapCoolingHours++;
-        }
-      }
-      const evapCoolingPotential = (evapCoolingHours / temperatures.length * 100).toFixed(1);
-      reportContent += `- Evaporative Cooling Potential: ${evapCoolingPotential}%\n`;
-      
-      reportContent += '\n## Report generated by Advanced EPW Climate Analysis Tool';
-      
-      // Create and download the report
-      const blob = new Blob([reportContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
+    }
+
+    function downloadCSVFile(content, filename) {
+      const blob = new Blob([content], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Climate_Analysis_${weatherLocation.city.replace(/\s+/g, '_')}.txt`;
-      document.body.appendChild(a);
+      a.download = filename;
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(url);
+    }
+
+    function downloadTextFile(content, filename) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    function calculateCorrelation(xData, yData) {
+      if (xData.length !== yData.length || xData.length === 0) return 0;
+      
+      const n = xData.length;
+      const sumX = xData.reduce((a, b) => a + b, 0);
+      const sumY = yData.reduce((a, b) => a + b, 0);
+      const sumXY = xData.reduce((acc, x, i) => acc + x * yData[i], 0);
+      const sumXX = xData.reduce((acc, x) => acc + x * x, 0);
+      const sumYY = yData.reduce((acc, y) => acc + y * y, 0);
+      
+      const numerator = n * sumXY - sumX * sumY;
+      const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+      
+      return denominator === 0 ? 0 : numerator / denominator;
+    }
+    
+    function calculateRegression(xData, yData) {
+      const n = xData.length;
+      const sumX = xData.reduce((a, b) => a + b, 0);
+      const sumY = yData.reduce((a, b) => a + b, 0);
+      const sumXY = xData.reduce((acc, x, i) => acc + x * yData[i], 0);
+      const sumXX = xData.reduce((acc, x) => acc + x * x, 0);
+      
+      const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+      const intercept = (sumY - slope * sumX) / n;
+      
+      // Calculate R-squared
+      const yMean = sumY / n;
+      const ssTotal = yData.reduce((acc, y) => acc + Math.pow(y - yMean, 2), 0);
+      const ssResidual = yData.reduce((acc, y, i) => {
+        const predicted = slope * xData[i] + intercept;
+        return acc + Math.pow(y - predicted, 2);
+      }, 0);
+      const rSquared = 1 - (ssResidual / ssTotal);
+      
+      return { slope, intercept, rSquared };
+    }
+    
+    function calculateStats(data) {
+      if (!data || data.length === 0) return { mean: 0, stdDev: 0, min: 0, max: 0, median: 0, range: 0 };
+      
+      const sorted = [...data].sort((a, b) => a - b);
+      const mean = data.reduce((a, b) => a + b, 0) / data.length;
+      const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / data.length;
+      const stdDev = Math.sqrt(variance);
+      const min = sorted[0];
+      const max = sorted[sorted.length - 1];
+      const median = sorted.length % 2 === 0 
+        ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+        : sorted[Math.floor(sorted.length / 2)];
+      const range = max - min;
+      
+      return { mean, stdDev, min, max, median, range };
+    }
+    
+    function generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
+      const goodTraits = [];
+      const badTraits = [];
+      const neutralTraits = [];
+      
+      // Temperature assessment
+      if (tempStats.mean >= 18 && tempStats.mean <= 26) {
+        goodTraits.push("🌡️ **Comfortable Temperature Range**: Average temperature is ideal for human comfort and energy efficiency");
+      } else if (tempStats.mean < 10) {
+        badTraits.push("❄️ **Cold Climate**: Low average temperature may increase heating demands and limit outdoor activities");
+      } else if (tempStats.mean > 30) {
+        badTraits.push("🔥 **Hot Climate**: High average temperature increases cooling demands and heat stress risk");
+      } else {
+        neutralTraits.push("🌡️ **Moderate Temperature**: Temperature range is acceptable but may require seasonal HVAC adjustments");
+      }
+      
+      // Temperature variability
+      if (tempStats.stdDev < 5) {
+        goodTraits.push("📊 **Stable Temperature**: Low temperature variation provides predictable conditions year-round");
+      } else if (tempStats.stdDev > 15) {
+        badTraits.push("📊 **High Temperature Variability**: Large temperature swings create challenging design conditions");
+      }
+      
+      // Humidity assessment
+      if (humidityStats.mean >= 40 && humidityStats.mean <= 60) {
+        goodTraits.push("💧 **Optimal Humidity**: Relative humidity is in the ideal range for comfort and health");
+      } else if (humidityStats.mean < 30) {
+        badTraits.push("🏜️ **Dry Climate**: Low humidity may cause discomfort and increase static electricity issues");
+      } else if (humidityStats.mean > 70) {
+        badTraits.push("🌊 **High Humidity**: Elevated humidity increases cooling loads and mold/moisture risks");
+      }
+      
+      // Solar radiation assessment
+      if (solarStats.mean >= 150 && solarStats.mean <= 250) {
+        goodTraits.push("☀️ **Good Solar Resource**: Excellent potential for daylighting and solar energy systems");
+      } else if (solarStats.mean < 100) {
+        neutralTraits.push("⛅ **Limited Solar**: Lower solar radiation may reduce natural lighting and solar energy potential");
+      } else if (solarStats.mean > 300) {
+        badTraits.push("🌞 **Intense Solar**: High solar radiation increases cooling loads and UV exposure concerns");
+      }
+      
+      // Wind assessment
+      if (windStats.mean >= 2 && windStats.mean <= 6) {
+        goodTraits.push("💨 **Moderate Wind**: Good for natural ventilation and wind energy potential");
+      } else if (windStats.mean < 1) {
+        neutralTraits.push("🌀 **Low Wind**: Limited natural ventilation potential, may require mechanical systems");
+      } else if (windStats.mean > 8) {
+        badTraits.push("🌪️ **High Wind**: Strong winds may create structural concerns and discomfort");
+      }
+      
+      // Correlation assessments (climate science relationships)
+      if (Math.abs(tempSolarCorr) > 0.7) {
+        goodTraits.push("📈 **Strong Solar-Temperature Correlation**: Predictable relationship useful for passive solar design");
+      }
+      
+      if (Math.abs(tempHumidityCorr) < -0.5) {
+        goodTraits.push("📉 **Good Temperature-Humidity Balance**: Inverse relationship helps moderate perceived temperature");
+      } else if (tempHumidityCorr > 0.6) {
+        badTraits.push("📈 **High Temp-Humidity Correlation**: Both high together increases heat index and discomfort");
+      }
+      
+      if (Math.abs(solarWindCorr) > 0.5) {
+        goodTraits.push("🌬️ **Solar-Wind Synergy**: Wind patterns correlate with solar intensity for natural cooling");
+      }
+      
+      // Generate HTML
+      let html = '<div class="traits-container">';
+      
+      if (goodTraits.length > 0) {
+        html += '<div class="trait-section good-traits">';
+        html += '<h6>✅ Positive Climate Traits</h6>';
+        html += '<ul>';
+        goodTraits.forEach(trait => html += `<li>${trait}</li>`);
+        html += '</ul></div>';
+      }
+      
+      if (badTraits.length > 0) {
+        html += '<div class="trait-section bad-traits">';
+        html += '<h6>⚠️ Climate Challenges</h6>';
+        html += '<ul>';
+        badTraits.forEach(trait => html += `<li>${trait}</li>`);
+        html += '</ul></div>';
+      }
+      
+      if (neutralTraits.length > 0) {
+        html += '<div class="trait-section neutral-traits">';
+        html += '<h6>ℹ️ Design Considerations</h6>';
+        html += '<ul>';
+        neutralTraits.forEach(trait => html += `<li>${trait}</li>`);
+        html += '</ul></div>';
+      }
+      
+      html += '</div>';
+      return html;
+    }
+
+    // Utility functions
+    function showLoading() {
+      document.getElementById('loading').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
     }
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96386773322327d2',t:'MTc1MzI0NDYyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
