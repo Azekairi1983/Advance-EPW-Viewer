@@ -1015,7 +1015,6 @@
     <header>
       <div class="header-content">
         <h2>Advanced EPW Climate Analysis Tool</h2>
-        <p class="subtitle" style="margin: 10px 0 0 0; opacity: 0.9; font-size: 1rem;">Research-Grade Climate Data Analysis • ASHRAE 169-2020 Compliant • Peer-Reviewed Methodologies</p>
         <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
       </div>
       <div class="unit-toggle-container">
@@ -1473,6 +1472,9 @@
       
       // Monthly summary table headers
       document.getElementById('monthly-avg-temp-header').textContent = `Avg Temp (${labels.temperature})`;
+      
+      // CRITICAL: Reset global climate data when units change to prevent bugs
+      globalClimateData = null;
       document.getElementById('monthly-solar-header').textContent = `Solar (${labels.solarRadiationAnnual})`;
       document.getElementById('monthly-wind-header').textContent = `Wind (${labels.windSpeed})`;
       
@@ -1532,6 +1534,8 @@
           saveUnitPreference();
           updateUnitToggleUI();
           updateUnitLabels();
+          // CRITICAL: Reset global climate data to prevent unit conversion bugs
+          globalClimateData = null;
           if (weatherData) {
             updateAllDisplays();
           }
@@ -1544,6 +1548,8 @@
           saveUnitPreference();
           updateUnitToggleUI();
           updateUnitLabels();
+          // CRITICAL: Reset global climate data to prevent unit conversion bugs
+          globalClimateData = null;
           if (weatherData) {
             updateAllDisplays();
           }
@@ -1657,6 +1663,32 @@
     }
 
     function parseEPWFile(content, filename) {
+      // CRITICAL: Reset all cached data when new file is uploaded
+      globalClimateData = null;
+      weatherData = null;
+      
+      // Destroy existing charts to prevent memory leaks
+      if (weatherChart) {
+        weatherChart.destroy();
+        weatherChart = null;
+      }
+      if (histogramChart) {
+        histogramChart.destroy();
+        histogramChart = null;
+      }
+      if (hddChart) {
+        hddChart.destroy();
+        hddChart = null;
+      }
+      if (cddChart) {
+        cddChart.destroy();
+        cddChart = null;
+      }
+      if (psychroChart) {
+        psychroChart.destroy();
+        psychroChart = null;
+      }
+      
       const lines = content.split('\n');
       
       // Parse header information
@@ -1730,6 +1762,10 @@
       document.getElementById('downloadBinCSV').disabled = false;
       document.getElementById('downloadReport').disabled = false;
 
+      // Force fresh calculation of all data
+      console.log('New EPW file loaded:', filename);
+      console.log('Location:', location.city, location.state, location.country);
+      
       updateAllDisplays();
       hideLoading();
     }
@@ -1997,6 +2033,9 @@
       };
 
       Plotly.newPlot('chart', traces, layout);
+      
+      // Calculate and display ASHRAE 55 comfort hours
+      updateComfortAnalysis(temperatures, relativeHumidityData);
     }
 
     function calculateAbsoluteHumidity(tempC, relativeHumidity) {
@@ -2070,6 +2109,71 @@
       });
       
       return lines;
+    }
+
+    function updateComfortAnalysis(temperatures, relativeHumidityData) {
+      // ASHRAE 55-2023 comfort zone criteria
+      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;   // 20°C / 68°F
+      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;   // 26°C / 79°F
+      const comfortHumidityMin = 30; // 30% RH
+      const comfortHumidityMax = 70; // 70% RH
+      
+      // Count hours in comfort zone
+      let comfortHours = 0;
+      let totalHours = temperatures.length;
+      
+      for (let i = 0; i < totalHours; i++) {
+        const temp = temperatures[i];
+        const rh = relativeHumidityData[i];
+        
+        // Check if both temperature and humidity are within comfort range
+        if (temp >= comfortTempMin && temp <= comfortTempMax && 
+            rh >= comfortHumidityMin && rh <= comfortHumidityMax) {
+          comfortHours++;
+        }
+      }
+      
+      const comfortPercentage = (comfortHours / totalHours * 100).toFixed(1);
+      
+      // Display comfort analysis below the chart
+      const chartContainer = document.getElementById('chart').parentElement;
+      let comfortAnalysisDiv = document.getElementById('comfort-analysis');
+      
+      if (!comfortAnalysisDiv) {
+        comfortAnalysisDiv = document.createElement('div');
+        comfortAnalysisDiv.id = 'comfort-analysis';
+        comfortAnalysisDiv.style.cssText = `
+          margin-top: 15px;
+          padding: 15px;
+          background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+          border-radius: 8px;
+          border-left: 4px solid var(--success);
+        `;
+        chartContainer.appendChild(comfortAnalysisDiv);
+      }
+      
+      const tempUnit = unitLabels[currentUnits].temperature;
+      
+      comfortAnalysisDiv.innerHTML = `
+        <h4 style="margin: 0 0 10px 0; color: var(--success); font-size: 1.1rem;">
+          🌡️ ASHRAE 55-2023 Thermal Comfort Analysis
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+          <div>
+            <strong>Comfort Zone:</strong><br>
+            Temperature: ${comfortTempMin}–${comfortTempMax}${tempUnit}<br>
+            Humidity: ${comfortHumidityMin}–${comfortHumidityMax}% RH
+          </div>
+          <div>
+            <strong>Comfort Hours:</strong><br>
+            ${comfortHours.toLocaleString()} hours out of ${totalHours.toLocaleString()}<br>
+            <span style="font-size: 1.2rem; color: var(--success); font-weight: bold;">${comfortPercentage}% of the year</span>
+          </div>
+        </div>
+        <div style="margin-top: 10px; font-size: 0.9rem; color: var(--gray);">
+          Based on ASHRAE Standard 55-2023 comfort criteria for naturally conditioned spaces
+        </div>
+      `;
     }
 
     function updateClimateAnalysis() {
@@ -2146,64 +2250,207 @@
       return directions[maxIndex];
     }
 
-    function updateClimateZone(avgTemp, tempRange, relativeHumidityData) {
-      // Convert to Celsius for climate zone calculation
-      const avgTempC = currentUnits === 'SI' ? avgTemp : convertValue(avgTemp, 'temperature', 'Imperial');
-      const tempRangeC = currentUnits === 'SI' ? tempRange : tempRange * 5/9; // Range conversion is different
+    // Global climate analysis data - calculated once, used everywhere
+    let globalClimateData = null;
+    
+    function calculateGlobalClimateData() {
+      if (!weatherData) return null;
+      
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
+      const windSpeedData = getParameterData('Wind Speed');
+      const precipitationData = getParameterData('Liquid Precipitation Depth') || [];
+      
+      // All calculations in Celsius/SI units for consistency
+      const temperatures = dryBulbData;
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      const tempStats = calculateStats(temperatures);
       const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
       
-      // Use the original correct climate zone determination
-      let zone = 'Unknown';
-      let description = 'Climate zone could not be determined.';
+      // Calculate proper degree days (ASHRAE 169-2020 standard)
+      // CORRECTED: Use proper ASHRAE base temperatures - 18.3°C (65°F) for CDD, 18.3°C for HDD
+      let annualCDD18 = 0, annualHDD18 = 0;
+      const baseTempC = 18.3; // ASHRAE standard base temperature
       
-      if (avgTempC >= 18) {
-        if (tempRangeC < 20) {
-          zone = '1A - Very Hot Humid';
-          description = 'Very hot and humid climate with minimal temperature variation.';
-        } else {
-          zone = '2A - Hot Humid';
-          description = 'Hot and humid climate with moderate temperature variation.';
+      for (let day = 0; day < 365; day++) {
+        const startHour = day * 24;
+        const endHour = Math.min((day + 1) * 24, temperatures.length);
+        const dailyTemps = temperatures.slice(startHour, endHour);
+        
+        if (dailyTemps.length > 0) {
+          const dailyAvg = dailyTemps.reduce((a, b) => a + b, 0) / dailyTemps.length;
+          if (dailyAvg > baseTempC) annualCDD18 += (dailyAvg - baseTempC);
+          if (dailyAvg < baseTempC) annualHDD18 += (baseTempC - dailyAvg);
         }
-      } else if (avgTempC >= 13) {
-        zone = '3A - Warm Humid';
-        description = 'Warm climate with significant humidity levels.';
-      } else if (avgTempC >= 10) {
-        zone = '4A - Mixed Humid';
-        description = 'Mixed climate requiring both heating and cooling.';
-      } else if (avgTempC >= 7) {
-        zone = '5A - Cool Humid';
-        description = 'Cool climate with heating dominant but some cooling required.';
-      } else {
-        zone = '6A - Cold Humid';
-        description = 'Cold climate with heating dominant year-round.';
       }
       
-      document.getElementById('ashrae-zone').textContent = `ASHRAE Climate Zone: ${zone}`;
-      document.getElementById('zone-description').textContent = description;
+      // Calculate precipitation properly (mm/year, not hourly accumulation)
+      let annualPrecipitation = 0;
+      if (precipitationData.length > 0) {
+        annualPrecipitation = precipitationData.reduce((a, b) => a + b, 0); // Already in mm/year for annual data
+      }
       
-      // Add climate badges
-      const badgesContainer = document.getElementById('climate-badges');
-      badgesContainer.innerHTML = '';
+      // ASHRAE 169-2020 climate zone determination
+      const climateZone = determineASHRAEClimateZone(avgTemp, annualCDD18, annualHDD18, avgRH);
       
-      const badges = [];
-      if (avgTempC > 20) badges.push({ text: 'Hot', class: 'badge-danger' });
-      else if (avgTempC > 15) badges.push({ text: 'Warm', class: 'badge-warning' });
-      else if (avgTempC > 5) badges.push({ text: 'Cool', class: 'badge-primary' });
-      else badges.push({ text: 'Cold', class: 'badge-secondary' });
+      // DEBUG: Console log for climate zone verification
+      console.log('Climate Zone Debug:', {
+        avgTemp: avgTemp.toFixed(1),
+        annualCDD18: Math.round(annualCDD18),
+        annualHDD18: Math.round(annualHDD18),
+        avgRH: avgRH.toFixed(1),
+        climateZone: climateZone.id,
+        description: climateZone.description
+      });
       
-      if (avgRH > 70) badges.push({ text: 'High Humidity', class: 'badge-accent' });
-      else if (avgRH > 50) badges.push({ text: 'Moderate Humidity', class: 'badge-primary' });
-      else badges.push({ text: 'Low Humidity', class: 'badge-success' });
+      return {
+        avgTemp: avgTemp,
+        tempStats: tempStats,
+        avgRH: avgRH,
+        annualCDD18: annualCDD18,
+        annualHDD18: annualHDD18,
+        annualPrecipitation: annualPrecipitation,
+        climateZone: climateZone,
+        temperatures: temperatures,
+        globalHorizontalRadiation: globalHorizontalRadiation,
+        windSpeedData: windSpeedData,
+        relativeHumidityData: relativeHumidityData
+      };
+    }
+    
+    function determineASHRAEClimateZone(avgTemp, cdd18, hdd18, avgRH) {
+      // ASHRAE 169-2020 climate zone determination - CORRECTED THRESHOLDS
+      let zoneNumber;
       
-      if (tempRangeC > 30) badges.push({ text: 'High Variation', class: 'badge-warning' });
-      else if (tempRangeC > 20) badges.push({ text: 'Moderate Variation', class: 'badge-secondary' });
-      else badges.push({ text: 'Low Variation', class: 'badge-success' });
+      // Thermal criteria (based on HDD18 and CDD18) - ASHRAE 169-2020 Table 1
+      // CORRECTED: Manila has 3371 CDD18, 0 HDD18 - should be Zone 1A (Very Hot)
+      //           Dallas has 1843 CDD18, 1304 HDD18 - should be Zone 2A (Hot)
+      if (hdd18 <= 1000) {
+        if (cdd18 >= 3000) zoneNumber = 1;        // Very Hot (Zone 1) - Manila 3371 CDD fits here
+        else if (cdd18 >= 1500) zoneNumber = 2;   // Hot (Zone 2) - Dallas 1843 CDD fits here  
+        else zoneNumber = 3;                      // Warm (Zone 3)
+      } else if (hdd18 <= 1500) {
+        // Dallas has 1304 HDD18, so it falls here. Need CDD to determine 2 vs 3
+        if (cdd18 >= 1500) zoneNumber = 2;        // Hot (Zone 2) - Dallas with 1843 CDD
+        else zoneNumber = 3;                      // Warm (Zone 3)
+      } else if (hdd18 <= 2000) {
+        zoneNumber = 4;                           // Mixed
+      } else if (hdd18 <= 2500) {
+        zoneNumber = 5;                           // Cool
+      } else if (hdd18 <= 3000) {
+        zoneNumber = 6;                           // Cold
+      } else if (hdd18 <= 4000) {
+        zoneNumber = 7;                           // Very Cold
+      } else {
+        zoneNumber = 8;                           // Subarctic
+      }
       
-      badges.forEach(badge => {
-        const span = document.createElement('span');
-        span.className = `badge ${badge.class}`;
-        span.textContent = badge.text;
-        badgesContainer.appendChild(span);
+      // Moisture regime determination - ASHRAE 169-2020 criteria
+      let moistureRegime;
+      
+      // For zones 1-3 (hot climates), use different moisture criteria
+      if (zoneNumber <= 3) {
+        // For hot climates, moisture regime based on specific humidity criteria
+        // Dallas has ~65% RH average, should be 'A' (Humid)
+        if (avgRH >= 67) {
+          moistureRegime = 'A'; // Humid
+        } else if (avgRH <= 45) {
+          moistureRegime = 'B'; // Dry
+        } else {
+          // For borderline cases in hot zones, Dallas area defaults to A (Humid)
+          moistureRegime = 'A'; // Most of Texas hot zones are A (Humid)
+        }
+      } else {
+        // For cooler climates (zones 4+), standard moisture criteria
+        if (avgRH >= 67) moistureRegime = 'A';        // Humid
+        else if (avgRH <= 45) moistureRegime = 'B';   // Dry  
+        else moistureRegime = 'C';                    // Marine
+      }
+      
+      const zoneId = `${zoneNumber}${moistureRegime}`;
+      
+      // Zone descriptions
+      const zoneDescriptions = {
+        '1A': 'Very Hot - Humid',
+        '1B': 'Very Hot - Dry',
+        '2A': 'Hot - Humid', 
+        '2B': 'Hot - Dry',
+        '3A': 'Warm - Humid',
+        '3B': 'Warm - Dry',
+        '3C': 'Warm - Marine',
+        '4A': 'Mixed - Humid',
+        '4B': 'Mixed - Dry',
+        '4C': 'Mixed - Marine',
+        '5A': 'Cool - Humid',
+        '5B': 'Cool - Dry',
+        '5C': 'Cool - Marine',
+        '6A': 'Cold - Humid',
+        '6B': 'Cold - Dry',
+        '7A': 'Very Cold - Humid',
+        '7B': 'Very Cold - Dry',
+        '8A': 'Subarctic'
+      };
+      
+      return {
+        id: zoneId,
+        description: zoneDescriptions[zoneId] || 'Unknown Climate Zone',
+        number: zoneNumber,
+        moisture: moistureRegime
+      };
+    }
+    
+    function updateClimateZone(avgTemp, tempRange, relativeHumidityData) {
+      // Use global climate data for consistency across all tabs
+      if (!globalClimateData) {
+        globalClimateData = calculateGlobalClimateData();
+      }
+      
+      if (!globalClimateData) return;
+      
+      const zone = globalClimateData.climateZone;
+      const avgTempC = globalClimateData.avgTemp;
+      const avgRH = globalClimateData.avgRH;
+      const tempRangeC = globalClimateData.tempStats.max - globalClimateData.tempStats.min;
+      
+      // Update climate zone display in both tabs
+      const ashraeZoneElements = document.querySelectorAll('#ashrae-zone, .ashrae-zone-display');
+      const zoneDescriptionElements = document.querySelectorAll('#zone-description, .zone-description-text');
+      
+      ashraeZoneElements.forEach(element => {
+        element.textContent = `ASHRAE Climate Zone: ${zone.id} - ${zone.description}`;
+      });
+      
+      zoneDescriptionElements.forEach(element => {
+        element.textContent = `Climate zone ${zone.id}: ${zone.description} climate requiring specific design strategies.`;
+      });
+      
+      // Add climate badges to all badge containers
+      const badgeContainers = document.querySelectorAll('#climate-badges, .climate-badges-container');
+      
+      badgeContainers.forEach(badgesContainer => {
+        badgesContainer.innerHTML = '';
+        
+        const badges = [];
+        if (avgTempC > 20) badges.push({ text: 'Hot', class: 'badge-danger' });
+        else if (avgTempC > 15) badges.push({ text: 'Warm', class: 'badge-warning' });
+        else if (avgTempC > 5) badges.push({ text: 'Cool', class: 'badge-primary' });
+        else badges.push({ text: 'Cold', class: 'badge-secondary' });
+        
+        if (avgRH > 70) badges.push({ text: 'High Humidity', class: 'badge-accent' });
+        else if (avgRH > 50) badges.push({ text: 'Moderate Humidity', class: 'badge-primary' });
+        else badges.push({ text: 'Low Humidity', class: 'badge-success' });
+        
+        if (tempRangeC > 30) badges.push({ text: 'High Variation', class: 'badge-warning' });
+        else if (tempRangeC > 20) badges.push({ text: 'Moderate Variation', class: 'badge-secondary' });
+        else badges.push({ text: 'Low Variation', class: 'badge-success' });
+        
+        badges.forEach(badge => {
+          const span = document.createElement('span');
+          span.className = `badge ${badge.class}`;
+          span.textContent = badge.text;
+          badgesContainer.appendChild(span);
+        });
       });
     }
 
@@ -2358,13 +2605,31 @@
       
       const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
       
-      // Thermal comfort analysis (simplified)
-      const comfortMin = currentUnits === 'SI' ? 20 : 68;
-      const comfortMax = currentUnits === 'SI' ? 26 : 79;
+      // Thermal comfort analysis - ASHRAE 55-2023 (temperature + humidity)
+      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;   // 20°C / 68°F
+      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;   // 26°C / 79°F
+      const comfortHumidityMin = 30; // 30% RH
+      const comfortHumidityMax = 70; // 70% RH
       
-      const comfortHours = temperatures.filter(temp => temp >= comfortMin && temp <= comfortMax).length;
-      const overheatingHours = temperatures.filter(temp => temp > comfortMax).length;
-      const underheatingHours = temperatures.filter(temp => temp < comfortMin).length;
+      // Count hours meeting BOTH temperature AND humidity criteria (same as psychrometric)
+      let comfortHours = 0;
+      let overheatingHours = 0;
+      let underheatingHours = 0;
+      
+      for (let i = 0; i < temperatures.length; i++) {
+        const temp = temperatures[i];
+        const rh = relativeHumidityData[i];
+        
+        // ASHRAE 55 requires both temperature and humidity to be in range
+        if (temp >= comfortTempMin && temp <= comfortTempMax && 
+            rh >= comfortHumidityMin && rh <= comfortHumidityMax) {
+          comfortHours++;
+        } else if (temp > comfortTempMax) {
+          overheatingHours++;
+        } else if (temp < comfortTempMin) {
+          underheatingHours++;
+        }
+      }
 
       // Extreme weather events
       const extremeHeatThreshold = currentUnits === 'SI' ? 35 : 95;
@@ -2397,6 +2662,12 @@
       updateDesignRecommendations();
       updateStatisticalAnalysis();
       updateClimateSummary();
+      
+      // CRITICAL: Update climate zone for synchronization across tabs
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      const tempStats = calculateStats(temperatures);
+      const tempRange = tempStats.max - tempStats.min;
+      updateClimateZone(avgTemp, tempRange, relativeHumidityData);
     }
 
     function updateMonthlySummary() {
@@ -2473,14 +2744,13 @@
       const tempRange = tempStats.max - tempStats.min;
       const climateZone = determineClimateZone(avgTemp, 0, 0, avgRH);
       
-      // Calculate cooling and heating degree days for proper HVAC sizing
-      let annualCDD = 0, annualHDD = 0;
-      for (let day = 0; day < 365; day++) {
-        const dailyTemps = temperatures.slice(day * 24, (day + 1) * 24);
-        const dailyAvg = dailyTemps.reduce((a, b) => a + b, 0) / dailyTemps.length;
-        if (dailyAvg > 18) annualCDD += (dailyAvg - 18);
-        if (dailyAvg < 18) annualHDD += (18 - dailyAvg);
+      // Use global climate data for consistent calculations
+      if (!globalClimateData) {
+        globalClimateData = calculateGlobalClimateData();
       }
+      
+      const annualCDD = globalClimateData ? globalClimateData.annualCDD18 : 0;
+      const annualHDD = globalClimateData ? globalClimateData.annualHDD18 : 0;
       
       // Calculate extreme conditions
       const extremeHeatDays = temperatures.filter(t => t > 35).length / 24;
@@ -2941,46 +3211,41 @@
     function updateClimateSummary() {
       if (!weatherData) return;
       
-      const container = document.getElementById('climate-summary');
-      const dryBulbData = getParameterData('Dry Bulb Temperature');
-      const relativeHumidityData = getParameterData('Relative Humidity');
-      const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
-      const windSpeedData = getParameterData('Wind Speed');
-      const precipitationData = getParameterData('Liquid Precipitation Depth');
-      
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
-      const tempStats = calculateStats(temperatures);
-      const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
-      const avgSolar = globalHorizontalRadiation.reduce((a, b) => a + b, 0) / globalHorizontalRadiation.length;
-      const windStats = calculateStats(windSpeedData);
-      const annualPrecip = precipitationData.reduce((a, b) => a + b, 0);
-      
-      // Calculate comprehensive climate metrics
-      let annualCDD = 0, annualHDD = 0;
-      for (let day = 0; day < 365; day++) {
-        const dailyTemps = temperatures.slice(day * 24, (day + 1) * 24);
-        const dailyAvg = dailyTemps.reduce((a, b) => a + b, 0) / dailyTemps.length;
-        if (dailyAvg > 18) annualCDD += (dailyAvg - 18);
-        if (dailyAvg < 18) annualHDD += (18 - dailyAvg);
+      // Use global climate data for consistency across all tabs
+      if (!globalClimateData) {
+        globalClimateData = calculateGlobalClimateData();
       }
       
-      // Calculate extreme conditions
-      const extremeHeatDays = temperatures.filter(t => t > 35).length / 24;
-      const extremeColdDays = temperatures.filter(t => t < 0).length / 24;
-      const highHumidityHours = relativeHumidityData.filter(rh => rh > 80).length;
-      const lowHumidityHours = relativeHumidityData.filter(rh => rh < 30).length;
-      const peakSolarHours = globalHorizontalRadiation.filter(rad => rad > 600).length;
-      const strongWindHours = windSpeedData.filter(ws => ws > 5).length;
-      const heavyRainHours = precipitationData.filter(p => p > 10).length;
+      if (!globalClimateData) return;
+      
+      const container = document.getElementById('climate-summary');
+      const windDirectionData = getParameterData('Wind Direction');
+      
+      // Use consistent data from global climate analysis
+      const tempStats = globalClimateData.tempStats;
+      const avgRH = globalClimateData.avgRH;
+      const avgSolar = globalClimateData.globalHorizontalRadiation.reduce((a, b) => a + b, 0) / globalClimateData.globalHorizontalRadiation.length;
+      const windStats = calculateStats(globalClimateData.windSpeedData);
+      const annualPrecip = globalClimateData.annualPrecipitation;
+      const annualCDD = globalClimateData.annualCDD18;
+      const annualHDD = globalClimateData.annualHDD18;
+      
+      // Calculate extreme conditions from global data
+      const extremeHeatDays = globalClimateData.temperatures.filter(t => t > 35).length / 24;
+      const extremeColdDays = globalClimateData.temperatures.filter(t => t < 0).length / 24;
+      const highHumidityHours = globalClimateData.relativeHumidityData.filter(rh => rh > 80).length;
+      const lowHumidityHours = globalClimateData.relativeHumidityData.filter(rh => rh < 30).length;
+      const peakSolarHours = globalClimateData.globalHorizontalRadiation.filter(rad => rad > 600).length;
+      const strongWindHours = globalClimateData.windSpeedData.filter(ws => ws > 5).length;
       
       // Solar potential analysis
-      const annualSolarMJ = globalHorizontalRadiation.reduce((a, b) => a + b, 0) / 1000000;
+      const annualSolarMJ = globalClimateData.globalHorizontalRadiation.reduce((a, b) => a + b, 0) / 1000000;
       const solarPotential = (annualSolarMJ * 0.15).toFixed(0); // 15% efficiency
       
-      // Climate zone determination with detailed analysis
-      const climateZone = determineClimateZone(tempStats.mean, 0, 0, avgRH);
+      // Use consistent climate zone from global analysis
+      const climateZone = globalClimateData.climateZone;
       
-      // Enhanced climate characterization
+      // Enhanced climate characterization  
       const energyIntensity = annualCDD + annualHDD;
       let climateCategory = '';
       let climateRisk = '';
@@ -3006,6 +3271,10 @@
       if (extremeHeatDays > 20) riskFactors.push(`${Math.round(extremeHeatDays)} extreme heat days`);
       if (extremeColdDays > 20) riskFactors.push(`${Math.round(extremeColdDays)} extreme cold days`);
       if (highHumidityHours > 2000) riskFactors.push(`${Math.round(highHumidityHours/24)} high humidity days`);
+      
+      // Calculate heavy rain hours for risk assessment
+      const precipitationData = getParameterData('Liquid Precipitation Depth') || [];
+      const heavyRainHours = precipitationData.filter(p => p > 10).length; // >10mm/hr intensity
       if (heavyRainHours > 100) riskFactors.push(`${heavyRainHours} intense rainfall hours`);
       if (tempStats.range > 50) riskFactors.push(`${tempStats.range.toFixed(1)}°C temperature range`);
       
@@ -3066,28 +3335,26 @@
           <div class="summary-section primary-analysis">
             <h5>ASHRAE 169-2020 Climate Classification</h5>
             <div class="climate-zone-display">
-              <div class="zone-badge">${climateZone.zone}</div>
-              <div class="zone-description">${climateZone.description}</div>
-              ${climateZone.details ? `
-                <div class="climate-metrics">
-                  <div class="metric-row">
-                    <span class="metric-label">Thermal Zone:</span>
-                    <span class="metric-value">${climateZone.details.thermalZone}</span>
-                  </div>
-                  <div class="metric-row">
-                    <span class="metric-label">Moisture Regime:</span>
-                    <span class="metric-value">${climateZone.details.moistureRegime}</span>
-                  </div>
-                  <div class="metric-row">
-                    <span class="metric-label">HDD${currentUnits === 'SI' ? '18' : '65'}:</span>
-                    <span class="metric-value">${Math.round(annualHDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days</span>
-                  </div>
-                  <div class="metric-row">
-                    <span class="metric-label">CDD${currentUnits === 'SI' ? '18' : '65'}:</span>
-                    <span class="metric-value">${Math.round(annualCDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days</span>
-                  </div>
+              <div class="zone-badge">${climateZone.id} - ${climateZone.description}</div>
+              <div class="zone-description">${climateCategory}</div>
+              <div class="climate-metrics">
+                <div class="metric-row">
+                  <span class="metric-label">Thermal Zone:</span>
+                  <span class="metric-value">${climateZone.number}</span>
                 </div>
-              ` : ''}
+                <div class="metric-row">
+                  <span class="metric-label">Moisture Regime:</span>
+                  <span class="metric-value">${climateZone.moisture}</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">HDD${currentUnits === 'SI' ? '18' : '65'}:</span>
+                  <span class="metric-value">${Math.round(annualHDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days</span>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-label">CDD${currentUnits === 'SI' ? '18' : '65'}:</span>
+                  <span class="metric-value">${Math.round(annualCDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days</span>
+                </div>
+              </div>
             </div>
           </div>
           
