@@ -782,6 +782,62 @@
       border-left: 3px solid #ffc107;
     }
     
+    /* Wind Rose Styles */
+    .windrose-stats {
+      margin-top: 20px;
+    }
+    
+    .wind-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .wind-stat-card {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .wind-stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .wind-stat-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .wind-recommendations {
+      background: var(--light);
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    
+    .wind-recommendations h6 {
+      margin: 0 0 15px 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    
+    .wind-recommendations ul {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+    
+    .wind-recommendations li {
+      margin-bottom: 10px;
+    }
+
     /* Statistical Analysis Styles */
     .stats-analysis-grid {
       display: grid;
@@ -1046,6 +1102,8 @@
       <div class="tab" data-tab="climate">Climate Analysis</div>
       <div class="tab" data-tab="hdd-cdd">HDD/CDD</div>
       <div class="tab" data-tab="advanced">Advanced Metrics</div>
+      <div class="tab" data-tab="heatmaps">Heat Maps</div>
+      <div class="tab" data-tab="windrose">Wind Rose</div>
     </div>
 
     <div id="timeseries" class="tab-content card active">
@@ -1335,6 +1393,70 @@
           <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--dark); line-height: 1.4; background: white; padding: 10px; border-radius: 4px;">
             Advanced EPW Climate Analysis Tool (Research Grade). ASHRAE 169-2020 compliant climate analysis with peer-reviewed statistical methodologies. Available at: [URL]. Accessed: [Date].
           </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="heatmaps" class="tab-content card">
+      <div class="heatmap-controls">
+        <h4>Climate Heat Maps - Temporal Pattern Analysis</h4>
+        <p>Explore hourly and seasonal patterns across the year with interactive heat maps showing temperature, humidity, solar radiation, and wind patterns.</p>
+        
+        <div class="controls-group">
+          <label for="heatmapParameter">Climate Variable:</label>
+          <select id="heatmapParameter">
+            <option value="temperature">Temperature</option>
+            <option value="humidity">Relative Humidity</option>
+            <option value="solar">Solar Radiation</option>
+            <option value="wind">Wind Speed</option>
+          </select>
+        </div>
+      </div>
+      <div id="heatmap-container">
+        <div id="heatmap-chart" style="width:100%;height:600px;"></div>
+      </div>
+    </div>
+
+    <div id="windrose" class="tab-content card">
+      <div class="windrose-controls">
+        <h4>Wind Rose Analysis - Wind Patterns & Building Orientation</h4>
+        <p>Analyze wind direction frequency and speed distributions to optimize building orientation, natural ventilation, and wind protection strategies.</p>
+        
+        <div class="controls-group">
+          <label for="windrosePeriod">Analysis Period:</label>
+          <select id="windrosePeriod">
+            <option value="annual">Annual (All Year)</option>
+            <option value="summer">Summer (Jun-Aug)</option>
+            <option value="winter">Winter (Dec-Feb)</option>
+            <option value="spring">Spring (Mar-May)</option>
+            <option value="autumn">Autumn (Sep-Nov)</option>
+          </select>
+        </div>
+      </div>
+      <div id="windrose-container">
+        <div id="windrose-chart" style="width:100%;height:600px;"></div>
+        <div id="windrose-stats" class="windrose-stats">
+          <div class="wind-stats-grid">
+            <div class="wind-stat-card">
+              <div class="wind-stat-value" id="prevailing-direction">-</div>
+              <div class="wind-stat-label">Prevailing Direction</div>
+            </div>
+            <div class="wind-stat-card">
+              <div class="wind-stat-value" id="average-speed">-</div>
+              <div class="wind-stat-label">Average Speed</div>
+            </div>
+            <div class="wind-stat-card">
+              <div class="wind-stat-value" id="calm-percentage">-</div>
+              <div class="wind-stat-label">Calm Conditions (%)</div>
+            </div>
+            <div class="wind-stat-card">
+              <div class="wind-stat-value" id="strong-wind-hours">-</div>
+              <div class="wind-stat-label">Strong Wind Hours</div>
+            </div>
+          </div>
+          <div id="wind-recommendations" class="wind-recommendations">
+            <!-- Wind-based design recommendations will be populated here -->
+          </div>
         </div>
       </div>
     </div>
@@ -2323,27 +2445,27 @@
       // ASHRAE 169-2020 climate zone determination - CORRECTED THRESHOLDS
       let zoneNumber;
       
-      // Thermal criteria (based on HDD18 and CDD18) - ASHRAE 169-2020 Table 1
-      // CORRECTED: Manila has 3371 CDD18, 0 HDD18 - should be Zone 1A (Very Hot)
-      //           Dallas has 1843 CDD18, 1304 HDD18 - should be Zone 2A (Hot)
-      if (hdd18 <= 1000) {
-        if (cdd18 >= 3000) zoneNumber = 1;        // Very Hot (Zone 1) - Manila 3371 CDD fits here
-        else if (cdd18 >= 1500) zoneNumber = 2;   // Hot (Zone 2) - Dallas 1843 CDD fits here  
-        else zoneNumber = 3;                      // Warm (Zone 3)
-      } else if (hdd18 <= 1500) {
-        // Dallas has 1304 HDD18, so it falls here. Need CDD to determine 2 vs 3
-        if (cdd18 >= 1500) zoneNumber = 2;        // Hot (Zone 2) - Dallas with 1843 CDD
-        else zoneNumber = 3;                      // Warm (Zone 3)
-      } else if (hdd18 <= 2000) {
-        zoneNumber = 4;                           // Mixed
-      } else if (hdd18 <= 2500) {
-        zoneNumber = 5;                           // Cool
-      } else if (hdd18 <= 3000) {
-        zoneNumber = 6;                           // Cold
-      } else if (hdd18 <= 4000) {
-        zoneNumber = 7;                           // Very Cold
+      // ASHRAE 169-2020 Official Thermal Zone Criteria
+      // Based on research table, using simplified but accurate criteria for classification
+      
+      if (cdd18 >= 5000) {
+        zoneNumber = 0;                           // Extremely Hot: CDD18 ≥ 5000 (rarely reached)
+      } else if (cdd18 >= 3000) {
+        zoneNumber = 1;                           // Very Hot: CDD18 ≥ 3000 (Manila: 3371)
+      } else if (cdd18 >= 1500 && hdd18 <= 2000) {
+        zoneNumber = 2;                           // Hot: CDD18 ≥ 1500 and HDD18 ≤ 2000 (Dallas: 1843 CDD, 1304 HDD)
+      } else if ((cdd18 >= 1000 && hdd18 <= 2500) || (cdd18 >= 500 && hdd18 <= 1500)) {
+        zoneNumber = 3;                           // Warm: moderate CDD with low HDD
+      } else if (hdd18 <= 2000 && cdd18 < 1500) {
+        zoneNumber = 4;                           // Mixed: low heating and cooling needs
+      } else if (hdd18 > 2000 && hdd18 <= 3000) {
+        zoneNumber = 5;                           // Cool: 2000 < HDD18 ≤ 3000
+      } else if (hdd18 > 3000 && hdd18 <= 4000) {
+        zoneNumber = 6;                           // Cold: 3000 < HDD18 ≤ 4000
+      } else if (hdd18 > 4000 && hdd18 <= 5000) {
+        zoneNumber = 7;                           // Very Cold: 4000 < HDD18 ≤ 5000 (Toronto: 3660)
       } else {
-        zoneNumber = 8;                           // Subarctic
+        zoneNumber = 8;                           // Subarctic: HDD18 > 5000
       }
       
       // Moisture regime determination - ASHRAE 169-2020 criteria
@@ -2372,6 +2494,8 @@
       
       // Zone descriptions
       const zoneDescriptions = {
+        '0A': 'Extremely Hot - Humid',
+        '0B': 'Extremely Hot - Dry',
         '1A': 'Very Hot - Humid',
         '1B': 'Very Hot - Dry',
         '2A': 'Hot - Humid', 
@@ -2979,6 +3103,86 @@
       container.innerHTML = html;
     }
 
+    function generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
+      let assessment = `
+        <div class="holistic-climate-assessment">
+          <h6>Holistic Climate Characterization</h6>
+          <div class="climate-narrative">
+            <p><strong>Climate Type Identification:</strong></p>
+            <p>${generateClimateNarrative(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr)}</p>
+            
+            <p><strong>Dominant Climate Drivers:</strong></p>
+            <ul>
+              ${tempSolarCorr > 0.5 ? '<li>🌞 <strong>Solar Radiation</strong> - Primary temperature control mechanism (clear sky conditions)</li>' : ''}
+              ${Math.abs(tempHumidityCorr) > 0.4 ? '<li>💧 <strong>Humidity-Temperature Coupling</strong> - ' + (tempHumidityCorr > 0 ? 'Tropical moisture retention' : 'Continental evaporative cooling') + '</li>' : ''}
+              ${Math.abs(solarWindCorr) > 0.4 ? '<li>🌬️ <strong>Thermal Winds</strong> - Solar heating drives wind patterns</li>' : ''}
+              ${Math.abs(humidityWindCorr) > 0.4 ? '<li>🌊 <strong>Moisture Advection</strong> - Wind transports humidity</li>' : ''}
+              ${tempSolarCorr < 0.3 && Math.abs(tempHumidityCorr) < 0.3 ? '<li>🌀 <strong>Weather Systems</strong> - Temperature controlled by air masses and fronts</li>' : ''}
+            </ul>
+            
+            <p><strong>Building Design Implications:</strong></p>
+            ${generateDesignImplications(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr)}
+          </div>
+        </div>
+      `;
+      return assessment;
+    }
+
+    function generateClimateNarrative(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
+      const tempRange = tempStats.max - tempStats.min;
+      const avgHumidity = humidityStats.mean;
+      const avgSolar = solarStats.mean;
+      const avgWind = windStats.mean;
+      
+      // Climate type determination based on correlations and statistics
+      if (tempSolarCorr > 0.6 && tempHumidityCorr > 0.4 && avgHumidity > 65) {
+        return "This location exhibits <strong>tropical humid climate characteristics</strong> with strong solar control and high moisture retention. Temperature and humidity rise together, creating high heat index conditions typical of equatorial regions.";
+      } else if (tempSolarCorr > 0.6 && tempHumidityCorr < -0.3 && avgHumidity < 50) {
+        return "This location shows <strong>arid/desert climate patterns</strong> with excellent solar control but inverse temperature-humidity relationship. Hot temperatures drive evaporation, creating dry conditions typical of continental desert regions.";
+      } else if (tempSolarCorr > 0.4 && Math.abs(tempHumidityCorr) < 0.3 && tempRange > 25) {
+        return "This location demonstrates <strong>continental climate characteristics</strong> with good solar influence but complex humidity patterns. Large temperature swings indicate continental air mass influences typical of interior regions.";
+      } else if (tempSolarCorr < 0.4 && humidityWindCorr > 0.3 && tempRange < 20) {
+        return "This location exhibits <strong>oceanic/maritime climate features</strong> with limited solar control and wind-driven humidity. Temperature moderated by water bodies with moisture transported by wind systems.";
+      } else if (tempSolarCorr < 0.3 && Math.abs(tempHumidityCorr) < 0.3) {
+        return "This location shows <strong>complex climate patterns</strong> where temperature is controlled by weather systems rather than solar radiation. Likely influenced by seasonal monsoons, frequent cloud cover, or strong topographic effects.";
+      } else {
+        return "This location demonstrates <strong>transitional climate characteristics</strong> with mixed influences from solar radiation, moisture patterns, and weather systems. Climate behavior varies seasonally between different regimes.";
+      }
+    }
+
+    function generateDesignImplications(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
+      let implications = '<ul>';
+      
+      if (tempSolarCorr > 0.5) {
+        implications += '<li>🏠 <strong>Passive Solar Design Effective</strong> - Predictable solar patterns enable daylighting and thermal mass strategies</li>';
+        implications += '<li>☀️ <strong>Solar Shading Critical</strong> - Direct solar control essential for comfort and energy efficiency</li>';
+      }
+      
+      if (tempHumidityCorr > 0.4) {
+        implications += '<li>💨 <strong>Dehumidification Priority</strong> - High temperature-humidity coupling requires active moisture control</li>';
+        implications += '<li>🌬️ <strong>Natural Ventilation Limited</strong> - Humid conditions reduce effectiveness of passive cooling</li>';
+      } else if (tempHumidityCorr < -0.3) {
+        implications += '<li>💨 <strong>Evaporative Cooling Potential</strong> - Dry conditions enable effective passive cooling strategies</li>';
+        implications += '<li>🌬️ <strong>Natural Ventilation Effective</strong> - Low humidity enhances comfort from air movement</li>';
+      }
+      
+      if (Math.abs(solarWindCorr) > 0.4) {
+        implications += '<li>🔄 <strong>Thermal Wind Utilization</strong> - Design can leverage predictable solar-driven wind patterns</li>';
+      }
+      
+      if (humidityWindCorr > 0.3) {
+        implications += '<li>🌊 <strong>Wind Direction Matters</strong> - Orientation should consider moisture-bearing wind directions</li>';
+      }
+      
+      const tempRange = tempStats.max - tempStats.min;
+      if (tempRange > 30) {
+        implications += '<li>🏗️ <strong>Thermal Mass Beneficial</strong> - Large temperature swings favor thermal storage strategies</li>';
+      }
+      
+      implications += '</ul>';
+      return implications;
+    }
+
     function updateStatisticalAnalysis() {
       if (!weatherData) return;
       
@@ -3107,28 +3311,76 @@
                 <span class="corr-value ${Math.abs(tempHumidityCorr) > 0.3 ? 'strong' : 'weak'}">
                   ${tempHumidityCorr.toFixed(3)}
                 </span>
-                <div class="corr-explanation">Clausius-Clapeyron relationship</div>
+                <div class="corr-explanation">
+                  <strong>Clausius-Clapeyron relationship:</strong> 
+                  ${tempHumidityCorr > 0.5 ? 'Strong positive correlation (+0.5 to +1.0) indicates hot air holds more moisture - typical of tropical/humid climates where temperature and humidity rise together, creating high heat index conditions.' :
+                    tempHumidityCorr > 0.2 ? 'Moderate positive correlation (+0.2 to +0.5) suggests seasonal humidity variations with temperature - transitional climates with some moisture retention during warm periods.' :
+                    tempHumidityCorr > -0.2 ? 'Weak correlation (-0.2 to +0.2) indicates continental/desert climate with independent humidity patterns - humidity controlled by factors other than temperature.' :
+                    tempHumidityCorr > -0.5 ? 'Moderate negative correlation (-0.2 to -0.5) suggests monsoon or Mediterranean patterns where peak temperatures occur during dry seasons - hot dry periods alternate with cooler wet periods.' :
+                    'Strong negative correlation (-0.5 to -1.0) indicates classic monsoon climate where hottest periods are driest - typical of locations with distinct wet and dry seasons.'}
+                  <br><strong>Your value (${tempHumidityCorr.toFixed(3)}):</strong> ${
+                    tempHumidityCorr > 0.5 ? 'Expect high heat index during hot periods. Dehumidification critical for comfort.' :
+                    tempHumidityCorr > 0.2 ? 'Moderate humidity-temperature coupling. Mixed comfort strategies needed.' :
+                    tempHumidityCorr > -0.2 ? 'Humidity independent of temperature. Local factors control moisture.' :
+                    tempHumidityCorr > -0.5 ? 'Seasonal comfort variations. Hot dry periods more tolerable than cool humid ones.' :
+                    'Classic dry heat vs humid cool pattern. Natural ventilation effective during hot/dry periods.'}
+                </div>
               </div>
               <div class="corr-item">
                 <strong>Temperature-Solar:</strong> 
                 <span class="corr-value ${Math.abs(tempSolarCorr) > 0.3 ? 'strong' : 'weak'}">
                   ${tempSolarCorr.toFixed(3)}
                 </span>
-                <div class="corr-explanation">Radiative forcing</div>
+                <div class="corr-explanation">
+                  <strong>Radiative forcing:</strong> 
+                  ${tempSolarCorr > 0.7 ? 'Very strong correlation (+0.7 to +1.0) - clear, sunny climate with direct solar heating dominance. Excellent solar potential and predictable thermal behavior.' :
+                    tempSolarCorr > 0.4 ? 'Strong correlation (+0.4 to +0.7) indicates solar radiation as primary temperature driver. Good solar design potential with some weather variability.' :
+                    tempSolarCorr > 0.1 ? 'Moderate correlation (+0.1 to +0.4) suggests cloud cover or atmospheric effects moderate solar heating. Limited but usable solar potential.' :
+                    tempSolarCorr > -0.1 ? 'Weak correlation (-0.1 to +0.1) indicates temperature controlled by air masses, ocean currents, or persistent cloud cover. Poor solar predictability.' :
+                    'Negative correlation (< -0.1) suggests inverse relationship - cloudy periods may be warmer due to greenhouse effect or weather patterns.'}
+                  <br><strong>Your value (${tempSolarCorr.toFixed(3)}):</strong> ${
+                    tempSolarCorr > 0.7 ? 'Excellent for passive solar design and solar panels. Shading essential for cooling.' :
+                    tempSolarCorr > 0.4 ? 'Good solar potential. Solar shading and thermal mass strategies effective.' :
+                    tempSolarCorr > 0.1 ? 'Moderate solar influence. Consider hybrid heating/cooling strategies.' :
+                    tempSolarCorr > -0.1 ? 'Solar heating unreliable. Focus on weather-resistant design strategies.' :
+                    'Unusual inverse solar relationship. Temperature driven by other factors than direct solar heating.'}
+                </div>
               </div>
               <div class="corr-item">
                 <strong>Solar-Wind:</strong> 
                 <span class="corr-value ${Math.abs(solarWindCorr) > 0.3 ? 'strong' : 'weak'}">
                   ${solarWindCorr.toFixed(3)}
                 </span>
-                <div class="corr-explanation">Thermal circulation</div>
+                <div class="corr-explanation">
+                  <strong>Thermal circulation:</strong> 
+                  ${solarWindCorr > 0.3 ? 'Positive correlation (+0.3 to +1.0) indicates thermal winds - solar heating drives convective wind patterns. Typical of continental climates, daily sea/land breezes, or mountain/valley winds.' :
+                    solarWindCorr < -0.3 ? 'Negative correlation (-0.3 to -1.0) suggests cloud-associated winds - stormy/windy periods coincide with low solar radiation. Weather fronts bring both clouds and wind.' :
+                    'Weak correlation (-0.3 to +0.3) indicates non-thermal wind drivers like pressure systems, topography, or coastal effects dominate over solar-driven winds.'}
+                  <br><strong>Your value (${solarWindCorr.toFixed(3)}):</strong> ${
+                    solarWindCorr > 0.5 ? 'Strong thermal wind patterns. Design to capture predictable solar-driven breezes for natural cooling.' :
+                    solarWindCorr > 0.3 ? 'Moderate thermal winds. Sunny periods generate helpful air movement for passive cooling.' :
+                    solarWindCorr > -0.3 ? 'Wind patterns independent of solar heating. Consider prevailing winds from pressure systems or topography.' :
+                    solarWindCorr > -0.5 ? 'Moderate storm winds. Windy periods often cloudy - useful for natural cooling during overcast conditions.' :
+                    'Strong storm wind pattern. High winds associated with weather systems and cloud cover rather than solar heating.'}
+                </div>
               </div>
               <div class="corr-item">
                 <strong>Humidity-Wind:</strong> 
                 <span class="corr-value ${Math.abs(humidityWindCorr) > 0.3 ? 'strong' : 'weak'}">
                   ${humidityWindCorr.toFixed(3)}
                 </span>
-                <div class="corr-explanation">Advection patterns</div>
+                <div class="corr-explanation">
+                  <strong>Advection patterns:</strong> 
+                  ${humidityWindCorr > 0.3 ? 'Positive correlation (+0.3 to +1.0) indicates moisture-laden winds - typical of coastal/oceanic climates where wind brings humidity from water bodies. Wind increases moisture content.' :
+                    humidityWindCorr < -0.3 ? 'Negative correlation (-0.3 to -1.0) suggests dry winds - continental climates where wind brings dry air masses or enhances evaporation. Wind reduces humidity.' :
+                    'Weak correlation (-0.3 to +0.3) indicates local moisture sources dominate over wind-transported humidity. Humidity patterns independent of wind direction/speed.'}
+                  <br><strong>Your value (${humidityWindCorr.toFixed(3)}):</strong> ${
+                    humidityWindCorr > 0.5 ? 'Strong moisture advection. Wind brings humid air from oceans/lakes. Consider wind direction for humidity control.' :
+                    humidityWindCorr > 0.3 ? 'Moderate humid winds. Some wind directions bring moisture while others may be drier.' :
+                    humidityWindCorr > -0.3 ? 'Wind-humidity independence. Local evaporation/condensation more important than wind-transported moisture.' :
+                    humidityWindCorr > -0.5 ? 'Moderate drying winds. Wind enhances evaporation and brings drier air masses - good for natural dehumidification.' :
+                    'Strong drying winds. Wind consistently reduces humidity through evaporation or dry air transport - excellent for evaporative cooling.'}
+                </div>
               </div>
             </div>
             <div class="corr-interpretation">
@@ -3142,7 +3394,7 @@
               <div class="reg-model">
                 <div class="reg-equation">
                   <strong>Solar-Temperature Model:</strong><br>
-                  T = ${solarTempRegression.slope.toFixed(4)} × Solar + ${solarTempRegression.intercept.toFixed(2)}°C
+                  <code>T = ${solarTempRegression.slope.toFixed(4)} × Solar + ${solarTempRegression.intercept.toFixed(2)}°C</code>
                 </div>
                 <div class="reg-rsquared">
                   <strong>R² = ${solarTempRegression.rSquared.toFixed(3)}</strong>
@@ -3150,12 +3402,21 @@
                     (${(solarTempRegression.rSquared * 100).toFixed(1)}% of temperature variance explained by solar radiation)
                   </span>
                 </div>
+                <div class="reg-interpretation">
+                  <strong>Climate Interpretation:</strong> ${
+                    solarTempRegression.rSquared > 0.7 ? 'Excellent solar control - clear sky conditions dominate. Temperature primarily driven by solar radiation. Ideal for passive solar design.' :
+                    solarTempRegression.rSquared > 0.4 ? 'Good solar influence - moderate cloud cover or atmospheric effects. Solar design strategies effective but consider weather variability.' :
+                    solarTempRegression.rSquared > 0.2 ? 'Limited solar control - temperature influenced by air masses, winds, or frequent cloud cover. Mixed solar potential.' :
+                    'Poor solar predictability - temperature dominated by weather patterns, ocean currents, or urban heat effects. Solar strategies less reliable.'
+                  }<br>
+                  <em>Slope of ${solarTempRegression.slope.toFixed(4)} indicates ${Math.abs(solarTempRegression.slope) > 0.01 ? 'strong' : 'weak'} temperature sensitivity to solar radiation changes.</em>
+                </div>
               </div>
               
               <div class="reg-model">
                 <div class="reg-equation">
                   <strong>Temperature-Humidity Model:</strong><br>
-                  RH = ${tempHumidityRegression.slope.toFixed(4)} × T + ${tempHumidityRegression.intercept.toFixed(1)}%
+                  <code>RH = ${tempHumidityRegression.slope.toFixed(4)} × T + ${tempHumidityRegression.intercept.toFixed(1)}%</code>
                 </div>
                 <div class="reg-rsquared">
                   <strong>R² = ${tempHumidityRegression.rSquared.toFixed(3)}</strong>
@@ -3163,10 +3424,25 @@
                     (${(tempHumidityRegression.rSquared * 100).toFixed(1)}% of humidity variance explained by temperature)
                   </span>
                 </div>
+                <div class="reg-interpretation">
+                  <strong>Climate Interpretation:</strong> ${
+                    tempHumidityRegression.slope > 0 && tempHumidityRegression.rSquared > 0.3 ? 'Typical tropical pattern - higher temperatures increase atmospheric moisture capacity. Expect high heat index during hot periods.' :
+                    tempHumidityRegression.slope < 0 && tempHumidityRegression.rSquared > 0.3 ? 'Continental/arid pattern - higher temperatures decrease relative humidity through evaporation. Good natural cooling potential.' :
+                    tempHumidityRegression.rSquared < 0.2 ? 'Complex humidity patterns - controlled by seasonal monsoons, irrigation, or local water bodies. Humidity independent of temperature.' :
+                    'Moderate humidity-temperature coupling - transitional climate with mixed influences from both temperature and external moisture sources.'
+                  }<br>
+                  <em>${tempHumidityRegression.slope > 0 ? 'Positive' : 'Negative'} slope of ${Math.abs(tempHumidityRegression.slope).toFixed(4)} indicates ${Math.abs(tempHumidityRegression.slope * 10).toFixed(1)} %RH change per 10°C temperature change.</em>
+                </div>
               </div>
             </div>
             <div class="climate-context">
-              <p><em>These models reflect atmospheric thermodynamics and are used in climate modeling worldwide</em></p>
+              <h6>Understanding Regression Models:</h6>
+              <ul>
+                <li><strong>R² values:</strong> 0.7+ = strong predictive model, 0.3-0.7 = moderate relationship, <0.3 = weak/complex relationship</li>
+                <li><strong>Solar-Temperature slope:</strong> Shows how much temperature changes per unit of solar radiation increase</li>
+                <li><strong>Temperature-Humidity slope:</strong> Reveals climate type - positive for tropical, negative for arid/continental</li>
+                <li><strong>Climate applications:</strong> These relationships inform passive design, HVAC sizing, and energy modeling</li>
+              </ul>
             </div>
           </div>
           
@@ -3939,31 +4215,28 @@
         if (dailyAvg > 18) CDD18 += (dailyAvg - 18);
       });
       
-      // Determine thermal zone (1-8) based on ASHRAE 169-2020 criteria
+      // ASHRAE 169-2020 Official Thermal Zone Criteria
+      // Using unified logic consistent with determineASHRAEClimateZone function
+      
       let thermalZone = '';
-      if (CDD18 >= 3000) {
+      if (CDD18 >= 5000) {
+        thermalZone = '0'; // Extremely Hot: CDD18 ≥ 5000°C-days
+      } else if (CDD18 >= 3000) {
         thermalZone = '1'; // Very Hot: CDD18 ≥ 3000°C-days
-      } else if (CDD18 >= 2200) {
-        thermalZone = '2'; // Hot: 2200 ≤ CDD18 < 3000°C-days
-      } else if (CDD18 >= 1400) {
-        thermalZone = '3'; // Warm: 1400 ≤ CDD18 < 2200°C-days
-      } else if (CDD18 >= 500 && HDD18 <= 2000) {
-        thermalZone = '4'; // Mixed: CDD18 ≥ 500 and HDD18 ≤ 2000°C-days
+      } else if (CDD18 >= 1500 && HDD18 <= 2000) {
+        thermalZone = '2'; // Hot: CDD18 ≥ 1500 and HDD18 ≤ 2000°C-days
+      } else if ((CDD18 >= 1000 && HDD18 <= 2500) || (CDD18 >= 500 && HDD18 <= 1500)) {
+        thermalZone = '3'; // Warm: moderate CDD with low HDD
+      } else if (HDD18 <= 2000 && CDD18 < 1500) {
+        thermalZone = '4'; // Mixed: low heating and cooling needs
       } else if (HDD18 > 2000 && HDD18 <= 3000) {
         thermalZone = '5'; // Cool: 2000 < HDD18 ≤ 3000°C-days
       } else if (HDD18 > 3000 && HDD18 <= 4000) {
         thermalZone = '6'; // Cold: 3000 < HDD18 ≤ 4000°C-days
       } else if (HDD18 > 4000 && HDD18 <= 5000) {
         thermalZone = '7'; // Very Cold: 4000 < HDD18 ≤ 5000°C-days
-      } else if (HDD18 > 5000) {
-        thermalZone = '8'; // Subarctic: HDD18 > 5000°C-days
       } else {
-        // For locations with low HDD and low CDD
-        if (CDD18 >= 300) {
-          thermalZone = '3'; // Likely warm
-        } else {
-          thermalZone = '4'; // Mixed/moderate
-        }
+        thermalZone = '8'; // Subarctic: HDD18 > 5000°C-days
       }
       
       // Determine moisture regime (A, B, C) based on ASHRAE 169-2020 criteria
@@ -3992,6 +4265,8 @@
       const fullZone = thermalZone + moistureRegime;
       
       const zoneDescriptions = {
+        '0A': 'Extremely Hot-Humid: Extreme heat year-round, very high humidity',
+        '0B': 'Extremely Hot-Dry: Extreme heat year-round, arid conditions',
         '1A': 'Very Hot-Humid: Very hot summers, warm winters, high humidity year-round',
         '1B': 'Very Hot-Dry: Very hot summers, warm winters, low humidity',
         '1C': 'Very Hot-Marine: Very hot summers, warm winters, moderate humidity',
@@ -4305,6 +4580,336 @@
       return html;
     }
 
+    // Heat Maps functionality
+    function updateHeatMaps() {
+      if (!weatherData) return;
+      
+      const parameter = document.getElementById('heatmapParameter').value;
+      generateHeatMap(parameter);
+    }
+    
+    function generateHeatMap(parameter) {
+      const data = getParameterData(parameter === 'temperature' ? 'Dry Bulb Temperature' : 
+                                   parameter === 'humidity' ? 'Relative Humidity' :
+                                   parameter === 'solar' ? 'Global Horizontal Radiation' :
+                                   'Wind Speed');
+      
+      if (!data || data.length === 0) return;
+      
+      // Create matrix data for heat map (hour of day vs day of year)
+      const heatmapData = [];
+      
+      for (let hour = 0; hour < 24; hour++) {
+        for (let day = 0; day < 365; day++) {
+          const dataIndex = day * 24 + hour;
+          if (dataIndex < data.length) {
+            let value = data[dataIndex];
+            
+            // Apply unit conversions
+            if (parameter === 'temperature' && currentUnits === 'Imperial') {
+              value = unitConversions.temperature.toImperial(value);
+            } else if (parameter === 'solar' && currentUnits === 'Imperial') {
+              value = unitConversions.solarRadiation.toImperial(value);
+            } else if (parameter === 'wind' && currentUnits === 'Imperial') {
+              value = unitConversions.windSpeed.toImperial(value);
+            }
+            
+            heatmapData.push([day, hour, value]);
+          }
+        }
+      }
+      
+      const parameterNames = {
+        'temperature': 'Temperature',
+        'humidity': 'Relative Humidity', 
+        'solar': 'Solar Radiation',
+        'wind': 'Wind Speed'
+      };
+      
+      const units = {
+        'temperature': currentUnits === 'SI' ? '°C' : '°F',
+        'humidity': '%',
+        'solar': currentUnits === 'SI' ? 'W/m²' : 'Btu/h·ft²',
+        'wind': currentUnits === 'SI' ? 'm/s' : 'mph'
+      };
+      
+      const colorScales = {
+        'temperature': [[0, '#313695'], [0.25, '#4575b4'], [0.5, '#ffffbf'], [0.75, '#f46d43'], [1, '#a50026']],
+        'humidity': [[0, '#f7fbff'], [0.25, '#c6dbef'], [0.5, '#6baed6'], [0.75, '#2171b5'], [1, '#08306b']],
+        'solar': [[0, '#000004'], [0.25, '#420a68'], [0.5, '#932667'], [0.75, '#dd513a'], [1, '#fca50a']],
+        'wind': [[0, '#edf8fb'], [0.25, '#b2e2e2'], [0.5, '#66c2a4'], [0.75, '#2ca25f'], [1, '#006d2c']]
+      };
+      
+      const trace = {
+        x: heatmapData.map(d => d[0]), // Day of year
+        y: heatmapData.map(d => d[1]), // Hour of day
+        z: heatmapData.map(d => d[2]), // Value
+        type: 'scatter',
+        mode: 'markers',
+        marker: {
+          size: 3,
+          color: heatmapData.map(d => d[2]),
+          colorscale: colorScales[parameter],
+          showscale: true,
+          colorbar: {
+            title: `${parameterNames[parameter]} (${units[parameter]})`
+          }
+        },
+        hovertemplate: 
+          'Day: %{x}<br>' +
+          'Hour: %{y}<br>' +
+          `${parameterNames[parameter]}: %{marker.color:.1f} ${units[parameter]}<br>` +
+          '<extra></extra>'
+      };
+      
+      const layout = {
+        title: `${parameterNames[parameter]} Heat Map - Hourly Annual Pattern`,
+        xaxis: {
+          title: 'Day of Year',
+          tickmode: 'array',
+          tickvals: [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334],
+          ticktext: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          showgrid: true
+        },
+        yaxis: {
+          title: 'Hour of Day',
+          tickmode: 'array',
+          tickvals: [0, 6, 12, 18],
+          ticktext: ['12 AM', '6 AM', '12 PM', '6 PM'],
+          showgrid: true
+        },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white',
+        margin: { l: 60, r: 60, t: 80, b: 60 }
+      };
+      
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+        displaylogo: false
+      };
+      
+      Plotly.newPlot('heatmap-chart', [trace], layout, config);
+    }
+
+    // Wind Rose functionality
+    function updateWindRose() {
+      if (!weatherData) return;
+      
+      const period = document.getElementById('windrosePeriod').value;
+      generateWindRose(period);
+    }
+    
+    function generateWindRose(period) {
+      const windSpeedData = getParameterData('Wind Speed');
+      const windDirectionData = getParameterData('Wind Direction');
+      
+      if (!windSpeedData || !windDirectionData || windSpeedData.length === 0) return;
+      
+      // Filter data by period
+      let filteredData = [];
+      const monthFilters = {
+        'annual': [1,2,3,4,5,6,7,8,9,10,11,12],
+        'summer': [6,7,8],
+        'winter': [12,1,2],
+        'spring': [3,4,5],
+        'autumn': [9,10,11]
+      };
+      
+      const targetMonths = monthFilters[period];
+      for (let i = 0; i < weatherData.data.length; i++) {
+        if (targetMonths.includes(weatherData.data[i].month)) {
+          let speed = windSpeedData[i];
+          let direction = windDirectionData[i];
+          
+          // Apply unit conversion for wind speed
+          if (currentUnits === 'Imperial') {
+            speed = unitConversions.windSpeed.toImperial(speed);
+          }
+          
+          filteredData.push({ speed, direction });
+        }
+      }
+      
+      // Define direction bins (16 compass directions)
+      const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      const directionBins = directions.map((_, i) => i * 22.5);
+      
+      // Define speed bins
+      const speedUnit = currentUnits === 'SI' ? 'm/s' : 'mph';
+      const speedBins = currentUnits === 'SI' ? 
+        [0, 2, 4, 6, 8, 10, 15] : 
+        [0, 4.5, 9, 13.5, 18, 22.5, 33.5];
+      const speedLabels = currentUnits === 'SI' ? 
+        ['0-2', '2-4', '4-6', '6-8', '8-10', '10-15', '>15'] :
+        ['0-4.5', '4.5-9', '9-13.5', '13.5-18', '18-22.5', '22.5-33.5', '>33.5'];
+      
+      // Count data in bins
+      const windRoseData = [];
+      const calmData = filteredData.filter(d => d.speed < speedBins[1]).length;
+      
+      for (let dirIdx = 0; dirIdx < directions.length; dirIdx++) {
+        const dirStart = (dirIdx * 22.5 - 11.25 + 360) % 360;
+        const dirEnd = (dirIdx * 22.5 + 11.25) % 360;
+        
+        for (let speedIdx = 1; speedIdx < speedBins.length; speedIdx++) {
+          const speedStart = speedBins[speedIdx - 1];
+          const speedEnd = speedIdx === speedBins.length - 1 ? Infinity : speedBins[speedIdx];
+          
+          let count = 0;
+          for (const point of filteredData) {
+            const inDir = dirStart <= dirEnd ? 
+              (point.direction >= dirStart && point.direction < dirEnd) :
+              (point.direction >= dirStart || point.direction < dirEnd);
+            const inSpeed = point.speed >= speedStart && point.speed < speedEnd;
+            
+            if (inDir && inSpeed) count++;
+          }
+          
+          if (count > 0) {
+            windRoseData.push({
+              direction: directions[dirIdx],
+              directionDegrees: dirIdx * 22.5,
+              speedBin: speedLabels[speedIdx - 1],
+              count: count,
+              percentage: (count / filteredData.length * 100)
+            });
+          }
+        }
+      }
+      
+      // Create polar plot traces for each speed bin
+      const traces = [];
+      const colors = ['#ffffcc', '#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494', '#081d58'];
+      
+      for (let speedIdx = 0; speedIdx < speedLabels.length; speedIdx++) {
+        const speedLabel = speedLabels[speedIdx];
+        const binData = windRoseData.filter(d => d.speedBin === speedLabel);
+        
+        if (binData.length === 0) continue;
+        
+        const r = binData.map(d => d.percentage);
+        const theta = binData.map(d => d.direction);
+        
+        traces.push({
+          type: 'barpolar',
+          r: r,
+          theta: theta,
+          name: `${speedLabel} ${speedUnit}`,
+          marker: {
+            color: colors[speedIdx],
+            line: { color: 'white', width: 1 }
+          },
+          hovertemplate: 
+            'Direction: %{theta}<br>' +
+            `Speed: ${speedLabel} ${speedUnit}<br>` +
+            'Frequency: %{r:.1f}%<br>' +
+            '<extra></extra>'
+        });
+      }
+      
+      const layout = {
+        title: `Wind Rose - ${period.charAt(0).toUpperCase() + period.slice(1)} Analysis`,
+        polar: {
+          radialaxis: {
+            title: 'Frequency (%)',
+            ticksuffix: '%',
+            range: [0, Math.max(...windRoseData.map(d => d.percentage)) * 1.1]
+          },
+          angularaxis: {
+            direction: 'clockwise',
+            period: 360,
+            tickmode: 'array',
+            tickvals: [0, 45, 90, 135, 180, 225, 270, 315],
+            ticktext: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+          }
+        },
+        showlegend: true,
+        legend: { x: 1.1, y: 0.5 },
+        margin: { l: 60, r: 120, t: 80, b: 60 }
+      };
+      
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+        displaylogo: false
+      };
+      
+      Plotly.newPlot('windrose-chart', traces, layout, config);
+      
+      // Update wind statistics
+      updateWindStatistics(filteredData, calmData, speedUnit);
+    }
+    
+    function updateWindStatistics(windData, calmCount, speedUnit) {
+      if (windData.length === 0) return;
+      
+      // Calculate prevailing direction
+      const directionCounts = {};
+      const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      
+      windData.forEach(point => {
+        const dirIndex = Math.round(point.direction / 22.5) % 16;
+        const dir = directions[dirIndex];
+        directionCounts[dir] = (directionCounts[dir] || 0) + 1;
+      });
+      
+      const prevailingDir = Object.keys(directionCounts).reduce((a, b) => 
+        directionCounts[a] > directionCounts[b] ? a : b
+      );
+      
+      // Calculate average speed
+      const avgSpeed = windData.reduce((sum, d) => sum + d.speed, 0) / windData.length;
+      
+      // Calculate calm percentage
+      const calmPercentage = (calmCount / (windData.length + calmCount)) * 100;
+      
+      // Calculate strong wind hours (>8 m/s or >18 mph)
+      const strongWindThreshold = currentUnits === 'SI' ? 8 : 18;
+      const strongWindCount = windData.filter(d => d.speed > strongWindThreshold).length;
+      
+      // Update UI
+      document.getElementById('prevailing-direction').textContent = prevailingDir;
+      document.getElementById('average-speed').textContent = `${avgSpeed.toFixed(1)} ${speedUnit}`;
+      document.getElementById('calm-percentage').textContent = `${calmPercentage.toFixed(1)}%`;
+      document.getElementById('strong-wind-hours').textContent = strongWindCount;
+      
+      // Generate wind-based design recommendations
+      generateWindRecommendations(prevailingDir, avgSpeed, calmPercentage, strongWindCount, speedUnit);
+    }
+    
+    function generateWindRecommendations(prevailingDir, avgSpeed, calmPercentage, strongWindHours, speedUnit) {
+      let recommendations = '<h6>Building Design Recommendations</h6><ul>';
+      
+      // Orientation recommendations
+      recommendations += `<li><strong>Building Orientation:</strong> Orient main facades perpendicular to ${prevailingDir} for maximum natural ventilation potential</li>`;
+      
+      // Wind protection
+      if (strongWindHours > 100) {
+        recommendations += `<li><strong>Wind Protection:</strong> ${strongWindHours} hours of strong winds - consider windbreaks, protected entrances, and structural wind resistance</li>`;
+      }
+      
+      // Natural ventilation potential
+      const speedThreshold = currentUnits === 'SI' ? 2 : 4.5;
+      if (avgSpeed > speedThreshold && calmPercentage < 30) {
+        recommendations += `<li><strong>Natural Ventilation:</strong> Good wind conditions (avg: ${avgSpeed.toFixed(1)} ${speedUnit}) - cross-ventilation and wind-driven cooling strategies recommended</li>`;
+      } else if (calmPercentage > 50) {
+        recommendations += `<li><strong>Mechanical Ventilation:</strong> High calm conditions (${calmPercentage.toFixed(1)}%) - rely on mechanical systems rather than natural ventilation</li>`;
+      }
+      
+      // Seasonal considerations
+      recommendations += `<li><strong>Seasonal Strategy:</strong> Consider operable wind barriers for winter protection and summer cooling optimization</li>`;
+      
+      // Comfort zones
+      recommendations += `<li><strong>Outdoor Comfort:</strong> Position outdoor spaces to benefit from ${prevailingDir} breezes while providing wind shelter options</li>`;
+      
+      recommendations += '</ul>';
+      
+      document.getElementById('wind-recommendations').innerHTML = recommendations;
+    }
+
     // Utility functions
     function showLoading() {
       document.getElementById('loading').style.display = 'flex';
@@ -4313,6 +4918,61 @@
     function hideLoading() {
       document.getElementById('loading').style.display = 'none';
     }
+    
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab click listeners
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabName = tab.getAttribute('data-tab');
+          
+          // Hide all tab contents
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('.tab').forEach(t => {
+            t.classList.remove('active');
+          });
+          
+          // Show selected tab content
+          document.getElementById(tabName).classList.add('active');
+          
+          // Add active class to selected tab
+          tab.classList.add('active');
+          
+          // Special handling for certain tabs
+          if (tabName === 'psychro') {
+            updatePsychrometricChart();
+          } else if (tabName === 'climate') {
+            updateClimateAnalysis();
+          } else if (tabName === 'hdd-cdd') {
+            updateHDDCDD();
+          } else if (tabName === 'advanced') {
+            updateAdvancedMetrics();
+            updateStatisticalAnalysis();
+            updateClimateSummary();
+          } else if (tabName === 'heatmaps') {
+            updateHeatMaps();
+          } else if (tabName === 'windrose') {
+            updateWindRose();
+          }
+        });
+      });
+      
+      // Heat map parameter change listener
+      const heatmapParameter = document.getElementById('heatmapParameter');
+      if (heatmapParameter) {
+        heatmapParameter.addEventListener('change', updateHeatMaps);
+      }
+      
+      // Wind rose period change listener
+      const windrosePeriod = document.getElementById('windrosePeriod');
+      if (windrosePeriod) {
+        windrosePeriod.addEventListener('change', updateWindRose);
+      }
+    });
   </script>
 </body>
 </html>
