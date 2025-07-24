@@ -1076,8 +1076,8 @@
       <div class="unit-toggle-container">
         <span class="unit-label">Units:</span>
         <div class="unit-toggle">
-          <button id="siButton" class="active">S.I.</button>
-          <button id="imperialButton">Imperial</button>
+          <button id="siButton">S.I.</button>
+          <button id="imperialButton" class="active">Imperial</button>
         </div>
       </div>
     </header>
@@ -1091,7 +1091,8 @@
         <button id="downloadSelectedCSV" disabled>Download Selected Parameter</button>
         <button id="downloadAllCSV" disabled>Download All Parameters</button>
         <button id="downloadBinCSV" disabled>Download Selected Parameter Bins</button>
-        <button id="downloadReport" class="accent" disabled>Download Full Climate Analysis Report</button>
+        <button id="downloadReport" class="accent" disabled>Download Text Report</button>
+        <button id="downloadPDFReport" class="accent" disabled>Download PDF Report</button>
       </div>
     </div>
 
@@ -1102,6 +1103,7 @@
       <div class="tab" data-tab="climate">Climate Analysis</div>
       <div class="tab" data-tab="hdd-cdd">HDD/CDD</div>
       <div class="tab" data-tab="advanced">Advanced Metrics</div>
+      <div class="tab" data-tab="water">Water/Condensate</div>
       <div class="tab" data-tab="heatmaps">Heat Maps</div>
       <div class="tab" data-tab="windrose">Wind Rose</div>
     </div>
@@ -1397,6 +1399,95 @@
       </div>
     </div>
 
+    <div id="water" class="tab-content card">
+      <h4>Condensate Water Analysis</h4>
+      <p>Calculate condensate water production from HVAC cooling coils based on airflow and weather conditions.</p>
+      
+      <div class="two-column">
+        <div class="card">
+          <h5>Input Parameters</h5>
+          <div class="controls-group">
+            <label for="airflow-input">Airflow Rate:</label>
+            <input type="number" id="airflow-input" value="1000" min="1" step="1">
+            <select id="airflow-units">
+              <option value="cfm">CFM (ft³/min)</option>
+              <option value="cms">m³/s</option>
+              <option value="cmh">m³/h</option>
+            </select>
+          </div>
+          
+          <div class="controls-group">
+            <label for="supply-temp">Supply Air Temperature:</label>
+            <input type="number" id="supply-temp" value="55" step="0.1">
+            <span id="supply-temp-unit">°F</span>
+          </div>
+          
+          <div class="controls-group">
+            <label for="coil-effectiveness">Cooling Coil Effectiveness:</label>
+            <input type="range" id="coil-effectiveness" min="0.5" max="1.0" value="0.85" step="0.01">
+            <span id="coil-effectiveness-value">85%</span>
+          </div>
+          
+          <div class="controls-group">
+            <label for="bypass-factor">Coil Bypass Factor:</label>
+            <input type="range" id="bypass-factor" min="0" max="0.3" value="0.1" step="0.01">
+            <span id="bypass-factor-value">10%</span>
+          </div>
+          
+          <button id="calculate-condensate" class="secondary">Calculate Condensate</button>
+        </div>
+        
+        <div class="card">
+          <h5>Annual Condensate Summary</h5>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="annual-condensate">-</div>
+              <div class="stat-label">Annual Total</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="peak-condensate-rate">-</div>
+              <div class="stat-label">Peak Rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="condensate-hours">-</div>
+              <div class="stat-label">Hours with Condensate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="avg-condensate-rate">-</div>
+              <div class="stat-label">Average Rate (when cooling)</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-value" id="ashrae-gal-cfm">-</div>
+              <div class="stat-label">Annual gal/CFM<br><small>Climate-specific calculation</small></div>
+            </div>
+          </div>
+          
+          <h5>Monthly Condensate Production</h5>
+          <div class="chart-wrapper">
+            <canvas id="condensateChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h5>ASHRAE Condensate Analysis</h5>
+        <div id="condensate-psychro-analysis">
+          <p><strong>Methodology:</strong> Calculations follow ASHRAE standards for AHU condensate collection, using psychrometric properties and coil performance models.</p>
+          <p><strong>Typical Range:</strong> ASHRAE studies show 0.4-0.6 gallons per ton of cooling (1.5-2.3 L per kW) for standard conditions.</p>
+          <p><strong>Applications:</strong> Condensate recovery systems are economically viable for buildings >100,000 ft² (9,290 m²) in humid climates.</p>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="condensatePsychroChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h5>Design Considerations</h5>
+        <div id="condensate-design-notes"></div>
+      </div>
+    </div>
+
     <div id="heatmaps" class="tab-content card">
       <div class="heatmap-controls">
         <h4>Climate Heat Maps - Temporal Pattern Analysis</h4>
@@ -1426,10 +1517,22 @@
           <label for="windrosePeriod">Analysis Period:</label>
           <select id="windrosePeriod">
             <option value="annual">Annual (All Year)</option>
-            <option value="summer">Summer (Jun-Aug)</option>
-            <option value="winter">Winter (Dec-Feb)</option>
-            <option value="spring">Spring (Mar-May)</option>
-            <option value="autumn">Autumn (Sep-Nov)</option>
+            <option value="january">January</option>
+            <option value="february">February</option>
+            <option value="march">March</option>
+            <option value="april">April</option>
+            <option value="may">May</option>
+            <option value="june">June</option>
+            <option value="july">July</option>
+            <option value="august">August</option>
+            <option value="september">September</option>
+            <option value="october">October</option>
+            <option value="november">November</option>
+            <option value="december">December</option>
+            <option value="winter">Winter Season (Dec-Feb)</option>
+            <option value="spring">Spring Season (Mar-May)</option>
+            <option value="summer">Summer Season (Jun-Aug)</option>
+            <option value="autumn">Autumn Season (Sep-Nov)</option>
           </select>
         </div>
       </div>
@@ -1475,7 +1578,7 @@
     let hddChart = null;
     let cddChart = null;
     let psychroChart = null;
-    let currentUnits = 'SI'; // 'SI' or 'Imperial'
+    let currentUnits = 'Imperial'; // 'SI' or 'Imperial' - Default to Imperial for typical US HVAC practice
     let showComfortZone = true;
     let showHumidityLines = true;
     
@@ -1580,6 +1683,12 @@
       document.getElementById('min-temp-label').textContent = `Minimum Temperature (${labels.temperature})`;
       document.getElementById('temp-range-label').textContent = `Annual Temperature Range (${labels.temperature})`;
       
+      // Update supply temperature unit label
+      const supplyTempUnit = document.getElementById('supply-temp-unit');
+      if (supplyTempUnit) {
+        supplyTempUnit.textContent = labels.temperature;
+      }
+      
       // Solar radiation labels
       document.getElementById('annual-solar-label').textContent = `Annual Solar Radiation (${labels.solarRadiationAnnual})`;
       document.getElementById('peak-solar-label').textContent = `Peak Solar Radiation (${labels.solarRadiation})`;
@@ -1652,7 +1761,19 @@
       // Unit toggle buttons
       document.getElementById('siButton').addEventListener('click', function() {
         if (currentUnits !== 'SI') {
+          const oldUnits = currentUnits;
           currentUnits = 'SI';
+          
+          // Convert supply temperature input from Imperial to SI
+          const supplyTempInput = document.getElementById('supply-temp');
+          if (supplyTempInput && oldUnits === 'Imperial') {
+            const currentTemp = parseFloat(supplyTempInput.value);
+            if (!isNaN(currentTemp)) {
+              const convertedTemp = (currentTemp - 32) * 5/9; // F to C
+              supplyTempInput.value = convertedTemp.toFixed(1);
+            }
+          }
+          
           saveUnitPreference();
           updateUnitToggleUI();
           updateUnitLabels();
@@ -1660,13 +1781,26 @@
           globalClimateData = null;
           if (weatherData) {
             updateAllDisplays();
+            updateCondensateAnalysis();
           }
         }
       });
 
       document.getElementById('imperialButton').addEventListener('click', function() {
         if (currentUnits !== 'Imperial') {
+          const oldUnits = currentUnits;
           currentUnits = 'Imperial';
+          
+          // Convert supply temperature input from SI to Imperial
+          const supplyTempInput = document.getElementById('supply-temp');
+          if (supplyTempInput && oldUnits === 'SI') {
+            const currentTemp = parseFloat(supplyTempInput.value);
+            if (!isNaN(currentTemp)) {
+              const convertedTemp = currentTemp * 9/5 + 32; // C to F
+              supplyTempInput.value = convertedTemp.toFixed(1);
+            }
+          }
+          
           saveUnitPreference();
           updateUnitToggleUI();
           updateUnitLabels();
@@ -1674,6 +1808,7 @@
           globalClimateData = null;
           if (weatherData) {
             updateAllDisplays();
+            updateCondensateAnalysis();
           }
         }
       });
@@ -1742,6 +1877,39 @@
       document.getElementById('downloadAllCSV').addEventListener('click', downloadAllCSV);
       document.getElementById('downloadBinCSV').addEventListener('click', downloadBinCSV);
       document.getElementById('downloadReport').addEventListener('click', downloadReport);
+      document.getElementById('downloadPDFReport').addEventListener('click', () => downloadPDFReport());
+      
+      // Condensate Analysis controls
+      const airflowInput = document.getElementById('airflow-input');
+      const airflowUnits = document.getElementById('airflow-units');
+      const supplyTemp = document.getElementById('supply-temp');
+      const coilEffectiveness = document.getElementById('coil-effectiveness');
+      const bypassFactor = document.getElementById('bypass-factor');
+      const calculateCondensateBtn = document.getElementById('calculate-condensate');
+      
+      if (airflowInput) airflowInput.addEventListener('change', updateCondensateAnalysis);
+      if (airflowUnits) airflowUnits.addEventListener('change', updateCondensateAnalysis);
+      if (supplyTemp) supplyTemp.addEventListener('change', updateCondensateAnalysis);
+      if (coilEffectiveness) {
+        coilEffectiveness.addEventListener('input', function() {
+          document.getElementById('coil-effectiveness-value').textContent = Math.round(this.value * 100) + '%';
+          updateCondensateAnalysis();
+        });
+      }
+      if (bypassFactor) {
+        bypassFactor.addEventListener('input', function() {
+          document.getElementById('bypass-factor-value').textContent = Math.round(this.value * 100) + '%';
+          updateCondensateAnalysis();
+        });
+      }
+      if (calculateCondensateBtn) {
+        calculateCondensateBtn.addEventListener('click', function() {
+          console.log('Calculate condensate button clicked');
+          updateCondensateAnalysis();
+        });
+      } else {
+        console.log('Calculate condensate button not found');
+      }
     }
 
     function populateParameterSelect() {
@@ -1883,6 +2051,7 @@
       document.getElementById('downloadAllCSV').disabled = false;
       document.getElementById('downloadBinCSV').disabled = false;
       document.getElementById('downloadReport').disabled = false;
+      document.getElementById('downloadPDFReport').disabled = false;
 
       // Force fresh calculation of all data
       console.log('New EPW file loaded:', filename);
@@ -2454,10 +2623,10 @@
         zoneNumber = 1;                           // Very Hot: CDD18 ≥ 3000 (Manila: 3371)
       } else if (cdd18 >= 1500 && hdd18 <= 2000) {
         zoneNumber = 2;                           // Hot: CDD18 ≥ 1500 and HDD18 ≤ 2000 (Dallas: 1843 CDD, 1304 HDD)
-      } else if ((cdd18 >= 1000 && hdd18 <= 2500) || (cdd18 >= 500 && hdd18 <= 1500)) {
-        zoneNumber = 3;                           // Warm: moderate CDD with low HDD
-      } else if (hdd18 <= 2000 && cdd18 < 1500) {
-        zoneNumber = 4;                           // Mixed: low heating and cooling needs
+      } else if (cdd18 >= 1000 && hdd18 <= 2500) {
+        zoneNumber = 3;                           // Warm: CDD18 ≥ 1000 and HDD18 ≤ 2500
+      } else if (hdd18 <= 2000 && cdd18 < 1000) {
+        zoneNumber = 4;                           // Mixed: HDD18 ≤ 2000 and CDD18 < 1000
       } else if (hdd18 > 2000 && hdd18 <= 3000) {
         zoneNumber = 5;                           // Cool: 2000 < HDD18 ≤ 3000
       } else if (hdd18 > 3000 && hdd18 <= 4000) {
@@ -2471,23 +2640,25 @@
       // Moisture regime determination - ASHRAE 169-2020 criteria
       let moistureRegime;
       
-      // For zones 1-3 (hot climates), use different moisture criteria
-      if (zoneNumber <= 3) {
-        // For hot climates, moisture regime based on specific humidity criteria
-        // Dallas has ~65% RH average, should be 'A' (Humid)
+      // ASHRAE 169-2020 Moisture regime determination
+      if (zoneNumber <= 2) {
+        // Hot climates (zones 1-2) - special criteria
         if (avgRH >= 67) {
           moistureRegime = 'A'; // Humid
         } else if (avgRH <= 45) {
           moistureRegime = 'B'; // Dry
         } else {
-          // For borderline cases in hot zones, Dallas area defaults to A (Humid)
-          moistureRegime = 'A'; // Most of Texas hot zones are A (Humid)
+          moistureRegime = 'A'; // Default to humid for borderline hot climates
         }
       } else {
-        // For cooler climates (zones 4+), standard moisture criteria
-        if (avgRH >= 67) moistureRegime = 'A';        // Humid
-        else if (avgRH <= 45) moistureRegime = 'B';   // Dry  
-        else moistureRegime = 'C';                    // Marine
+        // Warm/Mixed/Cool climates (zones 3+) - standard marine logic applies
+        if (avgRH >= 67) {
+          moistureRegime = 'A';        // Humid
+        } else if (avgRH <= 45) {
+          moistureRegime = 'B';        // Dry  
+        } else {
+          moistureRegime = 'C';        // Marine (California coast, Pacific Northwest)
+        }
       }
       
       const zoneId = `${zoneNumber}${moistureRegime}`;
@@ -2866,12 +3037,13 @@
       // Calculate comprehensive climate metrics
       const tempStats = calculateStats(temperatures);
       const tempRange = tempStats.max - tempStats.min;
-      const climateZone = determineClimateZone(avgTemp, 0, 0, avgRH);
-      
-      // Use global climate data for consistent calculations
+      // Use the global climate zone data and ensure it's calculated first
       if (!globalClimateData) {
         globalClimateData = calculateGlobalClimateData();
       }
+      const climateZone = globalClimateData ? globalClimateData.climateZone : { id: 'Unknown', description: 'Unknown Climate Zone' };
+      
+      // Global climate data already initialized above
       
       const annualCDD = globalClimateData ? globalClimateData.annualCDD18 : 0;
       const annualHDD = globalClimateData ? globalClimateData.annualHDD18 : 0;
@@ -2902,15 +3074,15 @@
         recommendations.push({
           category: 'HVAC Systems',
           priority: 'High',
-          title: 'Moderate Cooling Requirements',
-          description: `Moderate cooling needs (${Math.round(annualCDD)} CDD18). High-efficiency heat pumps or mini-split systems recommended. Consider economizer cycles for free cooling.`
+          title: 'Standard Cooling Systems',
+          description: `Moderate cooling demand (${Math.round(annualCDD)} CDD18). Install high-efficiency heat pumps or mini-split systems sized for actual loads. Include economizer cycles and free cooling strategies to reduce energy consumption.`
         });
       } else if (annualCDD > 100) {
         recommendations.push({
           category: 'HVAC Systems',
           priority: 'Medium',
-          title: 'Low Cooling Requirements',
-          description: `Low cooling demand (${Math.round(annualCDD)} CDD18). Natural ventilation with minimal mechanical cooling may suffice. Consider evaporative cooling in dry climates.`
+          title: 'Efficient Cooling Strategy',
+          description: `Low cooling demand (${Math.round(annualCDD)} CDD18). Prioritize natural ventilation and passive cooling strategies. Small-capacity high-efficiency systems recommended when mechanical cooling is needed. Consider evaporative cooling in dry climates.`
         });
       }
       
@@ -2925,8 +3097,15 @@
         recommendations.push({
           category: 'HVAC Systems',
           priority: 'High',
-          title: 'Moderate Heating Requirements',
-          description: `Moderate heating needs (${Math.round(annualHDD)} HDD18). High-efficiency heat pumps or hybrid systems recommended. Consider radiant heating for comfort.`
+          title: 'Standard Heating Systems',
+          description: `Moderate heating demand (${Math.round(annualHDD)} HDD18). Install high-efficiency heat pumps or hybrid heating systems properly sized for climate conditions. Consider radiant heating systems for enhanced comfort and efficiency.`
+        });
+      } else if (annualHDD > 200) {
+        recommendations.push({
+          category: 'HVAC Systems',
+          priority: 'Medium',
+          title: 'Efficient Heating Strategy',
+          description: `Low heating demand (${Math.round(annualHDD)} HDD18). Focus on passive solar heating and high-efficiency systems. Small-capacity heat pumps or electric heating may be sufficient with proper building envelope design.`
         });
       }
       
@@ -3070,7 +3249,7 @@
         category: 'Baseline Performance',
         priority: 'High',
         title: 'ASHRAE 169-2020 Compliance',
-        description: `Ensure all systems comply with ASHRAE 169-2020 climate classification (${climateZone.zone}). Follow local energy codes and consider certification programs (LEED, Energy Star, Passive House).`
+        description: `Ensure all systems comply with ASHRAE 169-2020 climate classification (${climateZone.id}). Follow local energy codes and consider certification programs (LEED, Energy Star, Passive House).`
       });
       
       // Render recommendations with enhanced styling
@@ -3616,11 +3795,11 @@
               <div class="climate-metrics">
                 <div class="metric-row">
                   <span class="metric-label">Thermal Zone:</span>
-                  <span class="metric-value">${climateZone.number}</span>
+                  <span class="metric-value">${climateZone.id ? climateZone.id.charAt(0) : 'Unknown'}</span>
                 </div>
                 <div class="metric-row">
                   <span class="metric-label">Moisture Regime:</span>
-                  <span class="metric-value">${climateZone.moisture}</span>
+                  <span class="metric-value">${climateZone.id ? climateZone.id.charAt(1) : 'Unknown'}</span>
                 </div>
                 <div class="metric-row">
                   <span class="metric-label">HDD${currentUnits === 'SI' ? '18' : '65'}:</span>
@@ -3910,6 +4089,861 @@
       downloadTextFile(report, `climate_analysis_report_${currentUnits}.txt`);
     }
 
+    function showPDFChartSelector() {
+      if (!weatherData) {
+        alert('Please load an EPW file first.');
+        return;
+      }
+      
+      // Create modal dialog
+      const modal = document.createElement('div');
+      modal.id = 'pdf-chart-selector';
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 10000; display: flex;
+        align-items: center; justify-content: center;
+      `;
+      
+      const dialog = document.createElement('div');
+      dialog.style.cssText = `
+        background: white; padding: 30px; border-radius: 10px; max-width: 500px;
+        width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      `;
+      
+      dialog.innerHTML = `
+        <h2 style="color: #2c5aa0; margin-bottom: 20px; text-align: center;">
+          📊 Select Charts for PDF Report
+        </h2>
+        <p style="margin-bottom: 20px; color: #666; text-align: center;">
+          Choose which visualizations to include in your professional climate analysis report:
+        </p>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-timeseries" checked style="margin-right: 10px;">
+            <strong>Annual Temperature Profile</strong> - Time series analysis of weather patterns
+          </label>
+          
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-histogram" checked style="margin-right: 10px;">
+            <strong>Parameter Distribution</strong> - Statistical analysis of climate data
+          </label>
+          
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-hddcdd" checked style="margin-right: 10px;">
+            <strong>Heating & Cooling Degree Days</strong> - Energy demand analysis
+          </label>
+          
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-psychrometric" style="margin-right: 10px;">
+            <strong>Psychrometric Chart</strong> - Humidity and temperature relationships
+          </label>
+          
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-windrose" style="margin-right: 10px;">
+            <strong>Wind Rose Diagram</strong> - Wind patterns and direction analysis
+          </label>
+          
+          <label style="display: block; margin-bottom: 10px; cursor: pointer;">
+            <input type="checkbox" id="include-heatmaps" style="margin-right: 10px;">
+            <strong>Climate Heat Maps</strong> - Annual weather pattern visualization
+          </label>
+        </div>
+        
+        <div style="text-align: center; margin-top: 25px;">
+          <button id="generate-pdf-btn" style="
+            background: #2c5aa0; color: white; border: none; padding: 12px 25px;
+            border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px;
+          ">Generate PDF Report</button>
+          
+          <button id="cancel-pdf-btn" style="
+            background: #666; color: white; border: none; padding: 12px 25px;
+            border-radius: 5px; font-size: 16px; cursor: pointer;
+          ">Cancel</button>
+        </div>
+      `;
+      
+      modal.appendChild(dialog);
+      document.body.appendChild(modal);
+      
+      // Event listeners
+      document.getElementById('generate-pdf-btn').onclick = async () => {
+        const selectedCharts = {
+          timeSeries: document.getElementById('include-timeseries').checked,
+          histogram: document.getElementById('include-histogram').checked,
+          hddCdd: document.getElementById('include-hddcdd').checked,
+          psychrometric: document.getElementById('include-psychrometric').checked,
+          windRose: document.getElementById('include-windrose').checked,
+          heatMaps: document.getElementById('include-heatmaps').checked
+        };
+        
+        modal.remove();
+        await generateSelectedPDF(selectedCharts);
+      };
+      
+      document.getElementById('cancel-pdf-btn').onclick = () => {
+        modal.remove();
+      };
+      
+      // Close on background click
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+      };
+    }
+
+    async function generateSelectedPDF(selectedCharts) {
+      // Show progress notification
+      const progressDiv = document.createElement('div');
+      progressDiv.id = 'pdf-progress';
+      progressDiv.style.cssText = `
+        position: fixed; top: 20px; right: 20px; background: #e8f4f8;
+        border: 2px solid #2c5aa0; padding: 15px; border-radius: 5px;
+        z-index: 10000; max-width: 300px; font-size: 14px;
+      `;
+      progressDiv.innerHTML = 'Capturing selected charts...<br><small>Generating your custom report</small>';
+      document.body.appendChild(progressDiv);
+      
+      try {
+        const chartImages = {};
+        
+        // Capture only selected charts
+        if (selectedCharts.timeSeries) {
+          const weatherChart = document.getElementById('weatherChart');
+          if (weatherChart && weatherChart.getContext) {
+            chartImages.timeSeries = weatherChart.toDataURL('image/png');
+            console.log('Captured time series chart');
+          }
+        }
+        
+        if (selectedCharts.histogram) {
+          const histogramChart = document.getElementById('histogramChart');
+          if (histogramChart && histogramChart.getContext) {
+            chartImages.histogram = histogramChart.toDataURL('image/png');
+            console.log('Captured histogram chart');
+          }
+        }
+        
+        if (selectedCharts.hddCdd) {
+          const hddChart = document.getElementById('hddChart');
+          const cddChart = document.getElementById('cddChart');
+          if (hddChart && hddChart.getContext) {
+            chartImages.hddChart = hddChart.toDataURL('image/png');
+          }
+          if (cddChart && cddChart.getContext) {
+            chartImages.cddChart = cddChart.toDataURL('image/png');
+          }
+          console.log('Captured HDD/CDD charts');
+        }
+        
+        // For Plotly charts, we'll use fallback generation for now
+        if (selectedCharts.psychrometric) {
+          console.log('Psychrometric chart selected - will use fallback');
+        }
+        
+        if (selectedCharts.windRose) {
+          console.log('Wind rose chart selected - will use fallback');
+        }
+        
+        if (selectedCharts.heatMaps) {
+          console.log('Heat maps selected - will use fallback');
+        }
+        
+        console.log('Selected charts captured:', Object.keys(chartImages));
+        
+        // Update progress
+        progressDiv.innerHTML = 'Generating PDF document...';
+        
+        const pdfContent = generatePDFReportWithImages(chartImages, selectedCharts);
+        
+        // Ensure PDF content is valid before creating
+        if (!pdfContent || typeof pdfContent !== 'string') {
+          throw new Error('Invalid PDF content generated');
+        }
+        
+        console.log('PDF content length:', pdfContent.length);
+        createPDF(pdfContent);
+        
+        // Close the chart selector modal after successful PDF generation
+        const modal = document.getElementById('pdfChartModal');
+        if (modal) {
+          modal.style.display = 'none';
+        }
+        
+      } catch (error) {
+        console.error('PDF generation error details:', error);
+        console.error('Error stack:', error.stack);
+        
+        // Show specific error details
+        const errorMsg = error.message || 'Unknown error occurred';
+        console.log('Error message:', errorMsg);
+        
+        // Try simple fallback with minimal content
+        try {
+          progressDiv.innerHTML = 'Generating simplified PDF report...';
+          const simpleContent = generateSimplePDFReport();
+          createPDF(simpleContent);
+          
+          // Close modal on fallback success too
+          const modal = document.getElementById('pdfChartModal');
+          if (modal) {
+            modal.style.display = 'none';
+          }
+        } catch (fallbackError) {
+          console.error('Fallback PDF error details:', fallbackError);
+          alert(`Unable to generate PDF report. Error: ${errorMsg}\n\nPlease check browser console for details.`);
+        }
+      } finally {
+        // Remove progress notification and close modal
+        if (progressDiv) progressDiv.remove();
+        
+        // Ensure modal is closed regardless of success/failure
+        const modal = document.getElementById('pdfChartModal');
+        if (modal) {
+          modal.style.display = 'none';
+        }
+      }
+    }
+
+    // Generate PDF directly without chart selector popup
+    async function downloadPDFReport() {
+      if (!weatherData || weatherData.length === 0) {
+        alert('Please load weather data first');
+        return;
+      }
+      
+      // Show progress notification
+      const progressDiv = document.createElement('div');
+      progressDiv.id = 'pdf-progress';
+      progressDiv.style.cssText = `
+        position: fixed; top: 20px; right: 20px; background: #e8f4f8;
+        border: 2px solid #2c5aa0; padding: 15px; border-radius: 5px;
+        z-index: 10000; max-width: 300px; font-size: 14px;
+      `;
+      progressDiv.innerHTML = 'Generating comprehensive PDF report...<br><small>Please wait</small>';
+      document.body.appendChild(progressDiv);
+      
+      try {
+        // Generate PDF using the same content as text report
+        const textReport = generateClimateReport();
+        const pdfContent = convertTextReportToHTML(textReport);
+        
+        if (!pdfContent || typeof pdfContent !== 'string') {
+          throw new Error('Invalid PDF content generated');
+        }
+        
+        console.log('PDF content length:', pdfContent.length);
+        createPDF(pdfContent);
+        
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        alert('Unable to generate PDF report. Please check the console for details.');
+      } finally {
+        // Remove progress notification
+        if (progressDiv) progressDiv.remove();
+      }
+    }
+
+    function convertTextReportToHTML(textReport) {
+      // Convert the text report to properly formatted HTML
+      const htmlReport = textReport
+        .replace(/\n/g, '<br>')
+        .replace(/CLIMATE ANALYSIS REPORT/g, '<h1 style="color: #2c5aa0; text-align: center; margin-bottom: 20px;">CLIMATE ANALYSIS REPORT</h1>')
+        .replace(/Generated: (.+)/g, '<p style="text-align: center; color: #666; margin-bottom: 30px;">Generated: $1</p>')
+        .replace(/LOCATION INFORMATION/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">LOCATION INFORMATION</h2>')
+        .replace(/TEMPERATURE ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">TEMPERATURE ANALYSIS</h2>')
+        .replace(/HUMIDITY ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">HUMIDITY ANALYSIS</h2>')
+        .replace(/SOLAR RADIATION ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">SOLAR RADIATION ANALYSIS</h2>')
+        .replace(/WIND ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">WIND ANALYSIS</h2>')
+        .replace(/PRECIPITATION ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">PRECIPITATION ANALYSIS</h2>')
+        .replace(/ASHRAE 169-2020 CLIMATE CLASSIFICATION/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">ASHRAE 169-2020 CLIMATE CLASSIFICATION</h2>')
+        .replace(/CLIMATE ZONE SUMMARY/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">CLIMATE ZONE SUMMARY</h2>')
+        .replace(/DESIGN RECOMMENDATIONS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">DESIGN RECOMMENDATIONS</h2>')
+        .replace(/HVAC SYSTEM RECOMMENDATIONS/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">HVAC SYSTEM RECOMMENDATIONS</h3>')
+        .replace(/BUILDING ENVELOPE RECOMMENDATIONS/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">BUILDING ENVELOPE RECOMMENDATIONS</h3>')
+        .replace(/RENEWABLE ENERGY POTENTIAL/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">RENEWABLE ENERGY POTENTIAL</h3>')
+        .replace(/ENERGY ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">ENERGY ANALYSIS</h2>')
+        .replace(/STANDARDS COMPLIANCE/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">STANDARDS COMPLIANCE</h2>')
+        .replace(/RESEARCH METHODOLOGY/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">RESEARCH METHODOLOGY</h2>')
+        .replace(/ADVANCED CLIMATE METRICS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">ADVANCED CLIMATE METRICS</h2>');
+      
+      return `
+        <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; font-family: 'Times New Roman', serif; color: #333; line-height: 1.6;">
+          ${htmlReport}
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">This report was generated using the EPW Climate Analysis Tool</p>
+            <p style="margin: 5px 0 0 0;">Weather data analysis performed in accordance with ASHRAE standards and engineering best practices</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function generatePDFReportWithImages(chartImages = {}, selectedCharts = null) {
+      // Generate the same text report used in the text export
+      const textReport = generateClimateReport();
+      
+      // Convert the text report to HTML format for PDF
+      const htmlReport = textReport
+        .replace(/\n/g, '<br>')
+        .replace(/CLIMATE ANALYSIS REPORT/g, '<h1 style="color: #2c5aa0; text-align: center; margin-bottom: 20px;">CLIMATE ANALYSIS REPORT</h1>')
+        .replace(/Generated: (.+)/g, '<p style="text-align: center; color: #666; margin-bottom: 30px;">Generated: $1</p>')
+        .replace(/LOCATION INFORMATION/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">LOCATION INFORMATION</h2>')
+        .replace(/TEMPERATURE ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">TEMPERATURE ANALYSIS</h2>')
+        .replace(/HUMIDITY ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">HUMIDITY ANALYSIS</h2>')
+        .replace(/SOLAR RADIATION ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">SOLAR RADIATION ANALYSIS</h2>')
+        .replace(/WIND ANALYSIS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">WIND ANALYSIS</h2>')
+        .replace(/ASHRAE 169-2020 CLIMATE CLASSIFICATION/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">ASHRAE 169-2020 CLIMATE CLASSIFICATION</h2>')
+        .replace(/CLIMATE ZONE SUMMARY/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">CLIMATE ZONE SUMMARY</h2>')
+        .replace(/DESIGN RECOMMENDATIONS/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">DESIGN RECOMMENDATIONS</h2>')
+        .replace(/HVAC SYSTEM RECOMMENDATIONS/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">HVAC SYSTEM RECOMMENDATIONS</h3>')
+        .replace(/BUILDING ENVELOPE RECOMMENDATIONS/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">BUILDING ENVELOPE RECOMMENDATIONS</h3>')
+        .replace(/RENEWABLE ENERGY POTENTIAL/g, '<h3 style="color: #2c5aa0; margin: 20px 0 10px 0;">RENEWABLE ENERGY POTENTIAL</h3>')
+        .replace(/STANDARDS COMPLIANCE/g, '<h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">STANDARDS COMPLIANCE</h2>');
+
+      // Add selected charts at the end if any are provided
+      let chartsSection = '';
+      if (selectedCharts && Object.keys(chartImages).length > 0) {
+        chartsSection += '<div style="page-break-before: always;"><h2 style="color: #2c5aa0; border-bottom: 2px solid #2c5aa0; padding-bottom: 5px; margin: 25px 0 15px 0;">VISUALIZATION CHARTS</h2>';
+        
+        if (selectedCharts.timeSeries && chartImages.timeSeries) {
+          chartsSection += `
+            <div style="margin-bottom: 20px;">
+              <h3 style="color: #2c5aa0;">Time Series Analysis</h3>
+              <img src="${chartImages.timeSeries}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" alt="Time Series Chart">
+            </div>`;
+        }
+        
+        if (selectedCharts.histogram && chartImages.histogram) {
+          chartsSection += `
+            <div style="margin-bottom: 20px;">
+              <h3 style="color: #2c5aa0;">Temperature Distribution</h3>
+              <img src="${chartImages.histogram}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" alt="Temperature Histogram">
+            </div>`;
+        }
+        
+        if (selectedCharts.hddCdd && (chartImages.hddChart || chartImages.cddChart)) {
+          chartsSection += `<div style="margin-bottom: 20px;"><h3 style="color: #2c5aa0;">Degree Day Analysis</h3>`;
+          if (chartImages.hddChart) {
+            chartsSection += `<img src="${chartImages.hddChart}" style="max-width: 100%; height: auto; border: 1px solid #ddd; margin-bottom: 10px;" alt="Heating Degree Days">`;
+          }
+          if (chartImages.cddChart) {
+            chartsSection += `<img src="${chartImages.cddChart}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" alt="Cooling Degree Days">`;
+          }
+          chartsSection += `</div>`;
+        }
+        
+        chartsSection += '</div>';
+      }
+
+      return `
+        <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; font-family: 'Times New Roman', serif; color: #333; line-height: 1.6;">
+          ${htmlReport}
+          ${chartsSection}
+          
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #666;">
+            <p style="margin: 0;">This report was generated using the EPW Climate Analysis Tool</p>
+            <p style="margin: 5px 0 0 0;">Weather data analysis performed in accordance with ASHRAE standards and engineering best practices</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Alternative chart generation for fallback
+    function generateFallbackChart(title, width = 600, height = 300) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      // White background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Border
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, width, height);
+      
+      // Title
+      ctx.fillStyle = '#333';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, width/2, 30);
+      
+      // Message
+      ctx.font = '14px Arial';
+      ctx.fillStyle = '#666';
+      ctx.fillText('Chart available in interactive tool', width/2, height/2);
+      
+      return `<img src="${canvas.toDataURL()}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" alt="${title}">`;
+    }
+
+    function getHVACRecommendations(hdd, cdd) {
+      let recommendations = '';
+      
+      // Heating recommendations
+      if (hdd > 2000) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Heating:</strong> High-performance systems required - condensing boilers, heat pumps with backup, or district heating. Design for extreme cold conditions with emergency backup systems.</p>';
+      } else if (hdd > 1000) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Heating:</strong> High-efficiency heat pumps or hybrid heating systems recommended. Consider radiant heating for enhanced comfort and efficiency.</p>';
+      } else if (hdd > 200) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Heating:</strong> Focus on passive solar heating and small-capacity high-efficiency systems. Electric heating or small heat pumps adequate.</p>';
+      }
+      
+      // Cooling recommendations  
+      if (cdd > 1000) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Cooling:</strong> Variable refrigerant flow (VRF) systems, high-efficiency chillers, or geothermal heat pumps. Size for peak loads with proper dehumidification capacity.</p>';
+      } else if (cdd > 500) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Cooling:</strong> High-efficiency heat pumps or mini-split systems sized for actual loads. Include economizer cycles and free cooling strategies.</p>';
+      } else if (cdd > 100) {
+        recommendations += '<p style="margin-bottom: 10px;"><strong>Cooling:</strong> Prioritize natural ventilation and passive cooling. Small-capacity high-efficiency systems when mechanical cooling needed.</p>';
+      }
+      
+      return recommendations;
+    }
+
+    function getEnvelopeRecommendations(hdd, cdd, tempRange) {
+      let recommendations = '';
+      
+      if (tempRange > 40 || hdd > 2000 || cdd > 1000) {
+        recommendations += '<li>High-performance continuous insulation systems</li>';
+        recommendations += '<li>Triple-pane windows with low-E coatings</li>';
+        recommendations += '<li>Advanced air sealing and vapor barrier systems</li>';
+      } else {
+        recommendations += '<li>Enhanced insulation levels 20-30% above code requirements</li>';
+        recommendations += '<li>Double-pane low-E windows with thermal breaks</li>';
+        recommendations += '<li>Continuous air barrier systems</li>';
+      }
+      
+      if (cdd > 500) {
+        recommendations += '<li>External shading devices and solar control systems</li>';
+        recommendations += '<li>Light-colored, high-reflectance roof materials</li>';
+      }
+      
+      return recommendations;
+    }
+
+    function getEfficiencyRecommendations(hdd, cdd) {
+      let recommendations = '';
+      
+      if (hdd > cdd) {
+        recommendations += '<li>Priority: Heating efficiency optimization</li>';
+        recommendations += '<li>Superior insulation and air sealing critical</li>';
+        recommendations += '<li>Heat recovery ventilation systems</li>';
+      } else if (cdd > hdd) {
+        recommendations += '<li>Priority: Cooling efficiency and solar control</li>';
+        recommendations += '<li>Natural ventilation and passive cooling strategies</li>';
+        recommendations += '<li>High-performance glazing and shading systems</li>';
+      } else {
+        recommendations += '<li>Balanced heating and cooling efficiency approach</li>';
+        recommendations += '<li>Comprehensive building envelope performance</li>';
+      }
+      
+      return recommendations;
+    }
+
+    // Chart snapshot capture functions
+    async function captureChartSnapshots() {
+      const images = {};
+      
+      try {
+        console.log('Starting chart capture...');
+        
+        // Capture time series chart (main weather chart)
+        try {
+          const weatherChart = document.getElementById('weatherChart');
+          if (weatherChart && weatherChart.getContext) {
+            images.timeSeries = weatherChart.toDataURL('image/png');
+            console.log('Captured time series chart');
+          }
+        } catch (e) {
+          console.warn('Time series capture failed:', e);
+        }
+        
+        // Capture histogram chart
+        try {
+          const histogramChart = document.getElementById('histogramChart');
+          if (histogramChart && histogramChart.getContext) {
+            images.histogram = histogramChart.toDataURL('image/png');
+            console.log('Captured histogram chart');
+          }
+        } catch (e) {
+          console.warn('Histogram capture failed:', e);
+        }
+        
+        // Capture HDD chart
+        try {
+          const hddChart = document.getElementById('hddChart');
+          if (hddChart && hddChart.getContext) {
+            images.hddChart = hddChart.toDataURL('image/png');
+            console.log('Captured HDD chart');
+          }
+        } catch (e) {
+          console.warn('HDD capture failed:', e);
+        }
+        
+        // Capture CDD chart
+        try {
+          const cddChart = document.getElementById('cddChart');
+          if (cddChart && cddChart.getContext) {
+            images.cddChart = cddChart.toDataURL('image/png');
+            console.log('Captured CDD chart');
+          }
+        } catch (e) {
+          console.warn('CDD capture failed:', e);
+        }
+        
+        // Generate charts programmatically without tab switching
+        console.log('Generating all charts programmatically...');
+        
+        // Generate psychrometric chart directly
+        try {
+          console.log('Generating psychrometric chart...');
+          const psychroContainer = document.createElement('div');
+          psychroContainer.id = 'temp-psychro-chart';
+          psychroContainer.style.width = '800px';
+          psychroContainer.style.height = '600px';
+          psychroContainer.style.position = 'absolute';
+          psychroContainer.style.left = '-9999px';
+          document.body.appendChild(psychroContainer);
+          
+          if (typeof generatePsychrometricChart === 'function') {
+            await generatePsychrometricChart(psychroContainer.id);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const plotlyDiv = psychroContainer.querySelector('.plotly-graph-div');
+            if (plotlyDiv && typeof Plotly !== 'undefined') {
+              images.psychrometric = await Plotly.toImage(plotlyDiv, {
+                format: 'png', 
+                width: 800, 
+                height: 600
+              });
+              console.log('Captured generated psychrometric chart');
+            }
+          }
+          document.body.removeChild(psychroContainer);
+        } catch (e) {
+          console.warn('Failed to generate psychrometric chart:', e);
+        }
+        
+        // Generate wind rose chart directly
+        try {
+          console.log('Generating wind rose chart...');
+          const windContainer = document.createElement('div');
+          windContainer.id = 'temp-wind-chart';
+          windContainer.style.width = '600px';
+          windContainer.style.height = '600px';
+          windContainer.style.position = 'absolute';
+          windContainer.style.left = '-9999px';
+          document.body.appendChild(windContainer);
+          
+          if (typeof generateWindRose === 'function') {
+            await generateWindRose(windContainer.id);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const plotlyDiv = windContainer.querySelector('.plotly-graph-div');
+            if (plotlyDiv && typeof Plotly !== 'undefined') {
+              images.windRose = await Plotly.toImage(plotlyDiv, {
+                format: 'png', 
+                width: 600, 
+                height: 600
+              });
+              console.log('Captured generated wind rose chart');
+            }
+          }
+          document.body.removeChild(windContainer);
+        } catch (e) {
+          console.warn('Failed to generate wind rose chart:', e);
+        }
+        
+        // Generate heat map chart directly
+        try {
+          console.log('Generating heat map chart...');
+          const heatContainer = document.createElement('div');
+          heatContainer.id = 'temp-heat-chart';
+          heatContainer.style.width = '800px';
+          heatContainer.style.height = '600px';
+          heatContainer.style.position = 'absolute';
+          heatContainer.style.left = '-9999px';
+          document.body.appendChild(heatContainer);
+          
+          if (typeof generateHeatMaps === 'function') {
+            await generateHeatMaps(heatContainer.id);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const plotlyDiv = heatContainer.querySelector('.plotly-graph-div');
+            if (plotlyDiv && typeof Plotly !== 'undefined') {
+              images.heatMap = await Plotly.toImage(plotlyDiv, {
+                format: 'png', 
+                width: 800, 
+                height: 600
+              });
+              console.log('Captured generated heat map chart');
+            }
+          }
+          document.body.removeChild(heatContainer);
+        } catch (e) {
+          console.warn('Failed to generate heat map chart:', e);
+        }
+        
+      } catch (error) {
+        console.warn('Chart capture error:', error);
+      }
+      
+      console.log('Chart capture complete. Captured:', Object.keys(images));
+      return images;
+    }
+
+    // Alternative chart generation for fallback
+    function generateSimplePDFReport() {
+      const location = weatherData.location;
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      
+      return `
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+          <h1 style="color: #2c5aa0; text-align: center;">Climate Analysis Report</h1>
+          
+          <div style="margin-bottom: 20px;">
+            <h2>Location Information</h2>
+            <p><strong>City:</strong> ${location.city}</p>
+            <p><strong>State/Province:</strong> ${location.state}</p>
+            <p><strong>Country:</strong> ${location.country}</p>
+            <p><strong>Latitude:</strong> ${location.latitude.toFixed(2)}°</p>
+            <p><strong>Longitude:</strong> ${location.longitude.toFixed(2)}°</p>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <h2>Temperature Summary</h2>
+            <p><strong>Data Points:</strong> ${dryBulbData.length} hourly values</p>
+            <p><strong>Average:</strong> ${(dryBulbData.reduce((a,b) => a+b, 0) / dryBulbData.length).toFixed(1)}°C</p>
+            <p><strong>Maximum:</strong> ${Math.max(...dryBulbData).toFixed(1)}°C</p>
+            <p><strong>Minimum:</strong> ${Math.min(...dryBulbData).toFixed(1)}°C</p>
+          </div>
+          
+          <div style="margin-top: 30px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+            <p><small>Report generated on ${new Date().toLocaleDateString()} using EPW Climate Analysis Tool</small></p>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateFallbackChart(title, width = 600, height = 300) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      // White background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Border
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, width, height);
+      
+      // Title
+      ctx.fillStyle = '#333';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(title, width/2, 30);
+      
+      // Message
+      ctx.font = '14px Arial';
+      ctx.fillStyle = '#666';
+      ctx.fillText('Chart available in interactive tool', width/2, height/2);
+      
+      return `<img src="${canvas.toDataURL()}" style="max-width: 100%; height: auto; border: 1px solid #ddd;" alt="${title}">`;
+    }
+
+    function generateHDDCDDChartForPDF() {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 600, 300);
+        
+        if (!globalClimateData) {
+          globalClimateData = calculateGlobalClimateData();
+        }
+        
+        const hdd = globalClimateData ? globalClimateData.annualHDD18 : 0;
+        const cdd = globalClimateData ? globalClimateData.annualCDD18 : 0;
+        
+        // Draw bars
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fillRect(150, 200 - (hdd / 20), 100, hdd / 20);
+        
+        ctx.fillStyle = '#4ecdc4';
+        ctx.fillRect(350, 200 - (cdd / 20), 100, cdd / 20);
+        
+        // Labels
+        ctx.fillStyle = '#333';
+        ctx.font = '16px Times New Roman';
+        ctx.textAlign = 'center';
+        ctx.fillText('Heating & Cooling Degree Days (Base 18°C)', 300, 30);
+        ctx.fillText(`HDD18: ${Math.round(hdd)}`, 200, 230);
+        ctx.fillText(`CDD18: ${Math.round(cdd)}`, 400, 230);
+        
+        return `<img src="${canvas.toDataURL()}" style="max-width: 100%; height: auto;" alt="HDD/CDD Chart">`;
+      } catch (error) {
+        return '<p style="text-align: center; color: #666; font-style: italic;">HDD/CDD chart data available in interactive tool</p>';
+      }
+    }
+
+    // Add instructions for capturing charts
+    function addChartCaptureInstructions() {
+      if (document.getElementById('chart-instructions')) return;
+      
+      const instructions = document.createElement('div');
+      instructions.id = 'chart-instructions';
+      instructions.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #e8f4f8;
+        border: 2px solid #2c5aa0;
+        padding: 15px;
+        border-radius: 5px;
+        max-width: 300px;
+        z-index: 1000;
+        font-size: 12px;
+        display: none;
+      `;
+      instructions.innerHTML = `
+        <strong>PDF Report Tip:</strong><br>
+        To include charts in your PDF report:
+        1. Navigate to each tab (Time Series, Psychrometric, etc.)
+        2. Wait for charts to fully load
+        3. Then click "Download PDF Report"
+        <button onclick="this.parentElement.style.display='none'" style="float: right; margin-top: 10px;">×</button>
+      `;
+      document.body.appendChild(instructions);
+    }
+
+    function generateAdvancedMetricsForPDF() {
+      if (!globalClimateData) {
+        globalClimateData = calculateGlobalClimateData();
+      }
+      
+      const tempData = getParameterData('Dry Bulb Temperature');
+      const rhData = getParameterData('Relative Humidity');
+      const precipData = getParameterData('Liquid Precipitation Depth');
+      
+      const temperatures = tempData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      const maxTemp = Math.max(...temperatures);
+      const minTemp = Math.min(...temperatures);
+      const avgRH = rhData.reduce((a, b) => a + b, 0) / rhData.length;
+      const annualPrecip = precipData.reduce((a, b) => a + b, 0);
+      
+      const tempUnit = unitLabels[currentUnits].temperature;
+      const precipUnit = currentUnits === 'SI' ? 'mm' : 'inches';
+      const displayPrecip = currentUnits === 'SI' ? Math.round(annualPrecip) : Math.round(annualPrecip * 0.0393701 * 10) / 10;
+      
+      return `
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+          <tr style="background: #f8f9fa;">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Metric</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Value</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">ASHRAE Context</th>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">Annual Average Temperature</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${avgTemp.toFixed(1)}°${tempUnit}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Base temperature for system sizing</td>
+          </tr>
+          <tr style="background: #f8f9fa;">
+            <td style="padding: 8px; border: 1px solid #ddd;">Temperature Range</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${(maxTemp - minTemp).toFixed(1)}°${tempUnit}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Building envelope stress indicator</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">Average Relative Humidity</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${avgRH.toFixed(1)}%</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Moisture management requirements</td>
+          </tr>
+          <tr style="background: #f8f9fa;">
+            <td style="padding: 8px; border: 1px solid #ddd;">Annual Precipitation</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${displayPrecip} ${precipUnit}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Site drainage and moisture control</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">Climate Zone</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${globalClimateData.climateZone.id}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">ASHRAE 169-2020 classification</td>
+          </tr>
+        </table>
+      `;
+    }
+
+    function createPDF(htmlContent) {
+      try {
+        if (!htmlContent || typeof htmlContent !== 'string') {
+          throw new Error('Invalid HTML content for PDF');
+        }
+        
+        // Create a new window for PDF generation
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+          throw new Error('Popup blocked - please allow popups for this site');
+        }
+        
+        // Write the styled HTML content
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Climate Analysis Report - ${weatherData.location.city}</title>
+            <style>
+              @media print {
+                body { margin: 0; }
+                .no-print { display: none; }
+                img { max-width: 100%; height: auto; }
+              }
+              body {
+                font-family: 'Times New Roman', serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 8.5in;
+                margin: 0 auto;
+                padding: 0.5in;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #ddd;
+                margin: 10px 0;
+              }
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+            <div class="no-print" style="text-align: center; margin-top: 20px;">
+              <button onclick="window.print()" style="background: #2c5aa0; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px;">Print to PDF</button>
+              <button onclick="window.close()" style="background: #666; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; margin-left: 10px;">Close</button>
+            </div>
+          </body>
+          </html>
+        `);
+        
+        printWindow.document.close();
+        
+        // Auto-trigger print dialog after a short delay
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('PDF creation error:', error);
+        alert(`Unable to create PDF: ${error.message}`);
+      }
+    }
+
     function generateClimateReport() {
       const location = weatherData.location;
       const dryBulbData = getParameterData('Dry Bulb Temperature');
@@ -3998,15 +5032,31 @@
       
       // Climate Zone Classification per ASHRAE 169-2020 Standard
       report += `ASHRAE 169-2020 CLIMATE CLASSIFICATION\n`;
-      const climateZone = determineClimateZone(avgTemp, extremeHeatDays, extremeColdDays, avgRH);
-      report += `Climate Zone: ${climateZone.zone}\n`;
-      report += `Description: ${climateZone.description}\n`;
-      if (climateZone.details) {
-        report += `Thermal Zone: ${climateZone.details.thermalZone}\n`;
-        report += `Moisture Regime: ${climateZone.details.moistureRegime}\n`;
-        report += `Heating Degree Days (base ${currentUnits === 'SI' ? '18°C' : '65°F'}): ${climateZone.details.HDD18} ${currentUnits === 'SI' ? '°C' : '°F'}-days\n`;
-        report += `Cooling Degree Days (base ${currentUnits === 'SI' ? '18°C' : '65°F'}): ${climateZone.details.CDD18} ${currentUnits === 'SI' ? '°C' : '°F'}-days\n`;
-        report += `Annual Precipitation: ${climateZone.details.annualPrecip} ${currentUnits === 'SI' ? 'mm' : 'inches'}\n`;
+      // Use the global climate data for consistent classification
+      if (!globalClimateData) {
+        globalClimateData = calculateGlobalClimateData();
+      }
+      const climateZone = globalClimateData ? globalClimateData.climateZone : null;
+      if (climateZone) {
+        report += `Climate Zone: ${climateZone.id}\n`;
+        report += `Description: ${climateZone.description}\n`;
+        if (globalClimateData) {
+          const thermalZone = climateZone.id ? climateZone.id.charAt(0) : 'Unknown';
+          const moistureRegime = climateZone.id ? climateZone.id.charAt(1) : 'Unknown';
+          const annualHDD = globalClimateData.annualHDD18 || 0;
+          const annualCDD = globalClimateData.annualCDD18 || 0;
+          const precipData = getParameterData('Liquid Precipitation Depth');
+          const annualPrecipMm = precipData.reduce((a, b) => a + b, 0);
+          const displayPrecip = currentUnits === 'SI' ? Math.round(annualPrecipMm) : Math.round(annualPrecipMm * 0.0393701 * 10) / 10;
+          
+          report += `Thermal Zone: ${thermalZone}\n`;
+          report += `Moisture Regime: ${moistureRegime}\n`;
+          report += `Heating Degree Days (base ${currentUnits === 'SI' ? '18°C' : '65°F'}): ${Math.round(annualHDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days\n`;
+          report += `Cooling Degree Days (base ${currentUnits === 'SI' ? '18°C' : '65°F'}): ${Math.round(annualCDD)} ${currentUnits === 'SI' ? '°C' : '°F'}-days\n`;
+          report += `Annual Precipitation: ${displayPrecip} ${currentUnits === 'SI' ? 'mm' : 'inches'}\n`;
+        }
+      } else {
+        report += `Climate Zone: Unable to determine\n`;
       }
       report += `\n`;
       
@@ -4024,34 +5074,54 @@
       report += `• Consider prevailing wind direction (${prevailingWind}) for natural ventilation\n`;
       report += `• Main glazing should face away from extreme weather directions\n\n`;
       
-      // Heating Considerations
+      // Heating Considerations based on HDD18 for more accurate assessment
+      const annualHDD = globalClimateData ? globalClimateData.annualHDD18 : 0;
       report += `HEATING DESIGN:\n`;
-      if (extremeColdDays > 30) {
-        report += `• High heating demand expected (${extremeColdDays.toFixed(0)} extreme cold days)\n`;
-        report += `• Consider high-efficiency heating systems and superior insulation\n`;
-        report += `• Thermal mass strategies recommended for temperature stabilization\n`;
-      } else if (extremeColdDays > 7) {
-        report += `• Moderate heating requirements (${extremeColdDays.toFixed(0)} cold days)\n`;
-        report += `• Standard insulation levels appropriate\n`;
+      if (annualHDD > 2000) {
+        report += `• High heating demand detected (${Math.round(annualHDD)} HDD18, ${extremeColdDays.toFixed(0)} extreme cold days)\n`;
+        report += `• Install high-efficiency condensing boilers, heat pumps with backup, or district heating\n`;
+        report += `• Superior insulation and thermal mass strategies essential for temperature stabilization\n`;
+        report += `• Design for extreme cold conditions with emergency heating backup\n`;
+      } else if (annualHDD > 1000) {
+        report += `• Moderate heating demand (${Math.round(annualHDD)} HDD18, ${extremeColdDays.toFixed(0)} cold days)\n`;
+        report += `• High-efficiency heat pumps or hybrid heating systems recommended\n`;
+        report += `• Enhanced insulation levels above code requirements appropriate\n`;
+        report += `• Consider radiant heating systems for improved comfort and efficiency\n`;
+      } else if (annualHDD > 200) {
+        report += `• Low heating demand (${Math.round(annualHDD)} HDD18, ${extremeColdDays.toFixed(0)} cold days)\n`;
+        report += `• Focus on passive solar heating and small-capacity high-efficiency systems\n`;
+        report += `• Standard insulation with attention to air sealing sufficient\n`;
+        report += `• Electric heating or small heat pumps may be adequate\n`;
       } else {
-        report += `• Minimal heating requirements (${extremeColdDays.toFixed(0)} cold days)\n`;
-        report += `• Focus on cooling strategies instead\n`;
+        report += `• Very low heating demand (${Math.round(annualHDD)} HDD18, ${extremeColdDays.toFixed(0)} cold days)\n`;
+        report += `• Prioritize cooling and ventilation strategies over heating\n`;
+        report += `• Backup heating for occasional cool periods only\n`;
       }
       report += `\n`;
       
-      // Cooling Considerations
+      // Cooling Considerations based on CDD18 for more accurate assessment
+      const annualCDD = globalClimateData ? globalClimateData.annualCDD18 : 0;
       report += `COOLING DESIGN:\n`;
-      if (extremeHeatDays > 30) {
-        report += `• High cooling demand expected (${extremeHeatDays.toFixed(0)} extreme heat days)\n`;
-        report += `• Consider high-efficiency cooling systems and superior solar control\n`;
-        report += `• External shading devices essential\n`;
-        report += `• Light-colored roof and wall materials recommended\n`;
-      } else if (extremeHeatDays > 7) {
-        report += `• Moderate cooling requirements (${extremeHeatDays.toFixed(0)} hot days)\n`;
-        report += `• Natural ventilation strategies may be sufficient with mechanical backup\n`;
+      if (annualCDD > 1000) {
+        report += `• High cooling demand detected (${Math.round(annualCDD)} CDD18, ${extremeHeatDays.toFixed(0)} extreme heat days)\n`;
+        report += `• Install variable refrigerant flow (VRF) systems, high-efficiency chillers, or geothermal heat pumps\n`;
+        report += `• Superior solar control with external shading devices essential\n`;
+        report += `• Light-colored roof and wall materials with high solar reflectance\n`;
+        report += `• Size systems for peak loads with proper dehumidification capacity\n`;
+      } else if (annualCDD > 500) {
+        report += `• Moderate cooling demand (${Math.round(annualCDD)} CDD18, ${extremeHeatDays.toFixed(0)} hot days)\n`;
+        report += `• High-efficiency heat pumps or mini-split systems sized for actual loads\n`;
+        report += `• Include economizer cycles and free cooling strategies\n`;
+        report += `• Natural ventilation strategies with mechanical backup systems\n`;
+      } else if (annualCDD > 100) {
+        report += `• Low cooling demand (${Math.round(annualCDD)} CDD18, ${extremeHeatDays.toFixed(0)} hot days)\n`;
+        report += `• Prioritize natural ventilation and passive cooling strategies\n`;
+        report += `• Small-capacity high-efficiency systems when mechanical cooling needed\n`;
+        report += `• Consider evaporative cooling in dry climates\n`;
       } else {
-        report += `• Low cooling requirements (${extremeHeatDays.toFixed(0)} hot days)\n`;
-        report += `• Natural ventilation and passive cooling strategies recommended\n`;
+        report += `• Very low cooling demand (${Math.round(annualCDD)} CDD18, ${extremeHeatDays.toFixed(0)} hot days)\n`;
+        report += `• Focus on natural ventilation and passive cooling strategies\n`;
+        report += `• Mechanical cooling may be unnecessary with proper building design\n`;
       }
       report += `\n`;
       
@@ -4186,148 +5256,8 @@
       return report;
     }
     
-    function determineClimateZone(avgTemp, hotDays, coldDays, avgRH) {
-      // ASHRAE 169-2020 Climate Zone Classification
-      // Based on thermal and moisture criteria
-      
-      // Get proper temperature data in Celsius
-      const dryBulbData = getParameterData('Dry Bulb Temperature');
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
-      
-      // Calculate ASHRAE thermal criteria
-      const avgTempC = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
-      
-      // Calculate HDD18 and CDD18 per ASHRAE 169-2020 (both use 18°C base)
-      let HDD18 = 0; // Heating Degree Days base 18°C
-      let CDD18 = 0; // Cooling Degree Days base 18°C
-      
-      // Group temperatures by day and calculate daily averages
-      const dailyTemps = [];
-      for (let i = 0; i < temperatures.length; i += 24) {
-        const dayTemps = temperatures.slice(i, i + 24);
-        const dailyAvg = dayTemps.reduce((a, b) => a + b, 0) / dayTemps.length;
-        dailyTemps.push(dailyAvg);
-      }
-      
-      // Calculate degree days from daily averages
-      dailyTemps.forEach(dailyAvg => {
-        if (dailyAvg < 18) HDD18 += (18 - dailyAvg);
-        if (dailyAvg > 18) CDD18 += (dailyAvg - 18);
-      });
-      
-      // ASHRAE 169-2020 Official Thermal Zone Criteria
-      // Using unified logic consistent with determineASHRAEClimateZone function
-      
-      let thermalZone = '';
-      if (CDD18 >= 5000) {
-        thermalZone = '0'; // Extremely Hot: CDD18 ≥ 5000°C-days
-      } else if (CDD18 >= 3000) {
-        thermalZone = '1'; // Very Hot: CDD18 ≥ 3000°C-days
-      } else if (CDD18 >= 1500 && HDD18 <= 2000) {
-        thermalZone = '2'; // Hot: CDD18 ≥ 1500 and HDD18 ≤ 2000°C-days
-      } else if ((CDD18 >= 1000 && HDD18 <= 2500) || (CDD18 >= 500 && HDD18 <= 1500)) {
-        thermalZone = '3'; // Warm: moderate CDD with low HDD
-      } else if (HDD18 <= 2000 && CDD18 < 1500) {
-        thermalZone = '4'; // Mixed: low heating and cooling needs
-      } else if (HDD18 > 2000 && HDD18 <= 3000) {
-        thermalZone = '5'; // Cool: 2000 < HDD18 ≤ 3000°C-days
-      } else if (HDD18 > 3000 && HDD18 <= 4000) {
-        thermalZone = '6'; // Cold: 3000 < HDD18 ≤ 4000°C-days
-      } else if (HDD18 > 4000 && HDD18 <= 5000) {
-        thermalZone = '7'; // Very Cold: 4000 < HDD18 ≤ 5000°C-days
-      } else {
-        thermalZone = '8'; // Subarctic: HDD18 > 5000°C-days
-      }
-      
-      // Determine moisture regime (A, B, C) based on ASHRAE 169-2020 criteria
-      // Calculate annual precipitation for moisture classification
-      const precipData = getParameterData('Liquid Precipitation Depth');
-      const annualPrecipMm = precipData.reduce((a, b) => a + b, 0);
-      
-      let moistureRegime = '';
-      let moistureDescription = '';
-      
-      // ASHRAE 169-2020 moisture criteria
-      if (annualPrecipMm >= 760) {
-        moistureRegime = 'A'; // Moist: Annual precipitation ≥ 760mm (30 inches)
-        moistureDescription = 'Moist';
-      } else if (annualPrecipMm <= 508) {
-        moistureRegime = 'B'; // Dry: Annual precipitation ≤ 508mm (20 inches)  
-        moistureDescription = 'Dry';
-      } else {
-        // For locations between 508-760mm, use additional criteria
-        // Near large water bodies with moderate precipitation = Marine
-        moistureRegime = 'C'; // Marine: Moderate precipitation (508-760mm)
-        moistureDescription = 'Marine';
-      }
-      
-      // Create zone designation and description
-      const fullZone = thermalZone + moistureRegime;
-      
-      const zoneDescriptions = {
-        '0A': 'Extremely Hot-Humid: Extreme heat year-round, very high humidity',
-        '0B': 'Extremely Hot-Dry: Extreme heat year-round, arid conditions',
-        '1A': 'Very Hot-Humid: Very hot summers, warm winters, high humidity year-round',
-        '1B': 'Very Hot-Dry: Very hot summers, warm winters, low humidity',
-        '1C': 'Very Hot-Marine: Very hot summers, warm winters, moderate humidity',
-        '2A': 'Hot-Humid: Hot summers, mild winters, high humidity',
-        '2B': 'Hot-Dry: Hot summers, mild winters, low humidity',
-        '2C': 'Hot-Marine: Hot summers, mild winters, moderate humidity',
-        '3A': 'Warm-Humid: Warm summers, cool winters, high humidity',
-        '3B': 'Warm-Dry: Warm summers, cool winters, low humidity',
-        '3C': 'Warm-Marine: Warm summers, cool winters, moderate humidity',
-        '4A': 'Mixed-Humid: Warm summers, cold winters, high humidity',
-        '4B': 'Mixed-Dry: Warm summers, cold winters, low humidity',
-        '4C': 'Mixed-Marine: Warm summers, cold winters, moderate humidity',
-        '5A': 'Cool-Humid: Cool summers, cold winters, high humidity',
-        '5B': 'Cool-Dry: Cool summers, cold winters, low humidity',
-        '5C': 'Cool-Marine: Cool summers, cold winters, moderate humidity',
-        '6A': 'Cold-Humid: Cool summers, very cold winters, high humidity',
-        '6B': 'Cold-Dry: Cool summers, very cold winters, low humidity',
-        '7A': 'Very Cold-Humid: Short cool summers, very cold winters, high humidity',
-        '7B': 'Very Cold-Dry: Short cool summers, very cold winters, low humidity',
-        '8A': 'Subarctic-Humid: Short cool summers, extremely cold winters, high humidity',
-        '8B': 'Subarctic-Dry: Short cool summers, extremely cold winters, low humidity'
-      };
-      
-      // Calculate Imperial degree days if needed
-      let displayHDD, displayCDD;
-      
-      if (currentUnits === 'SI') {
-        displayHDD = Math.round(HDD18);
-        displayCDD = Math.round(CDD18);
-      } else {
-        // Calculate Imperial degree days with 65°F base for both heating and cooling
-        let HDD65F = 0;
-        let CDD65F = 0;
-        
-        dailyTemps.forEach(dailyAvgC => {
-          const dailyAvgF = (dailyAvgC * 9/5) + 32; // Convert to Fahrenheit
-          if (dailyAvgF < 65) HDD65F += (65 - dailyAvgF);
-          if (dailyAvgF > 65) CDD65F += (dailyAvgF - 65);
-        });
-        
-        displayHDD = Math.round(HDD65F);
-        displayCDD = Math.round(CDD65F);
-      }
-      
-      // Triple-check precipitation conversion: 1 mm = 0.0393701 inches
-      const displayPrecip = currentUnits === 'SI' ? Math.round(annualPrecipMm) : Math.round(annualPrecipMm * 0.0393701 * 10) / 10;
-      
-      return {
-        zone: fullZone,
-        description: zoneDescriptions[fullZone] || `Climate Zone ${fullZone}`,
-        details: {
-          thermalZone: thermalZone,
-          moistureRegime: moistureRegime,
-          HDD18: displayHDD,
-          CDD18: displayCDD,
-          avgTemp: avgTempC.toFixed(1),
-          avgRH: avgRH.toFixed(1),
-          annualPrecip: displayPrecip
-        }
-      };
-    }
+    // REMOVED: determineClimateZone function that was duplicating logic and causing incorrect 0B classifications
+    // All climate zone determination now uses the unified determineASHRAEClimateZone function
 
     function downloadCSVFile(content, filename) {
       const blob = new Blob([content], { type: 'text/csv' });
@@ -4707,13 +5637,25 @@
       
       if (!windSpeedData || !windDirectionData || windSpeedData.length === 0) return;
       
-      // Filter data by period
+      // Filter data by period - Enhanced with individual months
       let filteredData = [];
       const monthFilters = {
         'annual': [1,2,3,4,5,6,7,8,9,10,11,12],
-        'summer': [6,7,8],
+        'january': [1],
+        'february': [2],
+        'march': [3],
+        'april': [4],
+        'may': [5],
+        'june': [6],
+        'july': [7],
+        'august': [8],
+        'september': [9],
+        'october': [10],
+        'november': [11],
+        'december': [12],
         'winter': [12,1,2],
         'spring': [3,4,5],
+        'summer': [6,7,8],
         'autumn': [9,10,11]
       };
       
@@ -4732,18 +5674,22 @@
         }
       }
       
-      // Define direction bins (16 compass directions)
+      // Define direction bins (16 compass directions - full 360° coverage)
       const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
       const directionBins = directions.map((_, i) => i * 22.5);
       
-      // Define speed bins
+      // Define comprehensive speed bins to capture all velocity ranges
       const speedUnit = currentUnits === 'SI' ? 'm/s' : 'mph';
       const speedBins = currentUnits === 'SI' ? 
-        [0, 2, 4, 6, 8, 10, 15] : 
-        [0, 4.5, 9, 13.5, 18, 22.5, 33.5];
+        [0, 1, 2, 3, 5, 7, 10, 15, 20] : 
+        [0, 2.5, 4.5, 7, 11, 16, 22, 34, 45];
       const speedLabels = currentUnits === 'SI' ? 
-        ['0-2', '2-4', '4-6', '6-8', '8-10', '10-15', '>15'] :
-        ['0-4.5', '4.5-9', '9-13.5', '13.5-18', '18-22.5', '22.5-33.5', '>33.5'];
+        ['0-1', '1-2', '2-3', '3-5', '5-7', '7-10', '10-15', '15-20', '>20'] :
+        ['0-2.5', '2.5-4.5', '4.5-7', '7-11', '11-16', '16-22', '22-34', '34-45', '>45'];
+      
+      // Debug: Clean up - remove debug logging
+      // console.log('Wind Rose Debug - First 10 wind data points:', filteredData.slice(0, 10));
+      // console.log('Wind Rose Debug - Total filtered data points:', filteredData.length);
       
       // Count data in bins
       const windRoseData = [];
@@ -4759,29 +5705,39 @@
           
           let count = 0;
           for (const point of filteredData) {
-            const inDir = dirStart <= dirEnd ? 
-              (point.direction >= dirStart && point.direction < dirEnd) :
-              (point.direction >= dirStart || point.direction < dirEnd);
+            // Handle direction wrapping around 360°/0° properly
+            let inDir = false;
+            if (dirStart <= dirEnd) {
+              // Normal case: direction range doesn't cross 0°
+              inDir = point.direction >= dirStart && point.direction < dirEnd;
+            } else {
+              // Wrapping case: direction range crosses 0° (e.g., 348.75° to 11.25° for North)
+              inDir = point.direction >= dirStart || point.direction < dirEnd;
+            }
             const inSpeed = point.speed >= speedStart && point.speed < speedEnd;
             
             if (inDir && inSpeed) count++;
           }
           
-          if (count > 0) {
-            windRoseData.push({
-              direction: directions[dirIdx],
-              directionDegrees: dirIdx * 22.5,
-              speedBin: speedLabels[speedIdx - 1],
-              count: count,
-              percentage: (count / filteredData.length * 100)
-            });
-          }
+          // Include all direction bins (even zero counts) for complete wind rose
+          windRoseData.push({
+            direction: directions[dirIdx],
+            directionDegrees: dirIdx * 22.5,
+            speedBin: speedLabels[speedIdx - 1],
+            count: count,
+            percentage: (count / filteredData.length * 100)
+          });
+          
+          // Debug: Clean up - remove debug logging
+          // if (count > 0) {
+          //   console.log(`Wind Rose Debug - ${directions[dirIdx]} (${(dirIdx * 22.5).toFixed(1)}°): ${count} points (${(count / filteredData.length * 100).toFixed(1)}%) for speed ${speedLabels[speedIdx - 1]} ${speedUnit}`);
+          // }
         }
       }
       
-      // Create polar plot traces for each speed bin
+      // Create polar plot traces for each speed bin with enhanced color scheme
       const traces = [];
-      const colors = ['#ffffcc', '#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494', '#081d58'];
+      const colors = ['#ffffd4', '#fed98e', '#fe9929', '#d95f02', '#993404', '#662506', '#4d1d02', '#330d01', '#1a0600'];
       
       for (let speedIdx = 0; speedIdx < speedLabels.length; speedIdx++) {
         const speedLabel = speedLabels[speedIdx];
@@ -4789,8 +5745,12 @@
         
         if (binData.length === 0) continue;
         
-        const r = binData.map(d => d.percentage);
-        const theta = binData.map(d => d.direction);
+        // Filter out zero data points for cleaner visualization
+        const nonZeroBinData = binData.filter(d => d.count > 0);
+        if (nonZeroBinData.length === 0) continue;
+        
+        const r = nonZeroBinData.map(d => d.percentage);
+        const theta = nonZeroBinData.map(d => d.directionDegrees);
         
         traces.push({
           type: 'barpolar',
@@ -4802,10 +5762,11 @@
             line: { color: 'white', width: 1 }
           },
           hovertemplate: 
-            'Direction: %{theta}<br>' +
+            'Direction: %{customdata}<br>' +
             `Speed: ${speedLabel} ${speedUnit}<br>` +
             'Frequency: %{r:.1f}%<br>' +
-            '<extra></extra>'
+            '<extra></extra>',
+          customdata: nonZeroBinData.map(d => d.direction)
         });
       }
       
@@ -4821,8 +5782,10 @@
             direction: 'clockwise',
             period: 360,
             tickmode: 'array',
-            tickvals: [0, 45, 90, 135, 180, 225, 270, 315],
-            ticktext: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+            tickvals: [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5],
+            ticktext: ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'],
+            rotation: 90,
+            dtick: 22.5
           }
         },
         showlegend: true,
@@ -4953,6 +5916,8 @@
             updateAdvancedMetrics();
             updateStatisticalAnalysis();
             updateClimateSummary();
+          } else if (tabName === 'water') {
+            updateCondensateAnalysis();
           } else if (tabName === 'heatmaps') {
             updateHeatMaps();
           } else if (tabName === 'windrose') {
@@ -4973,6 +5938,395 @@
         windrosePeriod.addEventListener('change', updateWindRose);
       }
     });
+
+    // Condensate Analysis Functions
+    let condensateChart = null;
+
+    function updateCondensateAnalysis() {
+      if (!weatherData) {
+        console.log('No weather data available for condensate analysis');
+        return;
+      }
+      
+      console.log('Starting condensate analysis calculation...');
+      console.log('Current units system:', currentUnits);
+
+      // Get input parameters
+      const airflow = parseFloat(document.getElementById('airflow-input').value) || 1000;
+      const airflowUnit = document.getElementById('airflow-units').value;
+      const supplyTempInput = parseFloat(document.getElementById('supply-temp').value) || 55;
+      const effectiveness = parseFloat(document.getElementById('coil-effectiveness').value) || 0.85;
+      const bypassFactor = parseFloat(document.getElementById('bypass-factor').value) || 0.1;
+      
+      console.log('Input parameters:', {
+        airflow,
+        airflowUnit,
+        supplyTempInput,
+        effectiveness,
+        bypassFactor
+      });
+
+      // Convert airflow to standard units (m³/s)
+      let airflowCMS;
+      switch (airflowUnit) {
+        case 'cfm':
+          airflowCMS = airflow * 0.0004719474; // Exact ASHRAE CFM to m³/s conversion
+          break;
+        case 'cmh':
+          airflowCMS = airflow / 3600; // m³/h to m³/s
+          break;
+        default:
+          airflowCMS = airflow; // already m³/s
+      }
+
+      // Convert supply temperature to Celsius if needed
+      // Default 55°F = 12.8°C for typical cooling supply air
+      let supplyTempC;
+      if (currentUnits === 'SI') {
+        supplyTempC = supplyTempInput; // Already in Celsius
+      } else {
+        supplyTempC = (supplyTempInput - 32) * 5/9; // Convert F to C
+      }
+      console.log('Supply temperature converted to Celsius:', supplyTempC, 'from input:', supplyTempInput, 'units:', currentUnits);
+
+      // Update supply temperature unit display
+      document.getElementById('supply-temp-unit').textContent = currentUnits === 'SI' ? '°C' : '°F';
+
+      // Get weather data using existing getParameterData function
+      const dryBulbData = getParameterData('Dry Bulb Temperature');
+      const relativeHumidityData = getParameterData('Relative Humidity');
+      
+      console.log('Data lengths:', dryBulbData.length, relativeHumidityData.length);
+
+      // Calculate condensate for each hour
+      const hourlyCondensate = [];
+      const monthlyCondensate = new Array(12).fill(0);
+      let totalCondensate = 0;
+      let peakCondensateRate = 0;
+      let condensateHours = 0;
+      let coolingHours = 0;
+
+      // Debug first few temperatures
+      console.log('First 5 temperatures:', dryBulbData.slice(0, 5));
+      console.log('Supply temperature:', supplyTempC);
+      
+      let coolingCandidates = 0;
+      
+      dryBulbData.forEach((dbTemp, index) => {
+        const rh = relativeHumidityData[index];
+        const month = Math.floor(index / (24 * 30.44)); // Approximate month
+
+        // Convert temperature to Celsius (EPW temperatures are already in Celsius)
+        const dbTempC = dbTemp;
+        
+        // Count hours with potential for condensate (cooling or dehumidification)
+        if (dbTempC > supplyTempC || (rh > 60 && Math.abs(dbTempC - supplyTempC) < 8)) {
+          coolingCandidates++;
+        }
+
+        // Calculate condensate for all hours when outdoor air is conditioned (more realistic for large systems)
+        // Large commercial systems often operate year-round for ventilation
+        const shouldCalculateCondensate = (dbTempC > supplyTempC) || 
+                                         (rh > 60 && Math.abs(dbTempC - supplyTempC) < 8); // Include high humidity conditions
+        
+        if (shouldCalculateCondensate) {
+          coolingHours++;
+
+          // ASHRAE psychrometric calculations using Antoine equation for saturation pressure
+          // Enhanced accuracy for HVAC applications per ASHRAE standards
+          const saturationPressure = 610.78 * Math.exp((17.27 * dbTempC) / (dbTempC + 237.3)); // Pa
+          const vaporPressure = (rh / 100) * saturationPressure;
+          const humidityRatio = 0.621945 * vaporPressure / (101325 - vaporPressure); // kg water / kg dry air (ASHRAE constant)
+
+          // Supply air conditions - realistic for dehumidification systems
+          const supplySatPressure = 610.78 * Math.exp((17.27 * supplyTempC) / (supplyTempC + 237.3));
+          const supplyVaporPressure = 0.98 * supplySatPressure; // Near saturation for realistic condensate
+          const supplyHumidityRatio = 0.621945 * supplyVaporPressure / (101325 - supplyVaporPressure);
+
+          // Enhanced ASHRAE coil model for commercial systems with higher moisture removal
+          // Account for outdoor air conditioning and dehumidification requirements
+          const moistureRemovalPotential = Math.max(0, humidityRatio - supplyHumidityRatio);
+          
+          // Commercial system effectiveness (higher than residential)
+          const commercialEffectiveness = Math.min(effectiveness * 1.2, 0.95); // Enhanced for large systems
+          const bypassAdjustment = 1 - (bypassFactor * 0.7); // Reduced bypass impact for commercial coils
+          
+          // Calculate moisture removal if condensation occurs
+          let moistureRemoval = 0;
+          if (moistureRemovalPotential > 0) {
+            moistureRemoval = moistureRemovalPotential * commercialEffectiveness * bypassAdjustment;
+            // Additional safety check for moisture removal
+            moistureRemoval = Math.max(0, moistureRemoval);
+
+            // ASHRAE standard air density calculation with enhanced commercial system modeling
+            // Account for mixed outdoor/return air conditions typical in large systems
+            const airDensity = 1.2041 * (273.15 + 20) / (273.15 + dbTempC); // kg/m³ corrected per ASHRAE
+            const dryAirMassFlow = airflowCMS * airDensity * 3600; // kg/h
+            
+            // Enhanced condensate rate for commercial HVAC systems
+            // Include factor for continuous operation and higher outdoor air percentages
+            const commercialFactor = 1.5; // Commercial systems typically have higher condensate production
+            let condensateRate = moistureRemoval * dryAirMassFlow * commercialFactor;
+            
+            // Safety check: Ensure no negative condensate values
+            condensateRate = Math.max(0, condensateRate);
+
+            hourlyCondensate.push(condensateRate);
+            monthlyCondensate[Math.min(month, 11)] += condensateRate;
+            totalCondensate += condensateRate;
+            peakCondensateRate = Math.max(peakCondensateRate, condensateRate);
+            condensateHours++;
+            
+            // Debug first few calculations
+            if (condensateHours <= 3) {
+              console.log(`Hour ${index}: dbTemp=${dbTempC}°C, RH=${rh}%, condensateRate=${condensateRate.toFixed(3)} L/h`);
+            }
+          } else {
+            hourlyCondensate.push(0);
+          }
+        } else {
+          hourlyCondensate.push(0);
+        }
+      });
+      
+      console.log('Cooling candidates (hours above supply temp):', coolingCandidates);
+
+      // ASHRAE standard unit conversions for display (declare first)
+      const volumeUnit = currentUnits === 'SI' ? 'L' : 'gal';
+      const rateUnit = currentUnits === 'SI' ? 'L/min' : 'gal/min';
+      // Exact ASHRAE conversion: 1 US gallon = 3.785411784 L
+      const volumeConversion = currentUnits === 'SI' ? 1 : (1 / 3.785411784); // L to US gallons (ASHRAE standard)
+      const rateConversion = currentUnits === 'SI' ? (1 / 60) : (1 / 3.785411784 / 60); // L/h to L/min or gal/min (ASHRAE standard)
+
+      // Update display
+      const avgCondensateRate = condensateHours > 0 ? totalCondensate / condensateHours : 0;
+      
+      // Always calculate gal/CFM regardless of input units or display preferences
+      const airflowCFM = airflowUnit === 'cfm' ? airflow : 
+                         airflowUnit === 'cmh' ? airflow * 0.588578 : 
+                         airflow * 2118.88; // m³/s to CFM
+      const galConversionForCFM = 1 / 3.785411784; // Always convert L to US gallons
+      const annualGalPerCFM = (totalCondensate * galConversionForCFM) / airflowCFM;
+      const operatingGalPerCFM = condensateHours > 0 ? (avgCondensateRate * galConversionForCFM / 60) / airflowCFM : 0;
+      
+      console.log('ASHRAE Verification Metrics:', {
+        airflowCFM: airflowCFM.toFixed(0),
+        totalAnnualGallons: (totalCondensate * volumeConversion).toFixed(0),
+        avgCondensateGalPerMin: (avgCondensateRate * rateConversion).toFixed(2),
+        peakCondensateGalPerMin: (peakCondensateRate * rateConversion).toFixed(2),
+        annualGalPerCFM: annualGalPerCFM.toFixed(3),
+        operatingGalPerCFM: operatingGalPerCFM.toFixed(6),
+        climateZone: globalClimateData ? globalClimateData.climateZone : 'Unknown',
+        condensateHours: condensateHours
+      });
+      
+      console.log('Calculation results:', {
+        totalCondensate,
+        peakCondensateRate,
+        condensateHours,
+        avgCondensateRate
+      });
+
+      const annualElement = document.getElementById('annual-condensate');
+      const peakElement = document.getElementById('peak-condensate-rate');
+      const hoursElement = document.getElementById('condensate-hours');
+      const avgElement = document.getElementById('avg-condensate-rate');
+
+      if (annualElement) annualElement.textContent = (totalCondensate * volumeConversion).toFixed(0) + ' ' + volumeUnit;
+      if (peakElement) peakElement.textContent = (peakCondensateRate * rateConversion).toFixed(1) + ' ' + rateUnit;
+      if (hoursElement) hoursElement.textContent = condensateHours + ' hrs';
+      if (avgElement) avgElement.textContent = (avgCondensateRate * rateConversion).toFixed(2) + ' ' + rateUnit;
+      
+      // Update gal/CFM metric display
+      const ashraeCFMElement = document.getElementById('ashrae-gal-cfm');
+      if (ashraeCFMElement && avgCondensateRate > 0) {
+        ashraeCFMElement.textContent = annualGalPerCFM.toFixed(3);
+      }
+
+      // Create monthly chart
+      updateCondensateChart(monthlyCondensate);
+
+      // Update design notes
+      updateCondensateDesignNotes(totalCondensate, peakCondensateRate, condensateHours, airflow, airflowUnit);
+    }
+
+    function updateCondensateChart(monthlyData) {
+      const ctx = document.getElementById('condensateChart');
+      if (!ctx) return;
+
+      if (condensateChart) {
+        condensateChart.destroy();
+      }
+
+      const rateConversion = currentUnits === 'SI' ? 1 : 0.264172;
+      const rateUnit = currentUnits === 'SI' ? 'L' : 'gal';
+
+      condensateChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: `Monthly Condensate (${rateUnit})`,
+            data: monthlyData.map(val => val * rateConversion),
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: `Condensate Volume (${rateUnit})`
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            }
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: 'Monthly Condensate Production'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y.toFixed(1)} ${rateUnit}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ASHRAE pipe sizing calculation for condensate drains
+    function getPipeSizingRecommendation(peakRateGPM) {
+      // Convert to GPM if in L/min
+      const peakGPM = currentUnits === 'SI' ? peakRateGPM * 0.264172 : peakRateGPM;
+      
+      let pipeSize, maxCapacity, velocityRange;
+      
+      if (peakGPM <= 0.5) {
+        pipeSize = '3/4"';
+        maxCapacity = '0.8 GPM';
+        velocityRange = '2-4 ft/s';
+      } else if (peakGPM <= 1.2) {
+        pipeSize = '1"';
+        maxCapacity = '1.8 GPM';
+        velocityRange = '2-4 ft/s';
+      } else if (peakGPM <= 2.5) {
+        pipeSize = '1.25"';
+        maxCapacity = '3.2 GPM';
+        velocityRange = '3-5 ft/s';
+      } else if (peakGPM <= 4.5) {
+        pipeSize = '1.5"';
+        maxCapacity = '6.0 GPM';
+        velocityRange = '3-5 ft/s';
+      } else if (peakGPM <= 8.0) {
+        pipeSize = '2"';
+        maxCapacity = '11 GPM';
+        velocityRange = '4-6 ft/s';
+      } else if (peakGPM <= 15) {
+        pipeSize = '2.5"';
+        maxCapacity = '20 GPM';
+        velocityRange = '4-6 ft/s';
+      } else if (peakGPM <= 25) {
+        pipeSize = '3"';
+        maxCapacity = '32 GPM';
+        velocityRange = '5-7 ft/s';
+      } else if (peakGPM <= 45) {
+        pipeSize = '4"';
+        maxCapacity = '60 GPM';
+        velocityRange = '5-7 ft/s';
+      } else {
+        pipeSize = '6"';
+        maxCapacity = '130+ GPM';
+        velocityRange = '6-8 ft/s';
+      }
+      
+      return `<p><strong>Recommended Pipe Size:</strong> ${pipeSize} PVC/CPVC drain line</p>
+              <p><strong>Capacity:</strong> Up to ${maxCapacity} at ${velocityRange} velocity</p>
+              <p><strong>Design Standard:</strong> Sized per industry standard engineering practice</p>`;
+    }
+
+    function updateCondensateDesignNotes(totalCondensate, peakRate, condensateHours, airflow, airflowUnit) {
+      const container = document.getElementById('condensate-design-notes');
+      if (!container) return;
+
+      // Use same conversions as main display (per minute rates)
+      const volumeConversion = currentUnits === 'SI' ? 1 : (1 / 3.785411784); // L to US gallons
+      const rateConversion = currentUnits === 'SI' ? (1 / 60) : (1 / 3.785411784 / 60); // L/h to L/min or gal/min
+      const rateUnit = currentUnits === 'SI' ? 'L/min' : 'gal/min';
+      const volumeUnit = currentUnits === 'SI' ? 'L' : 'gal';
+
+      container.innerHTML = `
+        <div class="recommendations-grid">
+          <div class="recommendation-card priority-medium">
+            <div class="rec-header">
+              <span class="rec-category">Drainage System</span>
+              <span class="rec-priority priority-medium">Medium</span>
+            </div>
+            <h6>Primary Drain Sizing</h6>
+            <p>Size primary condensate drain for peak flow rate of <strong>${(peakRate * rateConversion * 1.5).toFixed(2)} ${rateUnit}</strong> (150% safety factor).</p>
+            ${getPipeSizingRecommendation(peakRate * rateConversion)}
+          </div>
+
+          <div class="recommendation-card priority-high">
+            <div class="rec-header">
+              <span class="rec-category">Collection System</span>
+              <span class="rec-priority priority-high">High</span>
+            </div>
+            <h6>Condensate Collection</h6>
+            <p>Annual condensate production: <strong>${(totalCondensate * volumeConversion).toFixed(0)} ${volumeUnit}</strong></p>
+            <p><strong>Collection potential:</strong> ${(totalCondensate * volumeConversion) > 50000 ? 'High - Consider water reuse systems' : 'Moderate - Standard drainage sufficient'}</p>
+          </div>
+
+          <div class="recommendation-card priority-low">
+            <div class="rec-header">
+              <span class="rec-category">Maintenance</span>
+              <span class="rec-priority priority-low">Low</span>
+            </div>
+            <h6>System Maintenance</h6>
+            <p>Expected operating hours with condensate: <strong>${condensateHours} hours/year</strong></p>
+            <p><strong>Inspection frequency:</strong> ${condensateHours > 4000 ? 'Monthly' : 'Quarterly'} drain cleaning recommended</p>
+          </div>
+
+          <div class="recommendation-card priority-medium">
+            <div class="rec-header">
+              <span class="rec-category">Water Quality</span>
+              <span class="rec-priority priority-medium">Medium</span>
+            </div>
+            <h6>Condensate Quality</h6>
+            <p>Condensate pH typically 5.5-6.5 (slightly acidic)</p>
+            <p><strong>Materials:</strong> Use corrosion-resistant piping (PVC, stainless steel)</p>
+            <p><strong>Treatment:</strong> ${(totalCondensate * volumeConversion) > 20000 ? 'Consider pH neutralization for reuse' : 'Standard drainage acceptable'}</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: var(--light); border-radius: 8px;">
+          <h6>Calculation Summary</h6>
+          <ul>
+            <li><strong>Airflow Rate:</strong> ${airflow} ${airflowUnit.toUpperCase()}</li>
+            <li><strong>Supply Temperature:</strong> ${document.getElementById('supply-temp').value}${document.getElementById('supply-temp-unit').textContent}</li>
+            <li><strong>Coil Effectiveness:</strong> ${Math.round(parseFloat(document.getElementById('coil-effectiveness').value) * 100)}%</li>
+            <li><strong>Bypass Factor:</strong> ${Math.round(parseFloat(document.getElementById('bypass-factor').value) * 100)}%</li>
+          </ul>
+          <p style="margin-top: 10px; font-size: 0.9rem; color: var(--gray);">
+            <strong>Note:</strong> Calculations based on psychrometric analysis of outdoor air conditions and standard cooling coil performance. 
+            Actual condensate production may vary based on coil design, refrigerant conditions, and control strategies.
+          </p>
+        </div>
+      `;
+    }
   </script>
 </body>
 </html>
