@@ -1723,10 +1723,25 @@
     }
 
     // Format value with appropriate units
-    function formatValueWithUnits(value, parameterType, precision = 1) {
+    function formatValueWithUnits(value, parameterType, precision = 1, isRange = false) {
       const labels = unitLabels[currentUnits];
       const unit = labels[parameterType] || '';
-      return `${value.toFixed(precision)} ${unit}`;
+      
+      // Convert value to current units if needed
+      let convertedValue = value;
+      if (currentUnits === 'Imperial' && unitConversions[parameterType]) {
+        if (parameterType === 'temperature' && isRange) {
+          // For temperature ranges (differences), don't add 32, just multiply by 9/5
+          convertedValue = value * 9/5;
+        } else {
+          convertedValue = unitConversions[parameterType].toImperial(value);
+        }
+      } else if (currentUnits === 'SI' && unitConversions[parameterType]) {
+        // Value is already in SI, no conversion needed
+        convertedValue = value;
+      }
+      
+      return `${convertedValue.toFixed(precision)} ${unit}`;
     }
 
     // Update all unit labels in the interface
@@ -2651,12 +2666,13 @@
       const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const maxTemp = Math.max(...temperatures);
       const minTemp = Math.min(...temperatures);
-      const tempRange = maxTemp - minTemp;
+      const tempStats = calculateStats(temperatures);
+      const tempRange = tempStats.range;
 
       document.getElementById('avg-temp').textContent = formatValueWithUnits(avgTemp, 'temperature');
       document.getElementById('max-temp').textContent = formatValueWithUnits(maxTemp, 'temperature');
       document.getElementById('min-temp').textContent = formatValueWithUnits(minTemp, 'temperature');
-      document.getElementById('temp-range').textContent = formatValueWithUnits(tempRange, 'temperature');
+      document.getElementById('temp-range').textContent = formatValueWithUnits(tempRange, 'temperature', 1, true);
 
       // Humidity statistics
       const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
@@ -2872,7 +2888,7 @@
       const zone = globalClimateData.climateZone;
       const avgTempC = globalClimateData.avgTemp;
       const avgRH = globalClimateData.avgRH;
-      const tempRangeC = globalClimateData.tempStats.max - globalClimateData.tempStats.min;
+      const tempRangeC = globalClimateData.tempStats.range;
       
       // Update climate zone display in both tabs
       const ashraeZoneElements = document.querySelectorAll('#ashrae-zone, .ashrae-zone-display');
@@ -3155,7 +3171,7 @@
       // CRITICAL: Update climate zone for synchronization across tabs
       const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const tempStats = calculateStats(temperatures);
-      const tempRange = tempStats.max - tempStats.min;
+      const tempRange = tempStats.range;
       updateClimateZone(avgTemp, tempRange, relativeHumidityData);
     }
 
@@ -3231,7 +3247,7 @@
       
       // Calculate comprehensive climate metrics
       const tempStats = calculateStats(temperatures);
-      const tempRange = tempStats.max - tempStats.min;
+      const tempRange = tempStats.range;
       // Use the global climate zone data and ensure it's calculated first
       if (!globalClimateData) {
         globalClimateData = calculateGlobalClimateData();
@@ -3342,7 +3358,7 @@
           category: 'Building Envelope',
           priority: 'Critical',
           title: 'Extreme Climate Envelope Design',
-          description: `Extreme temperature variations detected (${tempRange.toFixed(1)}°C range, ${Math.round(extremeHeatDays)} extreme heat days, ${Math.round(extremeColdDays)} extreme cold days). Requires continuous high-performance insulation materials, high-performance windows (triple-pane), and advanced air sealing.`
+          description: `Extreme temperature variations detected (${formatValueWithUnits(tempRange, 'temperature', 1, true)} range, ${Math.round(extremeHeatDays)} extreme heat days, ${Math.round(extremeColdDays)} extreme cold days). Requires continuous high-performance insulation materials, high-performance windows (triple-pane), and advanced air sealing.`
         });
       } else if (tempRange > 25 || annualCDD > 1000 || annualHDD > 1000) {
         recommendations.push({
@@ -3543,7 +3559,7 @@
     }
 
     function generateClimateNarrative(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
-      const tempRange = tempStats.max - tempStats.min;
+      const tempRange = tempStats.range;
       const avgHumidity = humidityStats.mean;
       const avgSolar = solarStats.mean;
       const avgWind = windStats.mean;
@@ -3588,7 +3604,7 @@
         implications += '<li>🌊 <strong>Wind Direction Matters</strong> - Orientation should consider moisture-bearing wind directions</li>';
       }
       
-      const tempRange = tempStats.max - tempStats.min;
+      const tempRange = tempStats.range;
       if (tempRange > 30) {
         implications += '<li>🏗️ <strong>Thermal Mass Beneficial</strong> - Large temperature swings favor thermal storage strategies</li>';
       }
@@ -3713,7 +3729,7 @@
                 <strong>Std Dev:</strong> ${formatValueWithUnits(tempStats.stdDev, 'temperature')}
               </div>
               <div class="stat-item">
-                <strong>Range:</strong> ${formatValueWithUnits(tempStats.range, 'temperature')}
+                <strong>Range:</strong> ${formatValueWithUnits(tempStats.range, 'temperature', 1, true)}
               </div>
               <div class="stat-item">
                 <strong>Median:</strong> ${formatValueWithUnits(tempStats.median, 'temperature')}
@@ -3812,7 +3828,7 @@
               <div class="reg-model">
                 <div class="reg-equation">
                   <strong>Solar-Temperature Model:</strong><br>
-                  <code>T = ${solarTempRegression.slope.toFixed(4)} × Solar + ${solarTempRegression.intercept.toFixed(2)}°C</code>
+                  <code>T = ${solarTempRegression.slope.toFixed(4)} × Solar + ${formatValueWithUnits(solarTempRegression.intercept, 'temperature')}</code>
                 </div>
                 <div class="reg-rsquared">
                   <strong>R² = ${solarTempRegression.rSquared.toFixed(3)}</strong>
@@ -3849,7 +3865,7 @@
                     tempHumidityRegression.rSquared < 0.2 ? 'Complex humidity patterns - controlled by seasonal monsoons, irrigation, or local water bodies. Humidity independent of temperature.' :
                     'Moderate humidity-temperature coupling - transitional climate with mixed influences from both temperature and external moisture sources.'
                   }<br>
-                  <em>${tempHumidityRegression.slope > 0 ? 'Positive' : 'Negative'} slope of ${Math.abs(tempHumidityRegression.slope).toFixed(4)} indicates ${Math.abs(tempHumidityRegression.slope * 10).toFixed(1)} %RH change per 10°C temperature change.</em>
+                  <em>${tempHumidityRegression.slope > 0 ? 'Positive' : 'Negative'} slope of ${Math.abs(tempHumidityRegression.slope).toFixed(4)} indicates ${Math.abs(tempHumidityRegression.slope * (currentUnits === 'SI' ? 10 : 18)).toFixed(1)} %RH change per ${currentUnits === 'SI' ? '10°C' : '18°F'} temperature change.</em>
                 </div>
               </div>
             </div>
@@ -3883,22 +3899,22 @@
               <div class="season-card winter">
                 <h6>Winter</h6>
                 <div>Mean: ${formatValueWithUnits(seasonalStats.winter.mean, 'temperature')}</div>
-                <div>Range: ${formatValueWithUnits(seasonalStats.winter.range, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.winter.range, 'temperature', 1, true)}</div>
               </div>
               <div class="season-card spring">
                 <h6>Spring</h6>
                 <div>Mean: ${formatValueWithUnits(seasonalStats.spring.mean, 'temperature')}</div>
-                <div>Range: ${formatValueWithUnits(seasonalStats.spring.range, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.spring.range, 'temperature', 1, true)}</div>
               </div>
               <div class="season-card summer">
                 <h6>Summer</h6>
                 <div>Mean: ${formatValueWithUnits(seasonalStats.summer.mean, 'temperature')}</div>
-                <div>Range: ${formatValueWithUnits(seasonalStats.summer.range, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.summer.range, 'temperature', 1, true)}</div>
               </div>
               <div class="season-card autumn">
                 <h6>Autumn</h6>
                 <div>Mean: ${formatValueWithUnits(seasonalStats.autumn.mean, 'temperature')}</div>
-                <div>Range: ${formatValueWithUnits(seasonalStats.autumn.range, 'temperature')}</div>
+                <div>Range: ${formatValueWithUnits(seasonalStats.autumn.range, 'temperature', 1, true)}</div>
               </div>
             </div>
           </div>
@@ -3990,7 +4006,7 @@
       const precipitationData = getParameterData('Liquid Precipitation Depth') || [];
       const heavyRainHours = precipitationData.filter(p => p > 10).length; // >10mm/hr intensity
       if (heavyRainHours > 100) riskFactors.push(`${heavyRainHours} intense rainfall hours`);
-      if (tempStats.range > 50) riskFactors.push(`${tempStats.range.toFixed(1)}°C temperature range`);
+      if (tempStats.range > 50) riskFactors.push(`${formatValueWithUnits(tempStats.range, 'temperature', 1, true)} temperature range`);
       
       if (riskFactors.length > 2) {
         climateRisk = 'High Climate Stress';
@@ -4095,7 +4111,7 @@
             <div class="extremes-grid">
               <div class="extreme-item">
                 <span class="extreme-label">Temperature Range:</span>
-                <span class="extreme-value">${tempStats.range.toFixed(1)}°C (${formatValueWithUnits(tempStats.min, 'temperature')} to ${formatValueWithUnits(tempStats.max, 'temperature')})</span>
+                <span class="extreme-value">${formatValueWithUnits(tempStats.range, 'temperature', 1, true)} (${formatValueWithUnits(tempStats.min, 'temperature')} to ${formatValueWithUnits(tempStats.max, 'temperature')})</span>
               </div>
               <div class="extreme-item">
                 <span class="extreme-label">Extreme Heat Days:</span>
@@ -4974,9 +4990,9 @@
           <div style="margin-bottom: 20px;">
             <h2>Temperature Summary</h2>
             <p><strong>Data Points:</strong> ${dryBulbData.length} hourly values</p>
-            <p><strong>Average:</strong> ${(dryBulbData.reduce((a,b) => a+b, 0) / dryBulbData.length).toFixed(1)}°C</p>
-            <p><strong>Maximum:</strong> ${Math.max(...dryBulbData).toFixed(1)}°C</p>
-            <p><strong>Minimum:</strong> ${Math.min(...dryBulbData).toFixed(1)}°C</p>
+            <p><strong>Average:</strong> ${formatValueWithUnits((dryBulbData.reduce((a,b) => a+b, 0) / dryBulbData.length), 'temperature')}</p>
+            <p><strong>Maximum:</strong> ${formatValueWithUnits(Math.max(...dryBulbData), 'temperature')}</p>
+            <p><strong>Minimum:</strong> ${formatValueWithUnits(Math.min(...dryBulbData), 'temperature')}</p>
           </div>
           
           <div style="margin-top: 30px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
@@ -5118,7 +5134,7 @@
           </tr>
           <tr style="background: #f8f9fa;">
             <td style="padding: 8px; border: 1px solid #ddd;">Temperature Range</td>
-            <td style="padding: 8px; border: 1px solid #ddd;">${(maxTemp - minTemp).toFixed(1)}°${tempUnit}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${formatValueWithUnits((maxTemp - minTemp), 'temperature', 1, true)}</td>
             <td style="padding: 8px; border: 1px solid #ddd;">Building envelope stress indicator</td>
           </tr>
           <tr>
@@ -5262,7 +5278,7 @@
       report += `Annual Average: ${avgTemp.toFixed(1)} ${tempUnit}\n`;
       report += `Maximum: ${maxTemp.toFixed(1)} ${tempUnit}\n`;
       report += `Minimum: ${minTemp.toFixed(1)} ${tempUnit}\n`;
-      report += `Range: ${(maxTemp - minTemp).toFixed(1)} ${tempUnit}\n`;
+      report += `Range: ${formatValueWithUnits((maxTemp - minTemp), 'temperature', 1, true)}\n`;
       report += `Extreme Heat Days (>35°C): ${extremeHeatDays.toFixed(0)}\n`;
       report += `Extreme Cold Days (<0°C): ${extremeColdDays.toFixed(0)}\n\n`;
       
