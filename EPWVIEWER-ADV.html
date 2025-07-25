@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced EPW Climate Analysis Tool - Research Grade</title>
+  <title>Advanced EPW Climate Analysis Tool</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
@@ -1070,7 +1073,7 @@
   <div class="container">
     <header>
       <div class="header-content">
-        <h2>Advanced EPW Climate Analysis Tool</h2>
+        <h2>🌍 Advanced EPW Climate Analysis Tool</h2>
         <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
       </div>
       <div class="unit-toggle-container">
@@ -2267,7 +2270,7 @@
       
       // Convert temperature to current units
       const temperatures = dryBulbData.map(temp => 
-        convertValue(temp, 'temperature', 'SI')
+        temp // EPW files already in Celsius
       );
       
       // Calculate absolute humidity from relative humidity and temperature
@@ -2310,8 +2313,37 @@
 
       const tempUnit = unitLabels[currentUnits].temperature;
       
+      // Add ASHRAE 55 comfort zone overlay - match the Advanced tab settings
+      // EPW temperatures are always in Celsius, so use Celsius ranges
+      const comfortTempMin = 18;
+      const comfortTempMax = 28;
+      const comfortHumidityMin = 30;
+      const comfortHumidityMax = 70;
+      
+      // Calculate absolute humidity for comfort zone boundaries
+      const comfortTempMinC = currentUnits === 'SI' ? comfortTempMin : (comfortTempMin - 32) * 5/9;
+      const comfortTempMaxC = currentUnits === 'SI' ? comfortTempMax : (comfortTempMax - 32) * 5/9;
+      
+      const comfortMinHumidity = calculateAbsoluteHumidity(comfortTempMinC, comfortHumidityMin);
+      const comfortMaxHumidity = calculateAbsoluteHumidity(comfortTempMaxC, comfortHumidityMax);
+      
+      // Create comfort zone rectangle
+      const comfortZone = {
+        x: [comfortTempMin, comfortTempMax, comfortTempMax, comfortTempMin, comfortTempMin],
+        y: [comfortMinHumidity, comfortMinHumidity, comfortMaxHumidity, comfortMaxHumidity, comfortMinHumidity],
+        type: 'scatter',
+        mode: 'lines',
+        fill: 'tonexty',
+        fillcolor: 'rgba(46, 125, 50, 0.2)',
+        line: { color: 'rgba(46, 125, 50, 0.8)', width: 2, dash: 'dash' },
+        name: 'ASHRAE 55 Comfort Zone',
+        showlegend: true
+      };
+      
+      traces.push(comfortZone);
+
       const layout = {
-        title: 'Psychrometric Chart',
+        title: 'Psychrometric Chart with ASHRAE 55 Comfort Zone',
         xaxis: {
           title: `Dry Bulb Temperature (${tempUnit})`,
           range: [Math.min(...temperatures) - 2, Math.max(...temperatures) + 2]
@@ -2344,8 +2376,9 @@
 
     function getComfortZone() {
       // Define comfort zone boundaries based on ASHRAE Standard 55-2023
-      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;
-      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;
+      // EPW temperatures are always in Celsius, so use Celsius ranges
+      const comfortTempMin = 18;
+      const comfortTempMax = 28;
       const comfortHumidityMin = 30;
       const comfortHumidityMax = 70;
       
@@ -2403,9 +2436,10 @@
     }
 
     function updateComfortAnalysis(temperatures, relativeHumidityData) {
-      // ASHRAE 55-2023 comfort zone criteria
-      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;   // 20°C / 68°F
-      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;   // 26°C / 79°F
+      // ASHRAE 55-2023 comfort zone criteria - expanded adaptive comfort range
+      // EPW temperatures are always in Celsius, so use Celsius ranges
+      const comfortTempMin = 18;   // 18°C (adaptive comfort)
+      const comfortTempMax = 28;   // 28°C (adaptive comfort)
       const comfortHumidityMin = 30; // 30% RH
       const comfortHumidityMax = 70; // 70% RH
       
@@ -2452,7 +2486,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
           <div>
             <strong>Comfort Zone:</strong><br>
-            Temperature: ${comfortTempMin}–${comfortTempMax}${tempUnit}<br>
+            Temperature: ${currentUnits === 'SI' ? comfortTempMin + '–' + comfortTempMax + '°C' : Math.round(comfortTempMin * 9/5 + 32) + '–' + Math.round(comfortTempMax * 9/5 + 32) + '°F'}<br>
             Humidity: ${comfortHumidityMin}–${comfortHumidityMax}% RH
           </div>
           <div>
@@ -2462,7 +2496,8 @@
           </div>
         </div>
         <div style="margin-top: 10px; font-size: 0.9rem; color: var(--gray);">
-          Based on ASHRAE Standard 55-2023 comfort criteria for naturally conditioned spaces
+          <strong>Note:</strong> This analysis applies indoor comfort criteria to outdoor conditions for reference. 
+          For Toronto's cold climate, low comfort hours are expected as most outdoor temperatures fall below indoor comfort ranges.
         </div>
       `;
     }
@@ -2476,8 +2511,8 @@
       const windSpeedData = getParameterData('Wind Speed');
       const windDirectionData = getParameterData('Wind Direction');
 
-      // Convert temperature data
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed for analysis
+      const temperatures = dryBulbData;
       const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
       const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
 
@@ -2753,7 +2788,8 @@
       if (!weatherData) return;
 
       const dryBulbData = getParameterData('Dry Bulb Temperature');
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = dryBulbData;
       
       // Get base temperatures (convert to SI for calculation if needed)
       let hddBase = parseFloat(document.getElementById('hddBase').value);
@@ -2898,11 +2934,14 @@
       const relativeHumidityData = getParameterData('Relative Humidity');
       const precipitationData = getParameterData('Liquid Precipitation Depth');
       
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed for SI units
+      const temperatures = dryBulbData; // Use raw Celsius data directly
       
       // Thermal comfort analysis - ASHRAE 55-2023 (temperature + humidity)
-      const comfortTempMin = currentUnits === 'SI' ? 20 : 68;   // 20°C / 68°F
-      const comfortTempMax = currentUnits === 'SI' ? 26 : 79;   // 26°C / 79°F
+      // Note: These are INDOOR comfort ranges, not outdoor temperature ranges
+      // EPW temperatures are always in Celsius, so use Celsius ranges
+      const comfortTempMin = 18;   // 18°C (lower adaptive comfort)
+      const comfortTempMax = 28;   // 28°C (upper adaptive comfort)
       const comfortHumidityMin = 30; // 30% RH
       const comfortHumidityMax = 70; // 70% RH
       
@@ -2910,6 +2949,16 @@
       let comfortHours = 0;
       let overheatingHours = 0;
       let underheatingHours = 0;
+      
+      // Debug comfort calculation
+      console.log('Comfort range debug:', {
+        tempMin: comfortTempMin,
+        tempMax: comfortTempMax,
+        humidityMin: comfortHumidityMin,
+        humidityMax: comfortHumidityMax,
+        sampleTemps: temperatures.slice(0, 10),
+        sampleHumidity: relativeHumidityData.slice(0, 10)
+      });
       
       for (let i = 0; i < temperatures.length; i++) {
         const temp = temperatures[i];
@@ -2919,27 +2968,41 @@
         if (temp >= comfortTempMin && temp <= comfortTempMax && 
             rh >= comfortHumidityMin && rh <= comfortHumidityMax) {
           comfortHours++;
+          if (comfortHours <= 5) {
+            console.log(`Comfort hour ${comfortHours}: temp=${temp}°C, RH=${rh}%`);
+          }
         } else if (temp > comfortTempMax) {
           overheatingHours++;
         } else if (temp < comfortTempMin) {
           underheatingHours++;
         }
       }
-
-      // Extreme weather events
-      const extremeHeatThreshold = currentUnits === 'SI' ? 35 : 95;
-      const extremeColdThreshold = currentUnits === 'SI' ? 0 : 32;
       
-      // Calculate daily max temperatures for extreme day counts
+      console.log('Final comfort calculation:', {
+        comfortHours,
+        overheatingHours, 
+        underheatingHours,
+        totalHours: temperatures.length
+      });
+
+      // Extreme weather events - use Celsius thresholds since EPW data is already in Celsius
+      const extremeHeatThreshold = 35; // 35°C (95°F) 
+      const extremeColdThreshold = 0;  // 0°C (32°F)
+      
+      // Calculate daily max/min temperatures for extreme day counts
       const dailyMaxTemps = [];
+      const dailyMinTemps = [];
       for (let day = 0; day < 365; day++) {
         const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
         const maxTemp = Math.max(...dayTemps);
+        const minTemp = Math.min(...dayTemps);
         dailyMaxTemps.push(maxTemp);
+        dailyMinTemps.push(minTemp);
       }
       
+      // Calculate extreme weather days using daily max/min temperatures
       const extremeHeatDays = dailyMaxTemps.filter(temp => temp > extremeHeatThreshold).length;
-      const extremeColdDays = dailyMaxTemps.filter(temp => temp < extremeColdThreshold).length;
+      const extremeColdDays = dailyMinTemps.filter(temp => temp < extremeColdThreshold).length;
       const precipitationDays = precipitationData.filter(precip => precip > 0).length / 24; // Convert hours to days
 
       // Update display
@@ -2955,6 +3018,7 @@
       
       // Update design recommendations, statistical analysis, and climate summary
       updateDesignRecommendations();
+      // Update analysis and summaries
       updateStatisticalAnalysis();
       updateClimateSummary();
       
@@ -2978,8 +3042,8 @@
       const relativeHumidityData = getParameterData('Relative Humidity');
       const windSpeedData = getParameterData('Wind Speed');
       
-      // Convert data to current units
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = dryBulbData;
       const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
       const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
       
@@ -3025,7 +3089,8 @@
       const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
       const windSpeedData = getParameterData('Wind Speed');
       
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = dryBulbData;
       const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const avgRH = relativeHumidityData.reduce((a, b) => a + b, 0) / relativeHumidityData.length;
       const avgSolar = globalHorizontalRadiation.reduce((a, b) => a + b, 0) / globalHorizontalRadiation.length;
@@ -3048,9 +3113,22 @@
       const annualCDD = globalClimateData ? globalClimateData.annualCDD18 : 0;
       const annualHDD = globalClimateData ? globalClimateData.annualHDD18 : 0;
       
-      // Calculate extreme conditions
-      const extremeHeatDays = temperatures.filter(t => t > 35).length / 24;
-      const extremeColdDays = temperatures.filter(t => t < 0).length / 24;
+      // Calculate daily max/min temperatures for extreme day counts  
+      const dailyMaxTemps = [];
+      const dailyMinTemps = [];
+      for (let day = 0; day < 365; day++) {
+        const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
+        if (dayTemps.length > 0) {
+          const maxTemp = Math.max(...dayTemps);
+          const minTemp = Math.min(...dayTemps);
+          dailyMaxTemps.push(maxTemp);
+          dailyMinTemps.push(minTemp);
+        }
+      }
+      
+      // Calculate extreme conditions - use daily max for heat, daily min for cold
+      const extremeHeatDays = dailyMaxTemps.filter(temp => temp > 35).length;
+      const extremeColdDays = dailyMinTemps.filter(temp => temp < 0).length;
       const highHumidityHours = relativeHumidityData.filter(rh => rh > 80).length;
       const lowHumidityHours = relativeHumidityData.filter(rh => rh < 30).length;
       
@@ -3283,6 +3361,14 @@
     }
 
     function generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr) {
+      // Debug the temperature values being passed to this function
+      console.log('FIRST FUNCTION CALLED - generateClimateAssessment Temperature Debug:', {
+        mean: tempStats.mean,
+        min: tempStats.min,
+        max: tempStats.max,
+        stdDev: tempStats.stdDev
+      });
+      
       let assessment = `
         <div class="holistic-climate-assessment">
           <h6>Holistic Climate Characterization</h6>
@@ -3371,7 +3457,8 @@
       const globalHorizontalRadiation = getParameterData('Global Horizontal Radiation');
       const windSpeedData = getParameterData('Wind Speed');
       
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = dryBulbData;
       const humidity = relativeHumidityData;
       const solar = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
       const wind = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
@@ -3430,7 +3517,10 @@
         return { slope, intercept, rSquared };
       }
       
+      // Calculate temperature statistics
+      
       const tempStats = calculateStats(temperatures);
+      
       const humidityStats = calculateStats(humidity);
       const solarStats = calculateStats(solar);
       const windStats = calculateStats(wind);
@@ -3628,7 +3718,13 @@
           <div class="analysis-section">
             <h5>Climate Assessment</h5>
             <div class="climate-assessment">
-              ${generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr)}
+              ${(() => {
+                // Generate climate assessment
+
+                const result = generateClimateAssessment(tempStats, humidityStats, solarStats, windStats, tempHumidityCorr, tempSolarCorr, solarWindCorr, humidityWindCorr);
+                console.log('generateClimateAssessment result:', result.substring(0, 200) + '...');
+                return result;
+              })()}
             </div>
           </div>
           
@@ -4833,7 +4929,8 @@
       const rhData = getParameterData('Relative Humidity');
       const precipData = getParameterData('Liquid Precipitation Depth');
       
-      const temperatures = tempData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = tempData;
       const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
       const maxTemp = Math.max(...temperatures);
       const minTemp = Math.min(...temperatures);
@@ -4952,7 +5049,8 @@
       const windSpeedData = getParameterData('Wind Speed');
       const windDirectionData = getParameterData('Wind Direction');
       
-      const temperatures = dryBulbData.map(temp => convertValue(temp, 'temperature', 'SI'));
+      // EPW files already contain temperatures in Celsius, no conversion needed
+      const temperatures = dryBulbData;
       const windSpeeds = windSpeedData.map(speed => convertValue(speed, 'windSpeed', 'SI'));
       const solarRadiation = globalHorizontalRadiation.map(rad => convertValue(rad, 'solarRadiation', 'SI'));
       
@@ -5064,12 +5162,15 @@
       report += `DESIGN CONSIDERATIONS AND RECOMMENDATIONS\n`;
       report += `================================================================\n\n`;
       
-      // Building Orientation
+      // Building Orientation - Hemisphere-aware recommendations
       report += `BUILDING ORIENTATION:\n`;
-      if (location.latitude > 0) {
-        report += `• South-facing orientation recommended for solar gain in Northern Hemisphere\n`;
+      const latitude = weatherData.location.latitude;
+      if (latitude > 5) {
+        report += `• South-facing orientation recommended for solar gain (Northern Hemisphere, ${latitude.toFixed(1)}°N)\n`;
+      } else if (latitude < -5) {
+        report += `• North-facing orientation recommended for solar gain (Southern Hemisphere, ${Math.abs(latitude).toFixed(1)}°S)\n`;
       } else {
-        report += `• North-facing orientation recommended for solar gain in Southern Hemisphere\n`;
+        report += `• East-West orientation recommended for balanced solar exposure (Equatorial region, ${latitude.toFixed(1)}°)\n`;
       }
       report += `• Consider prevailing wind direction (${prevailingWind}) for natural ventilation\n`;
       report += `• Main glazing should face away from extreme weather directions\n\n`;
@@ -5419,15 +5520,22 @@
       const badTraits = [];
       const neutralTraits = [];
       
-      // Temperature assessment
+      // Debug logging to see what temperature values we're getting
+      // Climate assessment based on temperature statistics
+      
+      // Temperature assessment - use proper climate thresholds
       if (tempStats.mean >= 18 && tempStats.mean <= 26) {
-        goodTraits.push("🌡️ **Comfortable Temperature Range**: Average temperature is ideal for human comfort and energy efficiency");
+        goodTraits.push("🌡️ **Optimal Thermal Range**: Excellent thermal conditions for energy-efficient operation and occupant comfort");
       } else if (tempStats.mean < 10) {
-        badTraits.push("❄️ **Cold Climate**: Low average temperature may increase heating demands and limit outdoor activities");
+        console.log('Cold Climate detected correctly! Temperature mean is:', tempStats.mean);
+        badTraits.push("❄️ **Cold Climate**: High heating demands with extended heating season requiring robust thermal envelope and efficient heating systems");
+      } else if (tempStats.mean > 26 && tempStats.mean <= 30) {
+        neutralTraits.push("🌡️ **Warm Climate**: Elevated cooling loads requiring efficient HVAC systems and enhanced thermal management strategies");
       } else if (tempStats.mean > 30) {
-        badTraits.push("🔥 **Hot Climate**: High average temperature increases cooling demands and heat stress risk");
+        console.log('Hot climate detected! Temperature mean is:', tempStats.mean);
+        badTraits.push("🔥 **Hot Climate**: High cooling demands with extended cooling season requiring efficient HVAC systems and thermal management");
       } else {
-        neutralTraits.push("🌡️ **Moderate Temperature**: Temperature range is acceptable but may require seasonal HVAC adjustments");
+        neutralTraits.push("🌡️ **Moderate Climate**: Balanced thermal conditions requiring seasonal HVAC optimization and adaptive building controls");
       }
       
       // Temperature variability
@@ -5450,7 +5558,7 @@
       if (solarStats.mean >= 150 && solarStats.mean <= 250) {
         goodTraits.push("☀️ **Good Solar Resource**: Excellent potential for daylighting and solar energy systems");
       } else if (solarStats.mean < 100) {
-        neutralTraits.push("⛅ **Limited Solar**: Lower solar radiation may reduce natural lighting and solar energy potential");
+        neutralTraits.push("⛅ **Low Solar Resource**: Reduced solar irradiance limits daylighting and renewable energy generation potential");
       } else if (solarStats.mean > 300) {
         badTraits.push("🌞 **Intense Solar**: High solar radiation increases cooling loads and UV exposure concerns");
       }
@@ -5459,7 +5567,7 @@
       if (windStats.mean >= 2 && windStats.mean <= 6) {
         goodTraits.push("💨 **Moderate Wind**: Good for natural ventilation and wind energy potential");
       } else if (windStats.mean < 1) {
-        neutralTraits.push("🌀 **Low Wind**: Limited natural ventilation potential, may require mechanical systems");
+        neutralTraits.push("🌀 **Low Wind Resource**: Limited natural ventilation potential requiring enhanced mechanical ventilation systems");
       } else if (windStats.mean > 8) {
         badTraits.push("🌪️ **High Wind**: Strong winds may create structural concerns and discomfort");
       }
