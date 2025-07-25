@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced EPW Climate Analysis Tool</title>
+  <title>Advanced Climate Engine (ACE)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -13,30 +13,45 @@
   <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
   <style>
     :root {
-      --primary: #2563eb;
-      --primary-light: #3b82f6;
-      --primary-dark: #1d4ed8;
-      --secondary: #0f766e;
-      --secondary-light: #14b8a6;
-      --accent: #7c3aed;
-      --accent-light: #8b5cf6;
-      --success: #16a34a;
-      --warning: #ca8a04;
-      --danger: #dc2626;
-      --light: #f8fafc;
-      --dark: #1e293b;
-      --gray: #64748b;
-      --gray-light: #94a3b8;
-      --gray-lighter: #e2e8f0;
+      --primary: #0070f3;
+      --primary-light: #3291ff;
+      --primary-dark: #0051a5;
+      --secondary: #7928ca;
+      --secondary-light: #a855f7;
+      --accent: #ff0080;
+      --accent-light: #ff4081;
+      --success: #00d924;
+      --warning: #f5a623;
+      --danger: #e00;
+      --background: #fafafa;
+      --surface: #ffffff;
+      --border: #eaeaea;
+      --text-primary: #000000;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --shadow-small: 0 2px 4px rgba(0,0,0,0.1);
+      --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
+      --shadow-large: 0 8px 30px rgba(0,0,0,0.12);
+      --radius: 8px;
+      --radius-large: 12px;
+      
+      /* Keep compatibility with old variables */
+      --light: #fafafa;
+      --dark: #000000;
+      --gray: #666666;
+      --gray-light: #999999;
+      --gray-lighter: #eaeaea;
     }
     
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f0f4f8;
-      padding: 20px;
-      color: var(--dark);
-      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: var(--background);
+      padding: 24px;
+      color: var(--text-primary);
+      line-height: 1.5;
       margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
     .container {
@@ -127,11 +142,17 @@
     }
     
     .card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-large);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-small);
+      transition: box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-medium);
     }
     
     select, button, input[type="file"], input[type="number"] {
@@ -1073,7 +1094,15 @@
   <div class="container">
     <header>
       <div class="header-content">
-        <h2>🌍 Advanced EPW Climate Analysis Tool</h2>
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+          <div style="background: linear-gradient(45deg, #007bff, #0056b3); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; box-shadow: 0 4px 8px rgba(0,123,255,0.3);">
+            ACE
+          </div>
+          <div>
+            <h2 style="margin: 0; color: #2c3e50;">Advanced Climate Engine</h2>
+            <p style="margin: 5px 0 0 0; color: #495057; font-style: italic; font-size: 0.9rem; font-weight: 500;">The ultimate tool for EPW-based climate analysis, design, and visualization</p>
+          </div>
+        </div>
         <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
       </div>
       <div class="unit-toggle-container">
@@ -1229,7 +1258,7 @@
           <h4>Heating Degree Days (HDD)</h4>
           <div class="controls-group">
             <label for="hddBase">Base Temperature:</label>
-            <input type="number" id="hddBase" value="18" step="0.5">
+            <input type="number" id="hddBase" value="18.3" step="0.1">
             <span id="hdd-base-unit">°C</span>
           </div>
           <div class="stats-grid">
@@ -1251,7 +1280,7 @@
           <h4>Cooling Degree Days (CDD)</h4>
           <div class="controls-group">
             <label for="cddBase">Base Temperature:</label>
-            <input type="number" id="cddBase" value="18" step="0.5">
+            <input type="number" id="cddBase" value="18.3" step="0.1">
             <span id="cdd-base-unit">°C</span>
           </div>
           <div class="stats-grid">
@@ -1396,7 +1425,7 @@
         <div style="margin-top: 20px; padding: 15px; background: rgba(37, 99, 235, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
           <h6 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1rem;">Recommended Citation</h6>
           <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--dark); line-height: 1.4; background: white; padding: 10px; border-radius: 4px;">
-            Advanced EPW Climate Analysis Tool (Research Grade). ASHRAE 169-2020 compliant climate analysis with peer-reviewed statistical methodologies. Available at: [URL]. Accessed: [Date].
+            Advanced Climate Engine (ACE). ASHRAE 169-2020 compliant climate analysis with professional statistical methodologies. Available at: [URL]. Accessed: [Date].
           </p>
         </div>
       </div>
@@ -1405,6 +1434,15 @@
     <div id="water" class="tab-content card">
       <h4>Condensate Water Analysis</h4>
       <p>Calculate condensate water production from HVAC cooling coils based on airflow and weather conditions.</p>
+      
+      <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #17a2b8;">
+        <strong>Pure Psychrometric Calculation:</strong><br>
+        Condensate production calculated directly from outdoor air conditions, supply air temperature, and coil performance parameters. Operation mode controls when the system runs:
+        <br>• Set exact hourly schedule with on/off control for each hour
+        <br>• All On (24/7) = continuous lab operation (like your Excel)
+        <br>• Business Hours = typical 7 AM to 7 PM operation
+        <br>• Custom schedules for specialized operations
+      </div>
       
       <div class="two-column">
         <div class="card">
@@ -1435,6 +1473,21 @@
             <label for="bypass-factor">Coil Bypass Factor:</label>
             <input type="range" id="bypass-factor" min="0" max="0.3" value="0.1" step="0.01">
             <span id="bypass-factor-value">10%</span>
+          </div>
+          
+          <div class="controls-group">
+            <label>Hourly Operation Schedule:</label>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <button type="button" onclick="setAllHours(true)" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">All On (24/7)</button>
+              <button type="button" onclick="setAllHours(false)" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">All Off</button>
+              <button type="button" onclick="setBusinessHours()" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Business Hours</button>
+            </div>
+            <div id="hourly-schedule" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #f8f9fa;">
+              <!-- Schedule table will be populated by JavaScript -->
+            </div>
+            <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+              <span id="total-hours">0</span> hours/day selected
+            </div>
           </div>
           
           <button id="calculate-condensate" class="secondary">Calculate Condensate</button>
@@ -1700,9 +1753,29 @@
       document.getElementById('avg-wind-label').textContent = `Average Wind Speed (${labels.windSpeed})`;
       document.getElementById('max-wind-label').textContent = `Maximum Wind Speed (${labels.windSpeed})`;
       
-      // HDD/CDD base temperature units
+      // HDD/CDD base temperature units and values
       document.getElementById('hdd-base-unit').textContent = labels.temperature;
       document.getElementById('cdd-base-unit').textContent = labels.temperature;
+      
+      // Convert HDD/CDD base temperature values when switching units
+      const hddBaseInput = document.getElementById('hddBase');
+      const cddBaseInput = document.getElementById('cddBase');
+      
+      if (currentUnits === 'Imperial') {
+        // Convert from Celsius to Fahrenheit
+        if (hddBaseInput.value == '18.3') hddBaseInput.value = '65';
+        else hddBaseInput.value = (parseFloat(hddBaseInput.value) * 9/5 + 32).toFixed(1);
+        
+        if (cddBaseInput.value == '18.3') cddBaseInput.value = '65';
+        else cddBaseInput.value = (parseFloat(cddBaseInput.value) * 9/5 + 32).toFixed(1);
+      } else {
+        // Convert from Fahrenheit to Celsius
+        if (hddBaseInput.value == '65') hddBaseInput.value = '18.3';
+        else hddBaseInput.value = ((parseFloat(hddBaseInput.value) - 32) * 5/9).toFixed(1);
+        
+        if (cddBaseInput.value == '65') cddBaseInput.value = '18.3';
+        else cddBaseInput.value = ((parseFloat(cddBaseInput.value) - 32) * 5/9).toFixed(1);
+      }
       
       // Monthly summary table headers
       document.getElementById('monthly-avg-temp-header').textContent = `Avg Temp (${labels.temperature})`;
@@ -1913,6 +1986,64 @@
       } else {
         console.log('Calculate condensate button not found');
       }
+      
+      // Initialize hourly schedule
+      initializeHourlySchedule();
+    }
+
+    function initializeHourlySchedule() {
+      const scheduleDiv = document.getElementById('hourly-schedule');
+      if (!scheduleDiv) return;
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<tr><th style="border: 1px solid #ddd; padding: 5px; background: #e9ecef;">Hour</th><th style="border: 1px solid #ddd; padding: 5px; background: #e9ecef;">Operation</th></tr>';
+      
+      for (let hour = 0; hour < 24; hour++) {
+        const timeStr = hour === 0 ? '12:00 AM' : 
+                       hour < 12 ? `${hour}:00 AM` : 
+                       hour === 12 ? '12:00 PM' : 
+                       `${hour - 12}:00 PM`;
+        
+        html += `<tr>
+          <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">${timeStr}</td>
+          <td style="border: 1px solid #ddd; padding: 5px; text-align: center;">
+            <input type="checkbox" id="hour-${hour}" checked onchange="updateHourCount(); updateCondensateAnalysis();">
+          </td>
+        </tr>`;
+      }
+      
+      html += '</table>';
+      scheduleDiv.innerHTML = html;
+      updateHourCount();
+    }
+    
+    function setAllHours(isOn) {
+      for (let hour = 0; hour < 24; hour++) {
+        const checkbox = document.getElementById(`hour-${hour}`);
+        if (checkbox) checkbox.checked = isOn;
+      }
+      updateHourCount();
+      if (weatherData) updateCondensateAnalysis();
+    }
+    
+    function setBusinessHours() {
+      // Set 7 AM to 7 PM (12 hours)
+      for (let hour = 0; hour < 24; hour++) {
+        const checkbox = document.getElementById(`hour-${hour}`);
+        if (checkbox) checkbox.checked = (hour >= 7 && hour <= 19);
+      }
+      updateHourCount();
+      if (weatherData) updateCondensateAnalysis();
+    }
+    
+    function updateHourCount() {
+      let count = 0;
+      for (let hour = 0; hour < 24; hour++) {
+        const checkbox = document.getElementById(`hour-${hour}`);
+        if (checkbox && checkbox.checked) count++;
+      }
+      const totalHoursSpan = document.getElementById('total-hours');
+      if (totalHoursSpan) totalHoursSpan.textContent = count;
     }
 
     function populateParameterSelect() {
@@ -2791,13 +2922,14 @@
       // EPW files already contain temperatures in Celsius, no conversion needed
       const temperatures = dryBulbData;
       
-      // Get base temperatures (convert to SI for calculation if needed)
+      // Get base temperatures (convert to Celsius for calculation if needed)
       let hddBase = parseFloat(document.getElementById('hddBase').value);
       let cddBase = parseFloat(document.getElementById('cddBase').value);
       
       if (currentUnits === 'Imperial') {
-        hddBase = convertValue(hddBase, 'temperature', 'Imperial');
-        cddBase = convertValue(cddBase, 'temperature', 'Imperial');
+        // Convert Fahrenheit input to Celsius for calculation
+        hddBase = (hddBase - 32) * 5/9;
+        cddBase = (cddBase - 32) * 5/9;
       }
 
       // Calculate daily average temperatures
@@ -4467,7 +4599,7 @@
           ${htmlReport}
           
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">This report was generated using the EPW Climate Analysis Tool</p>
+            <p style="margin: 0;">This report was generated using Advanced Climate Engine (ACE)</p>
             <p style="margin: 5px 0 0 0;">Weather data analysis performed in accordance with ASHRAE standards and engineering best practices</p>
           </div>
         </div>
@@ -4537,7 +4669,7 @@
           ${chartsSection}
           
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 12px; color: #666;">
-            <p style="margin: 0;">This report was generated using the EPW Climate Analysis Tool</p>
+            <p style="margin: 0;">This report was generated using Advanced Climate Engine (ACE)</p>
             <p style="margin: 5px 0 0 0;">Weather data analysis performed in accordance with ASHRAE standards and engineering best practices</p>
           </div>
         </div>
@@ -4817,7 +4949,7 @@
           </div>
           
           <div style="margin-top: 30px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
-            <p><small>Report generated on ${new Date().toLocaleDateString()} using EPW Climate Analysis Tool</small></p>
+            <p><small>Report generated on ${new Date().toLocaleDateString()} using Advanced Climate Engine (ACE)</small></p>
           </div>
         </div>
       `;
@@ -5318,9 +5450,9 @@
         report += `• Solar energy systems highly recommended\n`;
       }
       
-      // Add research-grade documentation and citations
+      // Add professional documentation and citations
       report += `\n================================================================\n`;
-      report += `RESEARCH METHODOLOGY & VALIDATION\n`;
+      report += `ADVANCED CLIMATE ENGINE (ACE) METHODOLOGY & VALIDATION\n`;
       report += `================================================================\n\n`;
       
       report += `STANDARDS & REFERENCES:\n`;
@@ -5352,7 +5484,7 @@
       report += `RECOMMENDED CITATIONS:\n`;
       report += `• Climate data: Typical Meteorological Year (TMY) Database\n`;
       report += `• Standards: ASHRAE Standard 169-2020, ASHRAE Standard 55-2023\n`;
-      report += `• Tool: Advanced EPW Climate Analysis Tool (Research Grade)\n`;
+      report += `• Tool: Advanced Climate Engine (ACE)\n`;
       
       return report;
     }
@@ -5380,7 +5512,7 @@
       window.URL.revokeObjectURL(url);
     }
 
-    // Research-grade statistical functions - ASHRAE 169-2020 & 55-2023 compliant
+    // Advanced statistical functions - ASHRAE 169-2020 & 55-2023 compliant
     function calculateCorrelation(xData, yData) {
       if (xData.length !== yData.length || xData.length === 0) return 0;
       
@@ -6086,6 +6218,13 @@
         default:
           airflowCMS = airflow; // already m³/s
       }
+      
+      console.log('Airflow conversion debug:', {
+        inputAirflow: airflow,
+        inputUnit: airflowUnit,
+        airflowCMS: airflowCMS,
+        airflowCMH: airflowCMS * 3600
+      });
 
       // Convert supply temperature to Celsius if needed
       // Default 55°F = 12.8°C for typical cooling supply air
@@ -6132,62 +6271,58 @@
           coolingCandidates++;
         }
 
-        // Calculate condensate for all hours when outdoor air is conditioned (more realistic for large systems)
-        // Large commercial systems often operate year-round for ventilation
-        const shouldCalculateCondensate = (dbTempC > supplyTempC) || 
-                                         (rh > 60 && Math.abs(dbTempC - supplyTempC) < 8); // Include high humidity conditions
+        // ASHRAE Standard Condensate Calculation - Based on hourly schedule
+        const hourOfDay = index % 24;
+        const hourCheckbox = document.getElementById(`hour-${hourOfDay}`);
+        const shouldCalculateCondensate = hourCheckbox ? hourCheckbox.checked : true;
         
         if (shouldCalculateCondensate) {
           coolingHours++;
 
-          // ASHRAE psychrometric calculations using Antoine equation for saturation pressure
-          // Enhanced accuracy for HVAC applications per ASHRAE standards
+          // ASHRAE Fundamental psychrometric calculation
           const saturationPressure = 610.78 * Math.exp((17.27 * dbTempC) / (dbTempC + 237.3)); // Pa
           const vaporPressure = (rh / 100) * saturationPressure;
-          const humidityRatio = 0.621945 * vaporPressure / (101325 - vaporPressure); // kg water / kg dry air (ASHRAE constant)
+          const outdoorHumidityRatio = 0.621945 * vaporPressure / (101325 - vaporPressure); // kg/kg
 
-          // Supply air conditions - realistic for dehumidification systems
+          // Supply air leaving coil - match your Excel calculation assumptions
+          // Excel appears to use a specific supply air humidity ratio for coil leaving conditions
           const supplySatPressure = 610.78 * Math.exp((17.27 * supplyTempC) / (supplyTempC + 237.3));
-          const supplyVaporPressure = 0.98 * supplySatPressure; // Near saturation for realistic condensate
-          const supplyHumidityRatio = 0.621945 * supplyVaporPressure / (101325 - supplyVaporPressure);
+          // Use conditions that match typical cooling coil performance (90-95% RH leaving coil)
+          const supplyHumidityRatio = 0.621945 * (0.90 * supplySatPressure) / (101325 - (0.90 * supplySatPressure));
 
-          // Enhanced ASHRAE coil model for commercial systems with higher moisture removal
-          // Account for outdoor air conditioning and dehumidification requirements
-          const moistureRemovalPotential = Math.max(0, humidityRatio - supplyHumidityRatio);
+          // Moisture removal potential (limited by practical coil performance)
+          const maxMoistureRemoval = Math.max(0, outdoorHumidityRatio - supplyHumidityRatio);
           
-          // Commercial system effectiveness (higher than residential)
-          const commercialEffectiveness = Math.min(effectiveness * 1.2, 0.95); // Enhanced for large systems
-          const bypassAdjustment = 1 - (bypassFactor * 0.7); // Reduced bypass impact for commercial coils
+          // Apply coil efficiency and bypass factors exactly as in ASHRAE calculations
+          // This should match the moisture removal calculation in your Excel spreadsheet
+          const actualMoistureRemoval = maxMoistureRemoval * effectiveness * (1 - bypassFactor);
           
-          // Calculate moisture removal if condensation occurs
-          let moistureRemoval = 0;
-          if (moistureRemovalPotential > 0) {
-            moistureRemoval = moistureRemovalPotential * commercialEffectiveness * bypassAdjustment;
-            // Additional safety check for moisture removal
-            moistureRemoval = Math.max(0, moistureRemoval);
-
-            // ASHRAE standard air density calculation with enhanced commercial system modeling
-            // Account for mixed outdoor/return air conditions typical in large systems
-            const airDensity = 1.2041 * (273.15 + 20) / (273.15 + dbTempC); // kg/m³ corrected per ASHRAE
-            const dryAirMassFlow = airflowCMS * airDensity * 3600; // kg/h
+          if (actualMoistureRemoval > 0) {
+            // Standard air properties at sea level
+            const airDensity = 1.204 * (293.15) / (273.15 + dbTempC); // kg/m³ at outdoor temp
+            const massFlowRate = airflowCMS * airDensity; // kg/s dry air
             
-            // Enhanced condensate rate for commercial HVAC systems
-            // Include factor for continuous operation and higher outdoor air percentages
-            const commercialFactor = 1.5; // Commercial systems typically have higher condensate production
-            let condensateRate = moistureRemoval * dryAirMassFlow * commercialFactor;
+            // ASHRAE condensate calculation: kg water/s = (kg water/kg dry air) × (kg dry air/s)
+            const condensateKgPerSec = actualMoistureRemoval * massFlowRate;
+            const condensateRateL_h = condensateKgPerSec * 3600; // Convert to L/h (1 kg water = 1 L)
             
-            // Safety check: Ensure no negative condensate values
-            condensateRate = Math.max(0, condensateRate);
+            // Pure psychrometric calculation - no artificial scaling factors
+            // Condensate = airflow × moisture removal per unit of air
+            const finalCondensateRate = condensateRateL_h;
 
-            hourlyCondensate.push(condensateRate);
-            monthlyCondensate[Math.min(month, 11)] += condensateRate;
-            totalCondensate += condensateRate;
-            peakCondensateRate = Math.max(peakCondensateRate, condensateRate);
+            hourlyCondensate.push(finalCondensateRate);
+            monthlyCondensate[Math.min(month, 11)] += finalCondensateRate;
+            totalCondensate += finalCondensateRate;
+            peakCondensateRate = Math.max(peakCondensateRate, finalCondensateRate);
             condensateHours++;
             
             // Debug first few calculations
             if (condensateHours <= 3) {
-              console.log(`Hour ${index}: dbTemp=${dbTempC}°C, RH=${rh}%, condensateRate=${condensateRate.toFixed(3)} L/h`);
+              console.log(`Hour ${index}: dbTemp=${dbTempC}°C, RH=${rh}%`);
+              console.log(`  - outdoorHumidityRatio=${outdoorHumidityRatio.toFixed(6)}, supplyHumidityRatio=${supplyHumidityRatio.toFixed(6)}`);
+              console.log(`  - maxMoistureRemoval=${maxMoistureRemoval.toFixed(6)}, actualMoistureRemoval=${actualMoistureRemoval.toFixed(6)}`);
+              console.log(`  - airDensity=${airDensity.toFixed(3)}, massFlowRate=${massFlowRate.toFixed(3)} kg/s`);
+              console.log(`  - condensateRateL_h=${condensateRateL_h.toFixed(3)}, finalRate=${finalCondensateRate.toFixed(3)} L/h`);
             }
           } else {
             hourlyCondensate.push(0);
