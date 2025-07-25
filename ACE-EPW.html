@@ -2216,6 +2216,9 @@
       updateHDDCDD();
       updateAdvancedMetrics();
       updatePsychrometricChart();
+      // CRITICAL FIX: Update all chart types when units change
+      updateWindRose();
+      updateHeatMaps();
     }
 
     function updateCharts() {
@@ -5129,7 +5132,7 @@
           </tr>
           <tr>
             <td style="padding: 8px; border: 1px solid #ddd;">Annual Average Temperature</td>
-            <td style="padding: 8px; border: 1px solid #ddd;">${avgTemp.toFixed(1)}°${tempUnit}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${formatValueWithUnits(avgTemp, 'temperature')}</td>
             <td style="padding: 8px; border: 1px solid #ddd;">Base temperature for system sizing</td>
           </tr>
           <tr style="background: #f8f9fa;">
@@ -5275,9 +5278,9 @@
       const extremeColdDays = dailyMinTemps.filter(temp => temp < 0).length;
       
       report += `TEMPERATURE ANALYSIS\n`;
-      report += `Annual Average: ${avgTemp.toFixed(1)} ${tempUnit}\n`;
-      report += `Maximum: ${maxTemp.toFixed(1)} ${tempUnit}\n`;
-      report += `Minimum: ${minTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Annual Average: ${formatValueWithUnits(avgTemp, 'temperature')}\n`;
+      report += `Maximum: ${formatValueWithUnits(maxTemp, 'temperature')}\n`;
+      report += `Minimum: ${formatValueWithUnits(minTemp, 'temperature')}\n`;
       report += `Range: ${formatValueWithUnits((maxTemp - minTemp), 'temperature', 1, true)}\n`;
       report += `Extreme Heat Days (>35°C): ${extremeHeatDays.toFixed(0)}\n`;
       report += `Extreme Cold Days (<0°C): ${extremeColdDays.toFixed(0)}\n\n`;
