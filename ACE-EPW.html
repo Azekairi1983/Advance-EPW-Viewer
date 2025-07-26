@@ -1722,6 +1722,11 @@
       }
     }
 
+    // Get current unit system (required for EPW file parsing)
+    function getCurrentUnits() {
+      return currentUnits;
+    }
+
     // Format value with appropriate units
     function formatValueWithUnits(value, parameterType, precision = 1, isRange = false) {
       const labels = unitLabels[currentUnits];
@@ -2216,9 +2221,6 @@
       updateHDDCDD();
       updateAdvancedMetrics();
       updatePsychrometricChart();
-      // CRITICAL FIX: Update all chart types when units change
-      updateWindRose();
-      updateHeatMaps();
     }
 
     function updateCharts() {
@@ -2990,12 +2992,11 @@
       document.getElementById('monthly-hdd-max').textContent = maxMonthlyHDD.toFixed(0);
       document.getElementById('monthly-cdd-max').textContent = maxMonthlyCDD.toFixed(0);
       
-      // Display base temperatures in current units (show original user input values)
-      const originalHddBase = parseFloat(document.getElementById('hddBase').value);
-      const originalCddBase = parseFloat(document.getElementById('cddBase').value);
+      // Display base temperatures in current units (FIXED: Use exact standard ASHRAE base temperatures)
+      const standardBaseTempLabel = currentUnits === 'SI' ? '18°C' : '65°F';
       
-      document.getElementById('annual-hdd-label').textContent = `Annual HDD (base ${formatValueWithUnits(originalHddBase, 'temperature')})`;
-      document.getElementById('annual-cdd-label').textContent = `Annual CDD (base ${formatValueWithUnits(originalCddBase, 'temperature')})`;
+      document.getElementById('annual-hdd-label').textContent = `Annual HDD (base ${standardBaseTempLabel})`;
+      document.getElementById('annual-cdd-label').textContent = `Annual CDD (base ${standardBaseTempLabel})`;
 
       // Update charts
       updateHDDChart(monthlyHDD);
@@ -5132,7 +5133,7 @@
           </tr>
           <tr>
             <td style="padding: 8px; border: 1px solid #ddd;">Annual Average Temperature</td>
-            <td style="padding: 8px; border: 1px solid #ddd;">${formatValueWithUnits(avgTemp, 'temperature')}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${avgTemp.toFixed(1)}°${tempUnit}</td>
             <td style="padding: 8px; border: 1px solid #ddd;">Base temperature for system sizing</td>
           </tr>
           <tr style="background: #f8f9fa;">
@@ -5278,9 +5279,9 @@
       const extremeColdDays = dailyMinTemps.filter(temp => temp < 0).length;
       
       report += `TEMPERATURE ANALYSIS\n`;
-      report += `Annual Average: ${formatValueWithUnits(avgTemp, 'temperature')}\n`;
-      report += `Maximum: ${formatValueWithUnits(maxTemp, 'temperature')}\n`;
-      report += `Minimum: ${formatValueWithUnits(minTemp, 'temperature')}\n`;
+      report += `Annual Average: ${avgTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Maximum: ${maxTemp.toFixed(1)} ${tempUnit}\n`;
+      report += `Minimum: ${minTemp.toFixed(1)} ${tempUnit}\n`;
       report += `Range: ${formatValueWithUnits((maxTemp - minTemp), 'temperature', 1, true)}\n`;
       report += `Extreme Heat Days (>35°C): ${extremeHeatDays.toFixed(0)}\n`;
       report += `Extreme Cold Days (<0°C): ${extremeColdDays.toFixed(0)}\n\n`;
@@ -5750,13 +5751,21 @@
         badTraits.push("🌊 **High Humidity**: Elevated humidity increases cooling loads and mold/moisture risks");
       }
       
-      // Solar radiation assessment
-      if (solarStats.mean >= 150 && solarStats.mean <= 250) {
-        goodTraits.push("☀️ **Good Solar Resource**: Excellent potential for daylighting and solar energy systems");
-      } else if (solarStats.mean < 100) {
-        neutralTraits.push("⛅ **Low Solar Resource**: Reduced solar irradiance limits daylighting and renewable energy generation potential");
-      } else if (solarStats.mean > 300) {
-        badTraits.push("🌞 **Intense Solar**: High solar radiation increases cooling loads and UV exposure concerns");
+      // Solar radiation assessment (FIXED: Enhanced solar assessment logic using daylight hours)
+      const solarData = getParameterData('Global Horizontal Radiation');
+      const daylightHours = solarData.filter(rad => rad > 10).length; // Hours with meaningful solar
+      const avgDaylightSolar = daylightHours > 0 ? 
+        solarData.filter(rad => rad > 10).reduce((a, b) => a + b, 0) / daylightHours : 0;
+      const peakSolar = Math.max(...solarData);
+      
+      if (avgDaylightSolar >= 200 && peakSolar >= 800) {
+        goodTraits.push("☀️ **Excellent Solar Resource**: Outstanding potential for daylighting and solar energy systems");
+      } else if (avgDaylightSolar >= 120 && peakSolar >= 600) {
+        goodTraits.push("☀️ **Good Solar Resource**: Strong potential for daylighting and solar energy systems");
+      } else if (avgDaylightSolar >= 80 && peakSolar >= 400) {
+        neutralTraits.push("⛅ **Moderate Solar Resource**: Fair potential for solar applications with proper design");
+      } else {
+        neutralTraits.push("⛅ **Limited Solar Resource**: Reduced solar irradiance may limit daylighting and renewable energy potential");
       }
       
       // Wind assessment
@@ -6256,7 +6265,7 @@
       console.log('Current units system:', currentUnits);
 
       // Get input parameters
-      const airflow = parseFloat(document.getElementById('airflow-input').value) || 1000;
+      const airflow = parseFloat(document.getElementById('airflow-input').value) || 0;
       const airflowUnit = document.getElementById('airflow-units').value;
       const supplyTempInput = parseFloat(document.getElementById('supply-temp').value) || 55;
       const effectiveness = parseFloat(document.getElementById('coil-effectiveness').value) || 0.85;
@@ -6269,6 +6278,33 @@
         effectiveness,
         bypassFactor
       });
+
+      // CRITICAL FIX: Check for zero airflow at the start
+      if (airflow <= 0) {
+        console.log('Zero airflow detected - no condensate production possible');
+        
+        // Display zero results
+        const rateUnit = currentUnits === 'SI' ? 'L/min' : 'gal/min';
+        const volumeUnit = currentUnits === 'SI' ? 'L' : 'gal';
+        
+        // Fix element IDs to match actual HTML
+        document.getElementById('annual-condensate').textContent = `0 ${volumeUnit}`;
+        document.getElementById('peak-condensate-rate').textContent = `0.00 ${rateUnit}`;
+        document.getElementById('condensate-hours').textContent = '0 hrs';
+        document.getElementById('avg-condensate-rate').textContent = `0.00 ${rateUnit}`;
+        const ashraeCFMElement = document.getElementById('ashrae-gal-cfm');
+        if (ashraeCFMElement) ashraeCFMElement.textContent = '0.000';
+        
+        // Update design notes with zero values - THIS IS THE KEY FIX
+        updateCondensateDesignNotes(0, 0, 0, airflow, airflowUnit);
+        
+        // Clear chart
+        if (condensateChart) {
+          condensateChart.destroy();
+          condensateChart = null;
+        }
+        return;
+      }
 
       // Convert airflow to standard units (m³/s)
       let airflowCMS;
@@ -6566,8 +6602,15 @@
     }
 
     function updateCondensateDesignNotes(totalCondensate, peakRate, condensateHours, airflow, airflowUnit) {
+      console.log('CALLING updateCondensateDesignNotes with:', {
+        totalCondensate, peakRate, condensateHours, airflow, airflowUnit
+      });
+
       const container = document.getElementById('condensate-design-notes');
-      if (!container) return;
+      if (!container) {
+        console.log('ERROR: condensate-design-notes container not found');
+        return;
+      }
 
       // Use same conversions as main display (per minute rates)
       const volumeConversion = currentUnits === 'SI' ? 1 : (1 / 3.785411784); // L to US gallons
@@ -6575,36 +6618,104 @@
       const rateUnit = currentUnits === 'SI' ? 'L/min' : 'gal/min';
       const volumeUnit = currentUnits === 'SI' ? 'L' : 'gal';
 
+      // FIXED: Dynamic four-tier priority calculation system
+      const peakFlow = peakRate * rateConversion;
+      const annualVolume = totalCondensate * volumeConversion;
+
+      // Calculate dynamic priorities
+      let drainagePriority, drainageClass, drainageText;
+      if (peakFlow <= 0.5) {
+        drainagePriority = 'Low';
+        drainageClass = 'priority-low';
+        drainageText = 'Minimal drainage requirements';
+      } else if (peakFlow <= 5.0) {
+        drainagePriority = 'Medium';
+        drainageClass = 'priority-medium';
+        drainageText = 'Standard system recommended';
+      } else if (peakFlow <= 20.0) {
+        drainagePriority = 'High';
+        drainageClass = 'priority-high';
+        drainageText = 'Robust drainage system required';
+      } else {
+        drainagePriority = 'Critical';
+        drainageClass = 'priority-critical';
+        drainageText = 'Industrial-grade infrastructure essential';
+      }
+
+      let collectionPriority, collectionClass, collectionText;
+      if (annualVolume <= 500) {
+        collectionPriority = 'Low';
+        collectionClass = 'priority-low';
+        collectionText = 'No collection potential - system operates dry';
+      } else if (annualVolume <= 5000) {
+        collectionPriority = 'Medium';
+        collectionClass = 'priority-medium';
+        collectionText = 'Optional collection system';
+      } else if (annualVolume <= 25000) {
+        collectionPriority = 'High';
+        collectionClass = 'priority-high';
+        collectionText = 'Significant water recovery potential';
+      } else {
+        collectionPriority = 'Critical';
+        collectionClass = 'priority-critical';
+        collectionText = 'Industrial water recovery recommended';
+      }
+
+      let maintenancePriority, maintenanceClass, maintenanceText;
+      if (condensateHours <= 1000) {
+        maintenancePriority = 'Low';
+        maintenanceClass = 'priority-low';
+        maintenanceText = 'Annual inspection sufficient';
+      } else if (condensateHours <= 3000) {
+        maintenancePriority = 'Medium';
+        maintenanceClass = 'priority-medium';
+        maintenanceText = 'Bi-monthly cleaning recommended';
+      } else if (condensateHours <= 6000) {
+        maintenancePriority = 'High';
+        maintenanceClass = 'priority-high';
+        maintenanceText = 'Monthly cleaning required';
+      } else {
+        maintenancePriority = 'Critical';
+        maintenanceClass = 'priority-critical';
+        maintenanceText = 'Bi-weekly maintenance essential';
+      }
+
+      console.log('PRIORITY DEBUG:', {
+        peakFlow, annualVolume, condensateHours,
+        drainagePriority, collectionPriority, maintenancePriority
+      });
+
       container.innerHTML = `
         <div class="recommendations-grid">
-          <div class="recommendation-card priority-medium">
+          <div class="recommendation-card ${drainageClass}">
             <div class="rec-header">
               <span class="rec-category">Drainage System</span>
-              <span class="rec-priority priority-medium">Medium</span>
+              <span class="rec-priority ${drainageClass}">${drainagePriority}</span>
             </div>
             <h6>Primary Drain Sizing</h6>
             <p>Size primary condensate drain for peak flow rate of <strong>${(peakRate * rateConversion * 1.5).toFixed(2)} ${rateUnit}</strong> (150% safety factor).</p>
+            <p><strong>${drainageText}</strong></p>
             ${getPipeSizingRecommendation(peakRate * rateConversion)}
           </div>
 
-          <div class="recommendation-card priority-high">
+          <div class="recommendation-card ${collectionClass}">
             <div class="rec-header">
               <span class="rec-category">Collection System</span>
-              <span class="rec-priority priority-high">High</span>
+              <span class="rec-priority ${collectionClass}">${collectionPriority}</span>
             </div>
             <h6>Condensate Collection</h6>
-            <p>Annual condensate production: <strong>${(totalCondensate * volumeConversion).toFixed(0)} ${volumeUnit}</strong></p>
-            <p><strong>Collection potential:</strong> ${(totalCondensate * volumeConversion) > 50000 ? 'High - Consider water reuse systems' : 'Moderate - Standard drainage sufficient'}</p>
+            <p>Annual condensate production: <strong>${annualVolume.toFixed(0)} ${volumeUnit}</strong></p>
+            <p><strong>Collection potential:</strong> ${collectionText}</p>
           </div>
 
-          <div class="recommendation-card priority-low">
+          <div class="recommendation-card ${maintenanceClass}">
             <div class="rec-header">
               <span class="rec-category">Maintenance</span>
-              <span class="rec-priority priority-low">Low</span>
+              <span class="rec-priority ${maintenanceClass}">${maintenancePriority}</span>
             </div>
             <h6>System Maintenance</h6>
             <p>Expected operating hours with condensate: <strong>${condensateHours} hours/year</strong></p>
-            <p><strong>Inspection frequency:</strong> ${condensateHours > 4000 ? 'Monthly' : 'Quarterly'} drain cleaning recommended</p>
+            <p><strong>Inspection frequency:</strong> ${maintenanceText}</p>
           </div>
 
           <div class="recommendation-card priority-medium">
@@ -6615,7 +6726,7 @@
             <h6>Condensate Quality</h6>
             <p>Condensate pH typically 5.5-6.5 (slightly acidic)</p>
             <p><strong>Materials:</strong> Use corrosion-resistant piping (PVC, stainless steel)</p>
-            <p><strong>Treatment:</strong> ${(totalCondensate * volumeConversion) > 20000 ? 'Consider pH neutralization for reuse' : 'Standard drainage acceptable'}</p>
+            <p><strong>Treatment:</strong> ${annualVolume > 20000 ? 'Consider pH neutralization for reuse' : 'Standard drainage acceptable'}</p>
           </div>
         </div>
 
@@ -6633,6 +6744,10 @@
           </p>
         </div>
       `;
+      
+      console.log('SUCCESS: updateCondensateDesignNotes completed successfully with priorities:', {
+        drainagePriority, collectionPriority, maintenancePriority
+      });
     }
   </script>
 </body>
