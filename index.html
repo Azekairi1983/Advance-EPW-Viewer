@@ -637,6 +637,201 @@
       border-bottom: none;
     }
     
+    /* Daylighting Analysis Styles */
+    .daylighting-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+      padding: 20px;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    .daylighting-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .polar-chart-container, .sunpath-container {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow-small);
+    }
+
+    .building-analysis-section {
+      background: var(--light);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid var(--gray-lighter);
+    }
+
+    .orientation-recommendations {
+      margin-bottom: 25px;
+    }
+
+    .facade-card {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .facade-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .facade-card.critical-priority {
+      border-left: 4px solid #8B0000;
+      background: linear-gradient(135deg, #fff0f0, #ffffff);
+    }
+
+    .facade-card.high-priority {
+      border-left: 4px solid #E74C3C;
+      background: linear-gradient(135deg, #fff5f5, #ffffff);
+    }
+
+    .facade-card.medium-priority {
+      border-left: 4px solid #FF8C00;
+      background: linear-gradient(135deg, #fff8f0, #ffffff);
+    }
+
+    .facade-card.low-priority {
+      border-left: 4px solid #2E86C1;
+      background: linear-gradient(135deg, #f0f8ff, #ffffff);
+    }
+
+    .facade-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .facade-orientation {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .facade-priority {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .facade-priority.critical {
+      background: #8B0000;
+      color: white;
+    }
+
+    .facade-priority.high {
+      background: #E74C3C;
+      color: white;
+    }
+
+    .facade-priority.medium {
+      background: #FF8C00;
+      color: white;
+    }
+
+    .facade-priority.low {
+      background: #2E86C1;
+      color: white;
+    }
+
+    .solar-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .solar-metric {
+      text-align: center;
+      padding: 8px;
+      background: var(--light);
+      border-radius: 6px;
+    }
+
+    .metric-number {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .metric-unit {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .design-recommendations-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .design-recommendations-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-lighter);
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9rem;
+    }
+
+    .design-recommendations-list li:before {
+      content: '•';
+      color: var(--primary);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+
+    .design-recommendations-list li:last-child {
+      border-bottom: none;
+    }
+
+    .daylighting-metrics {
+      background: var(--light);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--gray-lighter);
+    }
+
+    .design-strategy {
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(0, 123, 255, 0.1);
+      border-radius: 6px;
+      border-left: 3px solid var(--primary);
+    }
+
+    .design-strategy h6 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .daylighting-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .daylighting-controls {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Enhanced Climate Summary Styles */
     .climate-summary-header {
       margin-bottom: 25px;
@@ -726,6 +921,214 @@
       font-size: 0.9rem;
       color: var(--text-muted);
       font-weight: 500;
+    }
+
+    /* Detailed Facade Recommendations Styling */
+    .detailed-recommendations {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 0;
+    }
+
+    .recommendation-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 3px solid #007bff;
+    }
+
+    .recommendation-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .recommendation-section h6 {
+      margin: 0 0 12px 0;
+      font-size: 1.0em;
+      font-weight: 600;
+      color: #2c3e50;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 8px;
+    }
+
+    .envelope-specs, .glazing-specs, .shading-specs {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .spec-item {
+      padding: 8px 12px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+
+    .spec-item strong {
+      color: #495057;
+      display: inline-block;
+      min-width: 140px;
+    }
+
+    .facade-card {
+      margin-bottom: 25px;
+    }
+
+    .critical-priority {
+      background: #721c24;
+      color: #ffffff;
+    }
+    
+    /* Override critical priority for facade cards specifically */
+    .facade-card.critical-priority {
+      background: linear-gradient(135deg, #fff5f5, #ffffff) !important;
+      color: var(--text-dark) !important;
+    }
+    
+    /* Facade Card Specific Styles */
+    .facade-card {
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .facade-card.critical-priority {
+      background: linear-gradient(135deg, #fff5f5, #ffffff);
+      border-left: 4px solid #dc3545;
+      color: var(--text-dark) !important;
+    }
+    
+    .facade-card.critical-priority .spec-item {
+      color: var(--text-dark) !important;
+    }
+    
+    .facade-card.critical-priority .facade-priority.critical {
+      color: white !important;
+      background-color: #dc3545;
+    }
+    
+    .facade-card.critical-priority .recommendation-section h6 {
+      color: var(--primary) !important;
+    }
+    
+    .facade-card.critical-priority .facade-orientation {
+      color: var(--text-dark) !important;
+    }
+    
+    .facade-card.critical-priority .metric-number {
+      color: var(--primary) !important;
+    }
+    
+    .facade-card.critical-priority .metric-unit {
+      color: var(--text-muted) !important;
+    }
+    
+    .facade-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--gray-lighter);
+    }
+    
+    .facade-orientation {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .facade-priority {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .facade-priority.critical {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .solar-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: var(--light);
+      border-radius: 6px;
+    }
+    
+    .solar-metric {
+      text-align: center;
+    }
+    
+    .metric-number {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .metric-unit {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .detailed-recommendations {
+      margin-top: 20px;
+    }
+    
+    .recommendation-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 6px;
+    }
+    
+    .recommendation-section h6 {
+      margin: 0 0 10px 0;
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--gray-lighter);
+      padding-bottom: 5px;
+    }
+    
+    .envelope-specs, .orientation-guidance, .glazing-specs, .shading-specs {
+      display: grid;
+      gap: 8px;
+    }
+    
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+      color: var(--text-dark);
+      line-height: 1.4;
+    }
+    
+    .spec-item:last-child {
+      border-bottom: none;
+    }
+    
+    .spec-item strong {
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-right: 10px;
+      min-width: 140px;
+      flex-shrink: 0;
     }
     
     .char-value {
@@ -1108,8 +1511,8 @@
       <div class="unit-toggle-container">
         <span class="unit-label">Units:</span>
         <div class="unit-toggle">
-          <button id="siButton">S.I.</button>
-          <button id="imperialButton" class="active">Imperial</button>
+          <button id="siButton" onclick="console.log('SI ONCLICK TRIGGERED'); window.toggleToSI();">S.I.</button>
+          <button id="imperialButton" class="active" onclick="console.log('IMPERIAL ONCLICK TRIGGERED'); window.toggleToImperial();">Imperial</button>
         </div>
       </div>
     </header>
@@ -1136,6 +1539,7 @@
       <div class="tab" data-tab="hdd-cdd">HDD/CDD</div>
       <div class="tab" data-tab="advanced">Advanced Metrics</div>
       <div class="tab" data-tab="water">Water/Condensate</div>
+      <div class="tab" data-tab="daylighting">Daylighting Analysis</div>
       <div class="tab" data-tab="heatmaps">Heat Maps</div>
       <div class="tab" data-tab="windrose">Wind Rose</div>
     </div>
@@ -1425,7 +1829,7 @@
         <div style="margin-top: 20px; padding: 15px; background: rgba(37, 99, 235, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
           <h6 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1rem;">Recommended Citation</h6>
           <p style="margin: 0; font-family: 'Courier New', monospace; font-size: 0.85rem; color: var(--dark); line-height: 1.4; background: white; padding: 10px; border-radius: 4px;">
-            Advanced Climate Engine (ACE). ASHRAE 169-2020 compliant climate analysis with professional statistical methodologies. Available at: [URL]. Accessed: [Date].
+            Advanced Climate Engine (ACE). ASHRAE 169-2020 compliant climate analysis with statistical methodologies. Available at: [URL]. Accessed: [Date].
           </p>
         </div>
       </div>
@@ -1541,6 +1945,87 @@
       <div class="card">
         <h5>Design Considerations</h5>
         <div id="condensate-design-notes"></div>
+      </div>
+    </div>
+
+    <div id="daylighting" class="tab-content card">
+      <h3>Daylighting Analysis & Solar Design</h3>
+      
+      <div class="daylighting-controls">
+        <div class="controls-group">
+          <label for="daylighting-period">Analysis Period:</label>
+          <select id="daylighting-period" onchange="updateDaylightingAnalysis()">
+            <option value="annual">Annual</option>
+            <option value="winter">Winter (DJF)</option>
+            <option value="spring">Spring (MAM)</option>
+            <option value="summer">Summer (JJA)</option>
+            <option value="fall">Fall (SON)</option>
+            <option value="january">January</option>
+            <option value="february">February</option>
+            <option value="march">March</option>
+            <option value="april">April</option>
+            <option value="may">May</option>
+            <option value="june">June</option>
+            <option value="july">July</option>
+            <option value="august">August</option>
+            <option value="september">September</option>
+            <option value="october">October</option>
+            <option value="november">November</option>
+            <option value="december">December</option>
+          </select>
+        </div>
+        
+        <div class="controls-group">
+          <label for="analysis-metric">Solar Metric:</label>
+          <select id="analysis-metric" onchange="updateDaylightingAnalysis()">
+            <option value="irradiance">Solar Irradiance (W/m²)</option>
+            <option value="illuminance">Illuminance (lux)</option>
+            <option value="daylight">Daylight Availability (%)</option>
+          </select>
+        </div>
+        
+        <!-- Instant update on dropdown change - button removed -->
+      </div>
+
+      <div class="daylighting-grid">
+        <div class="polar-chart-container">
+          <h4>Solar Resource Polar Analysis</h4>
+          <div id="solar-polar-chart" style="width: 100%; height: 700px;"></div>
+        </div>
+        
+        <div class="sunpath-container">
+          <h4>3D Sun Path Analysis</h4>
+          <div id="sunpath-3d-chart" style="width: 100%; height: 700px;"></div>
+        </div>
+      </div>
+
+      <div class="orientation-recommendations">
+        <h4>Facade Design Recommendations by Orientation</h4>
+        <div id="facade-recommendations" class="recommendations-grid">
+          <!-- Dynamic recommendations will be populated here -->
+        </div>
+      </div>
+
+      <div class="daylighting-metrics">
+        <h5>Annual Daylighting Performance Metrics</h5>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="annual-daylight-hours">-</div>
+            <div class="stat-label">Annual Daylight Hours (>200 lux)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="peak-illuminance">-</div>
+            <div class="stat-label">Peak Illuminance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="optimal-orientation">-</div>
+            <div class="stat-label">Optimal Building Orientation</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="solar-gain-potential">-</div>
+            <div class="stat-label">Annual Solar Gain Potential</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1845,69 +2330,92 @@
       'Liquid Precipitation Quantity': { index: 34, unit: null }
     };
 
+    // BULLETPROOF UNIT CONVERSION SYSTEM - Define functions globally BEFORE DOMContentLoaded
+    function performUnitConversion(targetUnits) {
+      console.log('===== PERFORMING UNIT CONVERSION TO:', targetUnits, '=====');
+      console.log('Current units before change:', currentUnits);
+      
+      if (currentUnits === targetUnits) {
+        console.log('Already in target units, no conversion needed');
+        return;
+      }
+      
+      const oldUnits = currentUnits;
+      currentUnits = targetUnits;
+      
+      // Convert supply temperature input
+      const supplyTempInput = document.getElementById('supply-temp');
+      if (supplyTempInput) {
+        const currentTemp = parseFloat(supplyTempInput.value);
+        if (!isNaN(currentTemp)) {
+          let convertedTemp;
+          if (targetUnits === 'SI' && oldUnits === 'Imperial') {
+            convertedTemp = (currentTemp - 32) * 5/9; // F to C
+          } else if (targetUnits === 'Imperial' && oldUnits === 'SI') {
+            convertedTemp = currentTemp * 9/5 + 32; // C to F
+          }
+          if (convertedTemp !== undefined) {
+            supplyTempInput.value = convertedTemp.toFixed(1);
+          }
+        }
+      }
+      
+      // Update system
+      saveUnitPreference();
+      updateUnitToggleUI();
+      updateUnitLabels();
+      globalClimateData = null; // Reset cached data
+      
+      // Force all chart updates if weather data exists
+      if (weatherData) {
+        console.log('=== FORCING ALL CHART UPDATES ===');
+        updateAllDisplays();
+        updateCondensateAnalysis();
+        updateHDDCDD(); // CRITICAL: Add HDD/CDD update
+        
+        // Extra force for problematic charts
+        setTimeout(() => {
+          console.log('=== SECONDARY CHART UPDATE ===');
+          updateHeatMaps();
+          updateWindRose();
+          updateDaylightingAnalysis();
+          updateHDDCDD(); // Force again for persistence
+        }, 100);
+      }
+      
+      console.log('=== UNIT CONVERSION COMPLETE ===');
+    }
+
+    // Global functions accessible to HTML onclick
+    window.toggleToSI = function() {
+      console.log('SI BUTTON CLICKED!');
+      performUnitConversion('SI');
+    };
+    
+    window.toggleToImperial = function() {
+      console.log('IMPERIAL BUTTON CLICKED!');
+      performUnitConversion('Imperial');
+    };
+
     // Initialize the application
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('=== DOM CONTENT LOADED ===');
       loadUnitPreference();
       updateUnitLabels();
       setupEventListeners();
       populateParameterSelect();
+      
+      // Test button access
+      const siBtn = document.getElementById('siButton');
+      const impBtn = document.getElementById('imperialButton');
+      console.log('SI Button found:', !!siBtn);
+      console.log('Imperial Button found:', !!impBtn);
+      console.log('toggleToSI function exists:', typeof window.toggleToSI);
+      console.log('toggleToImperial function exists:', typeof window.toggleToImperial);
     });
 
     function setupEventListeners() {
-      // Unit toggle buttons
-      document.getElementById('siButton').addEventListener('click', function() {
-        if (currentUnits !== 'SI') {
-          const oldUnits = currentUnits;
-          currentUnits = 'SI';
-          
-          // Convert supply temperature input from Imperial to SI
-          const supplyTempInput = document.getElementById('supply-temp');
-          if (supplyTempInput && oldUnits === 'Imperial') {
-            const currentTemp = parseFloat(supplyTempInput.value);
-            if (!isNaN(currentTemp)) {
-              const convertedTemp = (currentTemp - 32) * 5/9; // F to C
-              supplyTempInput.value = convertedTemp.toFixed(1);
-            }
-          }
-          
-          saveUnitPreference();
-          updateUnitToggleUI();
-          updateUnitLabels();
-          // CRITICAL: Reset global climate data to prevent unit conversion bugs
-          globalClimateData = null;
-          if (weatherData) {
-            updateAllDisplays();
-            updateCondensateAnalysis();
-          }
-        }
-      });
-
-      document.getElementById('imperialButton').addEventListener('click', function() {
-        if (currentUnits !== 'Imperial') {
-          const oldUnits = currentUnits;
-          currentUnits = 'Imperial';
-          
-          // Convert supply temperature input from SI to Imperial
-          const supplyTempInput = document.getElementById('supply-temp');
-          if (supplyTempInput && oldUnits === 'SI') {
-            const currentTemp = parseFloat(supplyTempInput.value);
-            if (!isNaN(currentTemp)) {
-              const convertedTemp = currentTemp * 9/5 + 32; // C to F
-              supplyTempInput.value = convertedTemp.toFixed(1);
-            }
-          }
-          
-          saveUnitPreference();
-          updateUnitToggleUI();
-          updateUnitLabels();
-          // CRITICAL: Reset global climate data to prevent unit conversion bugs
-          globalClimateData = null;
-          if (weatherData) {
-            updateAllDisplays();
-            updateCondensateAnalysis();
-          }
-        }
-      });
+      console.log('Setting up event listeners (unit buttons use onclick, not addEventListener)...');
 
       // File upload
       const fileInput = document.getElementById('fileInput');
@@ -2216,11 +2724,24 @@
     }
 
     function updateAllDisplays() {
+      console.log('updateAllDisplays() called with units:', currentUnits);
       updateCharts();
       updateClimateAnalysis();
       updateHDDCDD();
       updateAdvancedMetrics();
       updatePsychrometricChart();
+      
+      // Force Plotly chart updates with proper destruction pattern
+      console.log('Forcing heat maps update...');
+      updateHeatMaps();
+      console.log('Forcing wind rose update...');
+      updateWindRose();
+      
+      // Force daylighting analysis update
+      console.log('Forcing daylighting analysis update...');
+      updateDaylightingAnalysis();
+      
+      updateCondensateAnalysis();
     }
 
     function updateCharts() {
@@ -2937,7 +3458,11 @@
     }
 
     function updateHDDCDD() {
-      if (!weatherData) return;
+      console.log('updateHDDCDD() called with units:', currentUnits);
+      if (!weatherData) {
+        console.log('HDD/CDD update skipped: no weather data');
+        return;
+      }
 
       const dryBulbData = getParameterData('Dry Bulb Temperature');
       // EPW files already contain temperatures in Celsius, no conversion needed
@@ -2998,7 +3523,8 @@
       document.getElementById('annual-hdd-label').textContent = `Annual HDD (base ${standardBaseTempLabel})`;
       document.getElementById('annual-cdd-label').textContent = `Annual CDD (base ${standardBaseTempLabel})`;
 
-      // Update charts
+      // Update charts with proper unit display
+      console.log('Updating HDD/CDD charts with units:', currentUnits);
       updateHDDChart(monthlyHDD);
       updateCDDChart(monthlyCDD);
     }
@@ -3137,20 +3663,22 @@
         totalHours: temperatures.length
       });
 
-      // FIXED: Use unified extreme conditions thresholds (35°C heat, 0°C cold) - consistent across all tabs
+      // VERIFIED: Use unified extreme conditions thresholds (35°C heat, 0°C cold) - consistent across all tabs
       
       // Calculate daily max/min temperatures for extreme day counts
       const dailyMaxTemps = [];
       const dailyMinTemps = [];
       for (let day = 0; day < 365; day++) {
         const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
-        const maxTemp = Math.max(...dayTemps);
-        const minTemp = Math.min(...dayTemps);
-        dailyMaxTemps.push(maxTemp);
-        dailyMinTemps.push(minTemp);
+        if (dayTemps.length > 0) {
+          const maxTemp = Math.max(...dayTemps);
+          const minTemp = Math.min(...dayTemps);
+          dailyMaxTemps.push(maxTemp);
+          dailyMinTemps.push(minTemp);
+        }
       }
       
-      // Calculate extreme weather days using unified thresholds (35°C, 0°C) - consistent with all tabs
+      // Calculate extreme weather days using unified thresholds (35°C, 0°C) - consistent with all tabs and PDF reports
       const extremeHeatDays = dailyMaxTemps.filter(temp => temp > 35).length;
       const extremeColdDays = dailyMinTemps.filter(temp => temp < 0).length;
       const precipitationDays = precipitationData.filter(precip => precip > 0).length / 24; // Convert hours to days
@@ -4038,7 +4566,7 @@
         resourceOpportunities.push(`Optimal precipitation for water harvesting: ${Math.round(annualPrecip)}mm`);
       }
       
-      // Professional building performance indicators
+      // Building performance indicators
       const performanceIndicators = [];
       
       if (annualCDD > 1500) {
@@ -4061,7 +4589,7 @@
       
       const html = `
         <div class="climate-summary-header">
-          <h4>Professional Climate Analysis Report</h4>
+          <h4>Climate Analysis Report</h4>
           <p>Comprehensive assessment based on ASHRAE 169-2020 and ISO 15927 standards</p>
         </div>
         
@@ -4394,7 +4922,7 @@
           📊 Select Charts for PDF Report
         </h2>
         <p style="margin-bottom: 20px; color: #666; text-align: center;">
-          Choose which visualizations to include in your professional climate analysis report:
+          Choose which visualizations to include in your climate analysis report:
         </p>
         
         <div style="margin-bottom: 20px;">
@@ -5120,6 +5648,20 @@
       const avgRH = rhData.reduce((a, b) => a + b, 0) / rhData.length;
       const annualPrecip = precipData.reduce((a, b) => a + b, 0);
       
+      // Calculate extreme conditions using the same unified thresholds as all other tabs
+      const dailyMaxTemps = [];
+      const dailyMinTemps = [];
+      for (let day = 0; day < 365; day++) {
+        const dayTemps = temperatures.slice(day * 24, (day + 1) * 24);
+        if (dayTemps.length > 0) {
+          dailyMaxTemps.push(Math.max(...dayTemps));
+          dailyMinTemps.push(Math.min(...dayTemps));
+        }
+      }
+      const extremeHeatDays = dailyMaxTemps.filter(temp => temp > 35).length;
+      const extremeColdDays = dailyMinTemps.filter(temp => temp < 0).length;
+      const highHumidityHours = rhData.filter(rh => rh > 80).length;
+      
       const tempUnit = unitLabels[currentUnits].temperature;
       const precipUnit = currentUnits === 'SI' ? 'mm' : 'inches';
       const displayPrecip = currentUnits === 'SI' ? Math.round(annualPrecip) : Math.round(annualPrecip * 0.0393701 * 10) / 10;
@@ -5155,6 +5697,21 @@
             <td style="padding: 8px; border: 1px solid #ddd;">Climate Zone</td>
             <td style="padding: 8px; border: 1px solid #ddd;">${globalClimateData.climateZone.id}</td>
             <td style="padding: 8px; border: 1px solid #ddd;">ASHRAE 169-2020 classification</td>
+          </tr>
+          <tr style="background: #f8f9fa;">
+            <td style="padding: 8px; border: 1px solid #ddd;">Extreme Heat Days (>35°C/95°F)</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${extremeHeatDays}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Critical system sizing indicator</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">Extreme Cold Days (<0°C/32°F)</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${extremeColdDays}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Heating system requirements</td>
+          </tr>
+          <tr style="background: #f8f9fa;">
+            <td style="padding: 8px; border: 1px solid #ddd;">High Humidity Hours (>80% RH)</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${highHumidityHours}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">Moisture control requirements</td>
           </tr>
         </table>
       `;
@@ -5515,7 +6072,7 @@
         report += `• Solar energy systems highly recommended\n`;
       }
       
-      // Add professional documentation and citations
+      // Add documentation and citations
       report += `\n================================================================\n`;
       report += `ADVANCED CLIMATE ENGINE (ACE) METHODOLOGY & VALIDATION\n`;
       report += `================================================================\n\n`;
@@ -5542,7 +6099,7 @@
       
       report += `DISCLAIMER:\n`;
       report += `This analysis is based on typical meteorological year data and should be \n`;
-      report += `supplemented with local building codes, standards, and professional design expertise.\n`;
+      report += `supplemented with local building codes, standards, and design expertise.\n`;
       report += `For research applications, consider consulting peer-reviewed climate studies \n`;
       report += `and local meteorological authorities for site-specific validation.\n\n`;
       
@@ -5825,9 +6382,31 @@
 
     // Heat Maps functionality
     function updateHeatMaps() {
-      if (!weatherData) return;
+      console.log('updateHeatMaps() called - checking elements...');
       
-      const parameter = document.getElementById('heatmapParameter').value;
+      if (!weatherData) {
+        console.log('Heat map update skipped: no weather data');
+        return;
+      }
+      
+      const heatmapElement = document.getElementById('heatmap-chart');
+      const parameterElement = document.getElementById('heatmapParameter');
+      
+      console.log('Heatmap chart element exists:', !!heatmapElement);
+      console.log('Parameter element exists:', !!parameterElement);
+      
+      if (!heatmapElement) {
+        console.log('Heat map update skipped: chart element not found');
+        return;
+      }
+      
+      if (!parameterElement) {
+        console.log('Heat map update skipped: parameter element not found');
+        return;
+      }
+      
+      const parameter = parameterElement.value;
+      console.log('Updating heat map with parameter:', parameter, 'units:', currentUnits);
       generateHeatMap(parameter);
     }
     
@@ -5933,14 +6512,38 @@
         displaylogo: false
       };
       
+      // Clear existing plot first, then create new one (like Chart.js destroy pattern)
+      Plotly.purge('heatmap-chart');
       Plotly.newPlot('heatmap-chart', [trace], layout, config);
     }
 
     // Wind Rose functionality
     function updateWindRose() {
-      if (!weatherData) return;
+      console.log('updateWindRose() called - checking elements...');
       
-      const period = document.getElementById('windrosePeriod').value;
+      if (!weatherData) {
+        console.log('Wind rose update skipped: no weather data');
+        return;
+      }
+      
+      const windroseElement = document.getElementById('windrose-chart');
+      const periodElement = document.getElementById('windrosePeriod');
+      
+      console.log('Windrose chart element exists:', !!windroseElement);
+      console.log('Period element exists:', !!periodElement);
+      
+      if (!windroseElement) {
+        console.log('Wind rose update skipped: chart element not found');
+        return;
+      }
+      
+      if (!periodElement) {
+        console.log('Wind rose update skipped: period element not found');
+        return;
+      }
+      
+      const period = periodElement.value;
+      console.log('Updating wind rose with period:', period, 'units:', currentUnits);
       generateWindRose(period);
     }
     
@@ -6113,6 +6716,8 @@
         displaylogo: false
       };
       
+      // Clear existing plot first, then create new one (like Chart.js destroy pattern)
+      Plotly.purge('windrose-chart');
       Plotly.newPlot('windrose-chart', traces, layout, config);
       
       // Update wind statistics
@@ -6229,8 +6834,12 @@
             updateAdvancedMetrics();
             updateStatisticalAnalysis();
             updateClimateSummary();
+            updateHeatMaps();
+            updateWindRose();
           } else if (tabName === 'water') {
             updateCondensateAnalysis();
+          } else if (tabName === 'daylighting') {
+            updateDaylightingAnalysis();
           } else if (tabName === 'heatmaps') {
             updateHeatMaps();
           } else if (tabName === 'windrose') {
@@ -6748,6 +7357,1802 @@
       console.log('SUCCESS: updateCondensateDesignNotes completed successfully with priorities:', {
         drainagePriority, collectionPriority, maintenancePriority
       });
+    }
+
+    // ================================
+    // DAYLIGHTING ANALYSIS FUNCTIONS
+    // ================================
+
+    function updateDaylightingAnalysis() {
+      console.log('updateDaylightingAnalysis() called with units:', currentUnits);
+      if (!weatherData) {
+        console.log('Daylighting update skipped: no weather data');
+        return;
+      }
+
+      const period = document.getElementById('daylighting-period').value;
+      const metric = document.getElementById('analysis-metric').value;
+
+      // Get solar and climate data
+      const solarData = getParameterData('Global Horizontal Radiation');
+      const temperatures = getParameterData('Dry Bulb Temperature');
+      const latitude = weatherData.location.latitude;
+      const longitude = weatherData.location.longitude;
+
+      // Calculate solar metrics for selected period (for charts)
+      const periodData = filterDataByPeriod(solarData, period);
+      const solarMetrics = calculateSolarMetrics(periodData, metric);
+
+      // Update visualizations
+      createSolarPolarChart(solarMetrics, period, metric);
+      create3DSunPathChart(latitude, longitude, period);
+      
+      // Generate facade recommendations using ALL annual data (not just selected period/metric)
+      console.log('Daylighting Tab - WeatherData Climate Zone:', weatherData.climateZone);
+      generateFacadeRecommendations(solarMetrics, latitude, temperatures);
+
+      // Get comprehensive metrics for performance calculations
+      const comprehensiveIrradianceMetrics = calculateSolarMetrics(solarData, 'irradiance');
+      const comprehensiveIlluminanceMetrics = calculateSolarMetrics(solarData, 'illuminance');
+      const comprehensiveDaylightMetrics = calculateSolarMetrics(solarData, 'daylight');
+
+      updateDaylightingMetrics(solarData, latitude, comprehensiveIrradianceMetrics, comprehensiveIlluminanceMetrics, comprehensiveDaylightMetrics);
+    }
+
+    function filterDataByPeriod(data, period) {
+      const monthMap = {
+        'january': [0, 744], 'february': [744, 1416], 'march': [1416, 2160],
+        'april': [2160, 2880], 'may': [2880, 3624], 'june': [3624, 4344],
+        'july': [4344, 5088], 'august': [5088, 5832], 'september': [5832, 6552],
+        'october': [6552, 7296], 'november': [7296, 8016], 'december': [8016, 8760]
+      };
+
+      const seasonMap = {
+        'winter': [[0, 1416], [8016, 8760]], // Dec-Feb
+        'spring': [1416, 3624], // Mar-May
+        'summer': [3624, 6552], // Jun-Aug
+        'fall': [6552, 8016] // Sep-Nov
+      };
+
+      if (period === 'annual') {
+        return data;
+      } else if (monthMap[period]) {
+        const [start, end] = monthMap[period];
+        return data.slice(start, end);
+      } else if (seasonMap[period]) {
+        const ranges = seasonMap[period];
+        if (Array.isArray(ranges[0])) {
+          // Winter spans year boundary
+          return [...data.slice(ranges[0][0], ranges[0][1]), ...data.slice(ranges[1][0], ranges[1][1])];
+        } else {
+          return data.slice(ranges[0], ranges[1]);
+        }
+      }
+      return data;
+    }
+
+    function calculateSolarMetrics(solarData, metric) {
+      const orientations = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      const metrics = {};
+
+      console.log('Calculating solar metrics for orientations:', orientations);
+      console.log('Solar data sample:', solarData.slice(0, 5));
+
+      orientations.forEach(orientation => {
+        const angle = getOrientationAngle(orientation);
+        const orientationFactor = getOrientationFactor(angle);
+        let values;
+
+        if (metric === 'irradiance') {
+          // Apply orientation factor for solar irradiance
+          values = solarData.map(val => val * orientationFactor);
+        } else if (metric === 'illuminance') {
+          // Convert irradiance to illuminance (rough conversion: 1 W/m² ≈ 120 lux)
+          values = solarData.map(val => val * orientationFactor * 120);
+        } else { // daylight availability
+          // Calculate meaningful daylight hours (>200 lux equivalent)
+          const threshold = 200 / 120; // Convert 200 lux to W/m² equivalent
+          const adjustedData = solarData.map(val => val * orientationFactor);
+          const daylightHours = adjustedData.filter(val => val > threshold).length;
+          const percentage = (daylightHours / solarData.length) * 100;
+          values = [percentage];
+        }
+
+        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+        
+        metrics[orientation] = {
+          values: values,
+          mean: mean,
+          max: Math.max(...values),
+          min: Math.min(...values)
+        };
+
+        console.log(`${orientation} (${angle}°): mean=${mean.toFixed(1)}, factor=${orientationFactor.toFixed(2)}`, 
+                   weatherData?.location?.latitude < 0 ? '(Southern Hemisphere)' : '(Northern Hemisphere)');
+      });
+
+      console.log('Final metrics object:', metrics);
+      return metrics;
+    }
+
+    function getOrientationAngle(orientation) {
+      const angles = {
+        'N': 0, 'NE': 45, 'E': 90, 'SE': 135,
+        'S': 180, 'SW': 225, 'W': 270, 'NW': 315
+      };
+      return angles[orientation] || 0;
+    }
+
+    function getOrientationFactor(angle) {
+      // FIXED: Hemisphere-aware solar orientation factor
+      if (!weatherData || !weatherData.location) {
+        // Fallback to Northern Hemisphere assumption if no weather data
+        const southAngle = 180;
+        const deviation = Math.abs(angle - southAngle);
+        const normalizedDev = deviation > 180 ? 360 - deviation : deviation;
+        return Math.max(0.3, 1.0 - (normalizedDev / 180) * 0.7);
+      }
+      
+      const latitude = weatherData.location.latitude;
+      
+      // Determine optimal orientation based on hemisphere
+      let optimalAngle;
+      if (latitude > 0) {
+        optimalAngle = 180; // South for Northern Hemisphere
+      } else {
+        optimalAngle = 0;   // North for Southern Hemisphere
+      }
+      
+      const deviation = Math.abs(angle - optimalAngle);
+      const normalizedDev = deviation > 180 ? 360 - deviation : deviation;
+      
+      return Math.max(0.3, 1.0 - (normalizedDev / 180) * 0.7);
+    }
+
+    function createSolarPolarChart(solarMetrics, period, metric) {
+      console.log('Creating daylighting-appropriate polar chart for metric:', metric);
+      
+      // Daylighting-focused orientations
+      const orientations = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      const angles = [0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5];
+      const values = [];
+      
+      // Calculate appropriate daylighting values
+      orientations.forEach(orient => {
+        const angle = getDetailedOrientationAngle(orient);
+        let solarGain = calculateInterpolatedSolarGain(solarMetrics, angle, metric);
+        
+        // Apply metric-specific transformations for daylighting analysis
+        if (metric === 'illuminance') {
+          // Convert solar irradiance to illuminance using realistic daylight factor
+          if (currentUnits === 'Imperial') {
+            // For Imperial: W/m² to foot-candles, realistic conversion
+            solarGain = solarGain * 11.14; // Direct W/m² to foot-candles conversion
+          } else {
+            // For SI: W/m² to lux using daylight efficacy
+            solarGain = solarGain * 120; // ~120 lux per W/m² for daylight
+          }
+        } else if (metric === 'daylight') {
+          // Calculate daylight availability as percentage of peak solar conditions
+          const peakSolar = 1000; // Peak solar irradiance W/m²
+          solarGain = Math.min(100, (solarGain / peakSolar) * 100);
+        }
+        
+        values.push(solarGain);
+        console.log(`${orient} (${angle}°): ${solarGain.toFixed(1)} ${getMetricUnit(metric)}`);
+      });
+      
+      const maxValue = Math.max(...values);
+      const traces = [];
+      
+      // Create smooth polar area chart for daylighting
+      const smoothR = values.concat([values[0]]); // Close the polygon
+      const smoothTheta = angles.concat([angles[0]]);
+      
+      traces.push({
+        type: 'scatterpolar',
+        r: smoothR,
+        theta: smoothTheta,
+        fill: 'toself',
+        fillcolor: getDaylightingGradient(metric),
+        line: {
+          color: getDaylightingLineColor(metric),
+          width: 3
+        },
+        mode: 'lines',
+        name: `${metric.charAt(0).toUpperCase() + metric.slice(1)} Distribution`,
+        showlegend: false,
+        hoverinfo: 'skip'
+      });
+      
+      // Add data points with size based on value
+      traces.push({
+        type: 'scatterpolar',
+        r: values,
+        theta: angles,
+        mode: 'markers+text',
+        marker: {
+          color: values,
+          size: values.map(v => Math.max(8, Math.min(20, v / maxValue * 15 + 5))),
+          colorscale: getDaylightingColorScale(metric),
+          showscale: true,
+          colorbar: {
+            title: `${metric.charAt(0).toUpperCase() + metric.slice(1)}<br>${getMetricUnit(metric)}`,
+            titleside: 'right',
+            len: 0.7,
+            thickness: 12,
+            x: 1.02
+          },
+          line: {
+            color: 'white',
+            width: 2
+          }
+        },
+        text: orientations,
+        textfont: {
+          size: 11,
+          color: '#333333',
+          family: 'Arial Bold'
+        },
+        textposition: 'middle center',
+        name: 'Orientations',
+        hovertemplate: '<b>%{text} Facade</b><br>' +
+                      `${metric}: %{r:.1f}${getMetricUnit(metric)}<br>` +
+                      'Value: %{customdata}<extra></extra>',
+        customdata: values.map(v => v.toFixed(1))
+      });
+      
+      // Add concentric reference rings
+      const refValues = getMetricReferenceValues(metric, maxValue);
+      refValues.forEach(refVal => {
+        const ringTheta = [];
+        const ringR = [];
+        for (let i = 0; i <= 360; i += 5) {
+          ringTheta.push(i);
+          ringR.push(refVal);
+        }
+        
+        traces.push({
+          type: 'scatterpolar',
+          r: ringR,
+          theta: ringTheta,
+          mode: 'lines',
+          line: {
+            color: 'rgba(128, 128, 128, 0.2)',
+            width: 1,
+            dash: 'dot'
+          },
+          showlegend: false,
+          hoverinfo: 'skip'
+        });
+      });
+
+      const layout = {
+        polar: {
+          radialaxis: {
+            visible: true,
+            range: [0, maxValue * 1.1],
+            ticksuffix: getMetricUnit(metric),
+            gridcolor: 'rgba(150, 150, 150, 0.15)',
+            linecolor: 'rgba(150, 150, 150, 0.3)',
+            tickfont: { size: 11 },
+            title: {
+              text: `${metric.charAt(0).toUpperCase() + metric.slice(1)} ${getMetricUnit(metric)}`,
+              font: { size: 10 }
+            }
+          },
+          angularaxis: {
+            tickmode: 'array',
+            tickvals: angles,
+            ticktext: orientations,
+            direction: 'clockwise',
+            rotation: 90,
+            gridcolor: 'rgba(150, 150, 150, 0.15)',
+            linecolor: 'rgba(150, 150, 150, 0.3)',
+            tickfont: { size: 12, color: '#333333', family: 'Arial Bold' }
+          },
+          bgcolor: 'rgba(248, 249, 250, 0.8)'
+        },
+        title: {
+          text: `Solar Resource Analysis - ${period.charAt(0).toUpperCase() + period.slice(1)}<br><span style="font-size:12px">${getMetricDescription(metric)} by Building Orientation</span>`,
+          font: { size: 16, family: 'Arial, sans-serif' },
+          x: 0.5
+        },
+        showlegend: false,
+        margin: { t: 100, b: 60, l: 60, r: 120 },
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)'
+      };
+
+      // Clear existing plot first, then create new one (like other Plotly charts)
+      Plotly.purge('solar-polar-chart');
+      Plotly.newPlot('solar-polar-chart', traces, layout, {
+        responsive: true, 
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d']
+      });
+    }
+    
+    function getDaylightingGradient(metric) {
+      const gradients = {
+        irradiance: 'rgba(255, 193, 7, 0.2)',  // Warm yellow for solar
+        illuminance: 'rgba(13, 202, 240, 0.2)', // Cool blue for daylight
+        daylight: 'rgba(40, 167, 69, 0.2)'     // Green for availability
+      };
+      return gradients[metric] || 'rgba(0, 123, 255, 0.2)';
+    }
+    
+    function getDaylightingLineColor(metric) {
+      const colors = {
+        irradiance: 'rgba(255, 193, 7, 0.8)',
+        illuminance: 'rgba(13, 202, 240, 0.8)',
+        daylight: 'rgba(40, 167, 69, 0.8)'
+      };
+      return colors[metric] || 'rgba(0, 123, 255, 0.8)';
+    }
+    
+    function getDaylightingColorScale(metric) {
+      const scales = {
+        irradiance: [
+          [0, '#2E86C1'], [0.3, '#3498DB'], [0.6, '#F39C12'], [0.8, '#E74C3C'], [1, '#8B0000']
+        ],
+        illuminance: [
+          [0, '#1B2631'], [0.3, '#2874A6'], [0.6, '#0DCAF0'], [0.8, '#17A2B8'], [1, '#138496']
+        ],
+        daylight: [
+          [0, '#1E8449'], [0.3, '#28B463'], [0.6, '#58D68D'], [0.8, '#82E0AA'], [1, '#ABEBC6']
+        ]
+      };
+      return scales[metric] || [[0, '#2E86C1'], [1, '#E74C3C']];
+    }
+    
+    function getMetricDescription(metric) {
+      const descriptions = {
+        irradiance: 'Solar Irradiance Distribution',
+        illuminance: 'Natural Illuminance Availability', 
+        daylight: 'Daylight Availability Percentage'
+      };
+      return descriptions[metric] || 'Solar Analysis';
+    }
+    
+    function getMetricReferenceValues(metric, maxValue) {
+      if (metric === 'irradiance') {
+        return [50, 100, 150, 200].filter(v => v <= maxValue);
+      } else if (metric === 'illuminance') {
+        return [5000, 10000, 15000, 20000].filter(v => v <= maxValue);
+      } else if (metric === 'daylight') {
+        return [25, 50, 75].filter(v => v <= maxValue);
+      }
+      return [25, 50, 75, 100].filter(v => v <= maxValue);
+    }
+    
+    function generateFacadeRecommendations(solarMetrics, latitude, temperatures) {
+      const orientations = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+      const container = document.getElementById('facade-recommendations');
+      
+      // Get ASHRAE climate zone from global weather data (ensure consistency with other tabs)
+      let climateZone;
+      
+      // Force use the same climate zone calculation as other tabs
+      // Use the global climate data that was already calculated
+      if (globalClimateData && globalClimateData.climateZone) {
+        climateZone = globalClimateData.climateZone.id || globalClimateData.climateZone;
+        console.log('Using globalClimateData climate zone:', climateZone);
+      } else if (weatherData && weatherData.climateZone) {
+        climateZone = weatherData.climateZone;
+        console.log('Using weatherData climate zone:', climateZone);
+      } else {
+        // Calculate using the same method as determineASHRAEClimateZone
+        const avgTemp = temperatures.reduce((sum, temp) => sum + temp, 0) / temperatures.length;
+        const annualCDD18 = temperatures.filter(t => t > 18.3).reduce((sum, t) => sum + (t - 18.3), 0);
+        const annualHDD18 = temperatures.filter(t => t < 18.3).reduce((sum, t) => sum + (18.3 - t), 0);
+        
+        // Corrected climate zone determination that matches ASHRAE 169-2020
+        let thermalZone, moistureRegime;
+        if (annualCDD18 > 5000) thermalZone = 1;
+        else if (annualCDD18 > 3500) thermalZone = 2;
+        else if (annualCDD18 > 2500 || (annualCDD18 > 1000 && annualHDD18 < 2000)) thermalZone = 3;
+        else if ((annualCDD18 + annualHDD18 > 3000) || (annualHDD18 > 2000 && annualHDD18 < 3000)) thermalZone = 4;
+        else if (annualHDD18 > 3000 && annualHDD18 < 4000) thermalZone = 5;
+        else if (annualHDD18 > 4000 && annualHDD18 < 5000) thermalZone = 6;
+        else if (annualHDD18 > 5000 && annualHDD18 < 7000) thermalZone = 7;
+        else thermalZone = 8;
+        
+        // Simple moisture regime determination
+        const humidity = getParameterData('Relative Humidity');
+        const avgRH = humidity.reduce((sum, rh) => sum + rh, 0) / humidity.length;
+        if (avgRH > 75) moistureRegime = 'A';
+        else if (avgRH > 45) moistureRegime = 'B';
+        else moistureRegime = 'C';
+        
+        climateZone = `${thermalZone}${moistureRegime}`;
+        console.log('Calculated climate zone for daylighting consistency:', climateZone, 
+                   'CDD18:', annualCDD18, 'HDD18:', annualHDD18, 'AvgRH:', avgRH);
+      }
+      
+      // Extract the actual zone string from climate zone object if needed
+      if (typeof climateZone === 'object') {
+        climateZone = climateZone.climateZone || climateZone.id || '4A';
+      }
+      
+      // Fallback to ensure we have a valid string
+      if (!climateZone || typeof climateZone !== 'string') {
+        climateZone = '4A';
+      }
+      
+      console.log('Final Climate Zone for Facade Recommendations:', climateZone, 'WeatherData Zone:', weatherData?.climateZone);
+      
+      if (!solarMetrics || Object.keys(solarMetrics).length === 0) {
+        console.error('No solar metrics available for facade recommendations');
+        container.innerHTML = '<div class="error-message">Solar data not available. Please ensure EPW file is loaded and contains solar radiation data.</div>';
+        return;
+      }
+      
+      // Calculate comprehensive metrics for ALL orientations using annual data
+      const annualSolarData = getParameterData('Global Horizontal Radiation');
+      const irradianceMetrics = calculateSolarMetrics(annualSolarData, 'irradiance');
+      const illuminanceMetrics = calculateSolarMetrics(annualSolarData, 'illuminance');  
+      const daylightMetrics = calculateSolarMetrics(annualSolarData, 'daylight');
+      
+      let html = '';
+      
+      orientations.forEach(orientation => {
+        // Proper orientation mapping to match solar metrics calculation
+        const orientationMap = {
+          'North': 'N',
+          'Northeast': 'NE', 
+          'East': 'E',
+          'Southeast': 'SE',
+          'South': 'S',
+          'Southwest': 'SW',
+          'West': 'W',
+          'Northwest': 'NW'
+        };
+        const abbrev = orientationMap[orientation] || orientation.substring(0, orientation.length > 5 ? 2 : 1).toUpperCase();
+        
+        // Get metrics from all three calculations
+        const irradianceData = irradianceMetrics[abbrev];
+        const illuminanceData = illuminanceMetrics[abbrev];
+        const daylightData = daylightMetrics[abbrev];
+        
+        if (!irradianceData || !illuminanceData || !daylightData) return;
+        
+        const solarIrradiance = irradianceData.mean;
+        const illuminanceValue = illuminanceData.mean;
+        const daylightAvailability = daylightData.mean;
+        
+        // Advanced priority based on ALL metrics combined
+        let priority = getComprehensiveFacadePriority(solarIrradiance, illuminanceValue, daylightAvailability, orientation, latitude, temperatures);
+        
+        // Get detailed ASHRAE 90.1 recommendations based on comprehensive analysis
+        const envelopeSpecs = getASHRAE901EnvelopeSpecs(climateZone, orientation, solarIrradiance);
+        const glazingSpecs = getDetailedGlazingRecommendations(orientation, solarIrradiance, illuminanceValue, daylightAvailability, climateZone);
+        const shadingSpecs = getComprehensiveShadingStrategy(orientation, solarIrradiance, illuminanceValue, latitude);
+        
+        console.log('Climate Zone:', climateZone, 'Envelope Specs:', envelopeSpecs);
+        
+        // Get orientation-specific design guidance and VT recommendations
+        const orientationGuidance = getOrientationSpecificGuidance(orientation, solarIrradiance, illuminanceValue, daylightAvailability, latitude, climateZone);
+        const vtRecommendation = getOrientationSpecificVT(orientation, solarIrradiance, illuminanceValue, daylightAvailability);
+        
+        html += `
+          <div class="facade-card ${priority.toLowerCase()}-priority">
+            <div class="facade-header">
+              <div class="facade-orientation">${orientation} Facade</div>
+              <div class="facade-priority ${priority.toLowerCase()}">${priority.toUpperCase()}</div>
+            </div>
+            
+            <div class="solar-metrics">
+              <div class="solar-metric">
+                <div class="metric-number">${solarIrradiance.toFixed(0)}</div>
+                <div class="metric-unit">${currentUnits === 'SI' ? 'W/m²' : 'Btu/h·ft²'}</div>
+              </div>
+              <div class="solar-metric">
+                <div class="metric-number">${currentUnits === 'SI' ? Math.round(illuminanceValue).toLocaleString() : Math.round(illuminanceValue / 10.764).toLocaleString()}</div>
+                <div class="metric-unit">${currentUnits === 'SI' ? 'lux' : 'fc'}</div>
+              </div>
+              <div class="solar-metric">
+                <div class="metric-number">${daylightAvailability.toFixed(1)}</div>
+                <div class="metric-unit">% Daylight</div>
+              </div>
+            </div>
+            
+            <div class="detailed-recommendations">
+              <div class="recommendation-section">
+                <h6>ASHRAE 90.1-2022 Envelope Requirements (Zone ${typeof climateZone === 'object' ? climateZone.climateZone || climateZone.id || '4A' : climateZone})</h6>
+                <div class="envelope-specs">
+                  <div class="spec-item"><strong>Fenestration U-Value:</strong> ${envelopeSpecs.fenestrationU}</div>
+                  <div class="spec-item"><strong>SHGC Requirement:</strong> ${envelopeSpecs.shgc}</div>
+                  <div class="spec-item"><strong>Wall U-Value:</strong> ${envelopeSpecs.wallU}</div>
+                  <div class="spec-item"><strong>VT Minimum:</strong> ${envelopeSpecs.vt}</div>
+                  <div class="spec-item"><strong>Climate Context:</strong> ${envelopeSpecs.description}</div>
+                </div>
+              </div>
+              
+              <div class="recommendation-section">
+                <h6>${orientation} Orientation Strategy</h6>
+                <div class="orientation-guidance">
+                  <div class="spec-item"><strong>Solar Exposure:</strong> ${orientationGuidance.exposure}</div>
+                  <div class="spec-item"><strong>Design Priority:</strong> ${orientationGuidance.designPriority}</div>
+                  <div class="spec-item"><strong>Best Solution:</strong> ${orientationGuidance.bestSolution}</div>
+                  <div class="spec-item"><strong>Performance Notes:</strong> ${orientationGuidance.performanceNotes}</div>
+                </div>
+              </div>
+              
+              <div class="recommendation-section">
+                <h6>Glazing & Window Design</h6>
+                <div class="glazing-specs">
+                  <div class="spec-item"><strong>Window-to-Wall Ratio:</strong> ${glazingSpecs.wwr}</div>
+                  <div class="spec-item"><strong>Glazing Type:</strong> ${glazingSpecs.type}</div>
+                  <div class="spec-item"><strong>Frame Material:</strong> ${glazingSpecs.frame}</div>
+                  <div class="spec-item"><strong>Visual Light Transmission (VT):</strong> ${vtRecommendation.vt}</div>
+                  <div class="spec-item"><strong>VT Reasoning:</strong> ${vtRecommendation.reasoning}</div>
+                  <div class="spec-item"><strong>Glare Control:</strong> ${vtRecommendation.control}</div>
+                </div>
+              </div>
+              
+              <div class="recommendation-section">
+                <h6>Solar Control & Shading</h6>
+                <div class="shading-specs">
+                  <div class="spec-item"><strong>Shading System:</strong> ${shadingSpecs.system}</div>
+                  <div class="spec-item"><strong>Control Strategy:</strong> ${shadingSpecs.control}</div>
+                  <div class="spec-item"><strong>Overhang Depth:</strong> ${shadingSpecs.overhang}</div>
+                  <div class="spec-item"><strong>Side Fins:</strong> ${shadingSpecs.sideFins}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function getComprehensiveFacadePriority(irradiance, illuminance, daylightAvail, orientation, latitude, temperatures) {
+      // Comprehensive priority assessment using ALL metrics
+      const isNorthernHemisphere = latitude > 0;
+      const avgTemp = temperatures.reduce((a, b) => a + b, 0) / temperatures.length;
+      
+      // Scoring system: 0-100 points total
+      let score = 0;
+      
+      // Solar irradiance factor (0-40 points)
+      if (irradiance > 200) score += 40;
+      else if (irradiance > 150) score += 30;
+      else if (irradiance > 100) score += 20;
+      else if (irradiance > 50) score += 10;
+      
+      // Daylight availability factor (0-30 points)  
+      if (daylightAvail > 80) score += 30;
+      else if (daylightAvail > 60) score += 25;
+      else if (daylightAvail > 40) score += 20;
+      else if (daylightAvail > 20) score += 15;
+      else if (daylightAvail > 10) score += 10;
+      
+      // Orientation and hemisphere factor (0-20 points)
+      if (orientation.includes('South') && isNorthernHemisphere) score += 20;
+      else if (orientation.includes('North') && !isNorthernHemisphere) score += 20;
+      else if (orientation.includes('East') || orientation.includes('West')) score += 15;
+      else if (orientation.includes('North') && isNorthernHemisphere) score += 5;
+      
+      // Climate factor (0-10 points)
+      if (avgTemp > 25) score += 10; // Hot climate - more critical solar control
+      else if (avgTemp > 15) score += 5;
+      
+      // Return priority based on total score
+      if (score >= 80) return 'Critical';
+      if (score >= 60) return 'High';
+      if (score >= 40) return 'Medium';
+      return 'Low';
+    }
+
+    function getASHRAE901EnvelopeSpecs(climateZone, orientation, solarGain) {
+      // ASHRAE 90.1-2022 Envelope Requirements by Climate Zone (Table 5.5-1 through 5.5-8)
+      const envelopeData = {
+        '1A': { 
+          fenestrationU: '1.22 W/m²·K (0.21 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Very Hot Humid)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Very Hot Humid - Extreme cooling priority, maximum solar control'
+        },
+        '1B': { 
+          fenestrationU: '1.22 W/m²·K (0.21 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Very Hot Dry)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Very Hot Dry - Critical solar heat gain control'
+        },
+        '2A': { 
+          fenestrationU: '0.65 W/m²·K (0.114 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Hot Humid)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Hot Humid - High cooling loads, strict solar control'
+        },
+        '2B': { 
+          fenestrationU: '0.65 W/m²·K (0.114 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Hot Dry)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Hot Dry - Solar control priority over thermal resistance'
+        },
+        '3A': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Warm Humid)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Warm Humid - Enhanced thermal resistance with solar control'
+        },
+        '3B': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '0.25 max (Warm Dry)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Warm Dry - Balanced thermal and solar performance'
+        },
+        '3C': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '≥0.45 (Marine)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Warm Marine - Mild climate, thermal resistance focus'
+        },
+        '4A': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '0.40 max (Mixed Humid)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Mixed Humid - Seasonal balance, moderate solar control'
+        },
+        '4B': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '0.40 max (Mixed Dry)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Mixed Dry - Heating and cooling balance'
+        },
+        '4C': { 
+          fenestrationU: '0.50 W/m²·K (0.088 Btu/h·ft²·°F)', 
+          shgc: '≥0.45 (Marine)', 
+          wallU: '0.635 W/m²·K (0.112 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Mixed Marine - Temperate conditions'
+        },
+        '5A': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.40 (Cool)', 
+          wallU: '0.357 W/m²·K (0.063 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Cool Humid - Heating priority, enhanced insulation'
+        },
+        '5B': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.40 (Cool)', 
+          wallU: '0.357 W/m²·K (0.063 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Cool Dry - Heating focus, thermal bridge control'
+        },
+        '5C': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.45 (Marine)', 
+          wallU: '0.357 W/m²·K (0.063 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Cool Marine - Mild heating, moisture control'
+        },
+        '6A': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.35 (Cold)', 
+          wallU: '0.357 W/m²·K (0.063 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Cold Humid - Significant heating loads'
+        },
+        '6B': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.35 (Cold)', 
+          wallU: '0.357 W/m²·K (0.063 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Cold Dry - High heating, thermal continuity critical'
+        },
+        '7': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.30 (Very Cold)', 
+          wallU: '0.315 W/m²·K (0.055 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Very Cold - Maximum insulation, air sealing critical'
+        },
+        '8': { 
+          fenestrationU: '0.40 W/m²·K (0.070 Btu/h·ft²·°F)', 
+          shgc: '≥0.30 (Subarctic)', 
+          wallU: '0.315 W/m²·K (0.055 Btu/h·ft²·°F)', 
+          vt: '0.40 minimum',
+          description: 'Subarctic - Extreme insulation requirements'
+        }
+      };
+      
+      // Handle both string and object climate zones
+      let zoneKey = typeof climateZone === 'object' ? climateZone.id || '4A' : climateZone?.toString() || '4A';
+      
+      // Extract just the climate zone number (1-8) since ASHRAE 90.1 envelope requirements 
+      // depend only on the thermal zone number, not moisture regime (A/B/C)
+      const zoneNumber = zoneKey.charAt(0); // Get first character (1-8)
+      
+      // Map to the appropriate envelope data - use first available for each zone number
+      const zoneMapping = {
+        '1': '1A', '2': '2A', '3': '3A', '4': '4A', 
+        '5': '5A', '6': '6A', '7': '7', '8': '8'
+      };
+      
+      const mappedZone = zoneMapping[zoneNumber] || '4A';
+      return envelopeData[mappedZone] || envelopeData['4A'];
+    }
+
+    function getOrientationSpecificVT(orientation, irradiance, illuminance, daylightAvail) {
+      // Visual Light Transmission recommendations based on orientation and solar conditions
+      const vtRecommendations = {
+        'N': {
+          vt: '0.60-0.70',
+          reasoning: 'North facades receive minimal direct sun, allowing higher VT for maximum daylight while avoiding glare.',
+          control: 'No glare control typically needed'
+        },
+        'NE': {
+          vt: '0.50-0.60', 
+          reasoning: 'Morning sun exposure requires moderate VT to balance daylight with glare control.',
+          control: 'Light shelf or automated blinds recommended'
+        },
+        'E': {
+          vt: irradiance > 140 ? '0.35-0.45' : '0.40-0.50',
+          reasoning: irradiance > 140 ? 
+            'Very strong morning sun requires reduced VT to prevent severe glare.' :
+            'Strong morning sun requires reduced VT to prevent glare and overheating.',
+          control: irradiance > 140 ? 
+            'Automated exterior shading + vertical fins' : 
+            'Automated exterior shading or low-angle blinds'
+        },
+        'SE': {
+          vt: '0.35-0.45',
+          reasoning: 'High solar exposure in morning/midday requires lower VT for glare control.',
+          control: 'External shading with seasonal adjustment'
+        },
+        'S': {
+          vt: irradiance > 180 ? '0.25-0.35' : irradiance > 120 ? '0.30-0.40' : '0.40-0.50',
+          reasoning: irradiance > 180 ? 
+            'Very high solar exposure requires very low VT with comprehensive glare control.' :
+            irradiance > 120 ?
+            'High solar exposure requires low VT with advanced glare control systems.' :
+            'Moderate VT suitable with proper overhang design.',
+          control: irradiance > 180 ? 
+            'Automated exterior shading + interior glare control + light shelves' : 
+            irradiance > 120 ?
+            'Automated exterior shading + interior glare control' : 
+            'Fixed overhang (0.4-0.6H depth) + light shelf'
+        },
+        'SW': {
+          vt: '0.35-0.45',
+          reasoning: 'Afternoon sun and heat gain require reduced VT for thermal and visual comfort.',
+          control: 'West-optimized shading with heat rejection'
+        },
+        'W': {
+          vt: irradiance > 140 ? '0.35-0.45' : '0.40-0.50',
+          reasoning: irradiance > 140 ? 
+            'Very strong afternoon sun and heat gain require reduced VT for comfort.' :
+            'Late afternoon sun requires balanced VT with effective glare control.',
+          control: irradiance > 140 ? 
+            'Automated exterior shading + heat-rejecting glazing' : 
+            'Vertical fins or automated exterior blinds'
+        },
+        'NW': {
+          vt: '0.50-0.60',
+          reasoning: 'Limited evening sun allows higher VT while maintaining visual comfort.',
+          control: 'Minimal shading, interior glare control sufficient'
+        }
+      };
+      
+      return vtRecommendations[orientation] || vtRecommendations['S'];
+    }
+
+    function getOrientationSpecificGuidance(orientation, irradiance, illuminance, daylightAvail, latitude, climateZone) {
+      const isNorthern = latitude > 0;
+      const isHighSolar = irradiance > 150;
+      const isHighDaylight = daylightAvail > 60;
+      
+      let exposure, designPriority, bestSolution, performanceNotes;
+      
+      if (orientation.includes('South')) {
+        if (isNorthern) {
+          exposure = isHighSolar ? 'Maximum annual solar exposure' : 'High winter solar gain potential';
+          designPriority = isHighSolar ? 'Solar control with daylight optimization' : 'Maximize winter heat gain, summer control';
+          bestSolution = isHighSolar ? 
+            'Triple-pane low-E with external automated shading and light shelves' : 
+            'Double-pane low-E with seasonal shading control';
+          performanceNotes = `Peak irradiance ${irradiance.toFixed(0)} W/m² requires ${isHighSolar ? 'critical' : 'moderate'} solar management for ASHRAE compliance`;
+        } else {
+          exposure = 'Moderate solar exposure (Southern Hemisphere)';
+          designPriority = 'Balanced daylighting without overheating';
+          bestSolution = 'Standard glazing with interior solar control';
+          performanceNotes = 'Southern hemisphere south orientation has lower solar loads';
+        }
+      } else if (orientation.includes('North')) {
+        if (isNorthern) {
+          exposure = 'Minimal direct solar exposure';
+          designPriority = 'Maximize daylight without heat loss';
+          bestSolution = 'High-performance glazing (U≤0.40) with maximum VT';
+          performanceNotes = 'Optimal for consistent daylighting and meeting ASHRAE thermal requirements';
+        } else {
+          exposure = 'Maximum solar exposure (Southern Hemisphere)';
+          designPriority = 'Critical solar control and thermal management';
+          bestSolution = 'High-performance glazing with comprehensive external shading';
+          performanceNotes = 'Southern hemisphere north requires maximum solar control strategies';
+        }
+      } else if (orientation.includes('East') || orientation.includes('West')) {
+        exposure = isHighSolar ? 'High morning/afternoon solar loads' : 'Moderate directional solar exposure';
+        designPriority = isHighSolar ? 'Glare control with thermal management' : 'Standard daylight optimization';
+        bestSolution = isHighSolar ? 
+          'Vertical fins with high-performance glazing and automated control' : 
+          'Fixed shading with standard low-E glazing';
+        performanceNotes = `${orientation} exposure: ${irradiance.toFixed(0)} W/m² peak requires ${isHighSolar ? 'advanced' : 'standard'} shading strategies`;
+      }
+      
+      return { exposure, designPriority, bestSolution, performanceNotes };
+    }
+
+    function getDetailedGlazingRecommendations(orientation, irradiance, illuminance, daylightAvail, climateZone) {
+      const isHighSolar = irradiance > 150;
+      const isHighDaylight = daylightAvail > 60;
+      const isHighIlluminance = illuminance > 10000;
+      
+      let wwr, type, frame, daylighting;
+      
+      // WWR based on comprehensive solar analysis
+      if (orientation.includes('South')) {
+        if (isHighSolar && isHighDaylight) wwr = '30-40%';
+        else if (isHighSolar || isHighDaylight) wwr = '40-50%';
+        else wwr = '50-60%';
+        daylighting = 'Maximize with comprehensive solar control';
+      } else if (orientation.includes('North')) {
+        if (isHighDaylight) wwr = '60-70%';
+        else wwr = '50-60%';
+        daylighting = 'Optimize for consistent daylight distribution';
+      } else { // East/West
+        if (isHighSolar && isHighIlluminance) wwr = '25-35%';
+        else if (isHighSolar || isHighIlluminance) wwr = '35-45%';
+        else wwr = '40-55%';
+        daylighting = 'Balance daylight with glare and heat control';
+      }
+      
+      // Glazing type based on solar loads and climate
+      if (isHighSolar && isHighIlluminance) {
+        type = 'Triple-pane low-E with selective coating (SHGC ≤0.25)';
+      } else if (isHighSolar || isHighIlluminance) {
+        type = 'Double-pane low-E with selective coating (SHGC ≤0.40)';
+      } else {
+        type = (climateZone && climateZone.toString().match(/[5-8]/)) ? 'Triple-pane low-E' : 'Double-pane low-E';
+      }
+      
+      frame = (climateZone && climateZone.toString().match(/[5-8]/)) ? 'Thermally broken aluminum or fiberglass' : 'Vinyl or thermally broken aluminum';
+      
+      return { wwr, type, frame, daylighting };
+    }
+
+    function getComprehensiveShadingStrategy(orientation, irradiance, illuminance, latitude) {
+      const isHighSolar = irradiance > 150;
+      const isVeryHighSolar = irradiance > 200;
+      const isHighIlluminance = illuminance > 10000;
+      
+      let system, control, overhang, sideFins;
+      
+      if (orientation.includes('South')) {
+        if (isVeryHighSolar && isHighIlluminance) {
+          system = 'External automated louvers with daylight sensors';
+          control = 'Automated solar tracking with daylight optimization';
+          overhang = `${(0.4 + Math.min((irradiance - 150) / 300, 0.3)).toFixed(1)}H`;
+        } else if (isHighSolar) {
+          system = 'Fixed overhangs with operable external louvers';
+          control = 'Manual or scheduled operation with override';
+          overhang = `${(0.3 + Math.min((irradiance - 100) / 400, 0.2)).toFixed(1)}H`;
+        } else {
+          system = 'Fixed overhangs with interior blinds';
+          control = 'Manual operation acceptable';
+          overhang = '0.2-0.3H';
+        }
+        sideFins = 'Not typically required for south orientation';
+      } else if (orientation.includes('East') || orientation.includes('West')) {
+        if (isVeryHighSolar && isHighIlluminance) {
+          system = 'External vertical fins with automated louvers';
+          control = 'Solar-responsive automation with time-based scheduling';
+          overhang = `${(0.2 + Math.min((irradiance - 120) / 300, 0.2)).toFixed(1)}H`;
+          sideFins = `${(0.6 + Math.min((irradiance - 120) / 200, 0.4)).toFixed(1)}H projection`;
+        } else if (isHighSolar) {
+          system = 'Fixed vertical fins with operable shutters';
+          control = 'Time-based or manual control';
+          overhang = `${(0.1 + Math.min((irradiance - 80) / 300, 0.2)).toFixed(1)}H`;
+          sideFins = `${(0.4 + Math.min((irradiance - 80) / 250, 0.3)).toFixed(1)}H projection`;
+        } else {
+          system = 'Interior blinds with light shelves';
+          control = 'Manual operation';
+          overhang = '0.1H weather protection';
+          sideFins = '0.2-0.3H projection if needed';
+        }
+      } else { // North
+        if (isHighIlluminance) {
+          system = 'Interior blinds with light shelves for glare control';
+          control = 'Manual operation with daylight sensors';
+        } else {
+          system = 'Interior blinds sufficient';
+          control = 'Manual operation acceptable';
+        }
+        overhang = 'Minimal - 0.1H weather protection only';
+        sideFins = 'Not required for north orientation';
+      }
+      
+      return { system, control, overhang, sideFins };
+    }
+
+    function getDetailedOrientationAngle(orientation) {
+      const angles = {
+        'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
+        'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
+        'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
+        'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5
+      };
+      return angles[orientation] || 0;
+    }
+
+    function calculateInterpolatedSolarGain(solarMetrics, targetAngle, metric) {
+      // Find the two closest cardinal/intercardinal directions for interpolation
+      const baseOrientations = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      const baseAngles = baseOrientations.map(o => getOrientationAngle(o));
+      
+      // Find the two closest angles for linear interpolation
+      let closest1 = 0, closest2 = 1;
+      let minDiff1 = 360, minDiff2 = 360;
+      
+      baseAngles.forEach((angle, idx) => {
+        let diff = Math.abs(angle - targetAngle);
+        // Handle 360° wraparound
+        if (diff > 180) diff = 360 - diff;
+        
+        if (diff < minDiff1) {
+          minDiff2 = minDiff1;
+          closest2 = closest1;
+          minDiff1 = diff;
+          closest1 = idx;
+        } else if (diff < minDiff2) {
+          minDiff2 = diff;
+          closest2 = idx;
+        }
+      });
+
+      // Get values from both closest orientations
+      const baseOrientation1 = baseOrientations[closest1];
+      const baseOrientation2 = baseOrientations[closest2];
+      
+      if (!solarMetrics[baseOrientation1] || !solarMetrics[baseOrientation2]) {
+        console.warn('Missing solar metrics for orientations:', baseOrientation1, baseOrientation2);
+        return 100; // Fallback value
+      }
+      
+      const value1 = solarMetrics[baseOrientation1].mean;
+      const value2 = solarMetrics[baseOrientation2].mean;
+      
+      // Linear interpolation based on angle distance
+      const totalDiff = minDiff1 + minDiff2;
+      if (totalDiff === 0) return value1;
+      
+      const weight1 = minDiff2 / totalDiff;
+      const weight2 = minDiff1 / totalDiff;
+      
+      return value1 * weight1 + value2 * weight2;
+    }
+
+    function getSolarGradientColor(value, maxValue) {
+      const ratio = value / maxValue;
+      if (ratio > 0.8) return '#8B0000';      // Critical - Dark Red
+      if (ratio > 0.6) return '#E74C3C';      // High - Red  
+      if (ratio > 0.4) return '#FF8C00';      // Medium - Orange
+      if (ratio > 0.2) return '#3498DB';      // Medium-Low - Light Blue
+      return '#2E86C1';                       // Low - Blue
+    }
+
+    function getMetricUnit(metric) {
+      const units = {
+        'irradiance': currentUnits === 'SI' ? ' W/m²' : ' Btu/h·ft²',
+        'illuminance': currentUnits === 'SI' ? ' lux' : ' fc',
+        'daylight': '%'
+      };
+      return units[metric] || ' W/m²';
+    }
+
+    function create3DSunPathChart(latitude, longitude, period) {
+      const sunPaths = calculateAdvancedSunPaths(latitude, period);
+      const buildingModel = createAdvancedBuildingGeometry();
+      
+      // Create advanced 3D sun path visualization
+      const traces = [];
+      
+      // Add enhanced sun path traces with time-based coloring
+      sunPaths.forEach((path, index) => {
+        // Create gradient coloring based on solar intensity
+        const intensityColors = path.intensity.map(intensity => 
+          `rgba(${255 * intensity}, ${200 * intensity}, ${50 * (1-intensity)}, 0.9)`
+        );
+        
+        traces.push({
+          type: 'scatter3d',
+          mode: 'lines+markers',
+          x: path.x,
+          y: path.y,
+          z: path.z,
+          line: {
+            color: intensityColors[Math.floor(intensityColors.length/2)],
+            width: 6
+          },
+          marker: {
+            size: path.intensity.map(i => 4 + i * 4),
+            color: intensityColors,
+            colorscale: [
+              [0, '#FF6B6B'],    // Morning - Red
+              [0.3, '#FFE66D'],  // Mid-morning - Yellow
+              [0.7, '#FF8E53'],  // Afternoon - Orange  
+              [1, '#6BCF7F']     // Evening - Green
+            ],
+            showscale: index === 0,
+            colorbar: {
+              title: 'Solar Intensity',
+              titleside: 'right'
+            }
+          },
+          name: path.name,
+          hovertemplate: 
+            '<b>%{text}</b><br>' +
+            'Azimuth: %{customdata[0]:.1f}°<br>' +
+            'Elevation: %{z:.1f}°<br>' +
+            'Solar Intensity: %{customdata[1]:.2f}<br>' +
+            '<extra></extra>',
+          text: path.times,
+          customdata: path.customData
+        });
+      });
+
+      // Add enhanced building model with shadows
+      traces.push(...buildingModel);
+
+      // Add comprehensive sky dome with solar trajectories
+      const skyDome = createAdvancedSkyDome();
+      traces.push(...skyDome);
+
+      // Add solar intensity surface
+      const solarSurface = createSolarIntensitySurface(latitude);
+      if (solarSurface) traces.push(solarSurface);
+
+      const layout = {
+        scene: {
+          xaxis: { 
+            title: 'East ← → West', 
+            range: [-120, 120],
+            gridcolor: 'rgba(150, 150, 150, 0.3)',
+            zerolinecolor: 'rgba(100, 100, 100, 0.5)'
+          },
+          yaxis: { 
+            title: 'South ← → North', 
+            range: [-120, 120],
+            gridcolor: 'rgba(150, 150, 150, 0.3)',
+            zerolinecolor: 'rgba(100, 100, 100, 0.5)'
+          },
+          zaxis: { 
+            title: 'Solar Elevation (°)', 
+            range: [0, 95],
+            gridcolor: 'rgba(150, 150, 150, 0.3)',
+            zerolinecolor: 'rgba(100, 100, 100, 0.5)'
+          },
+          camera: {
+            eye: { x: 1.8, y: 1.8, z: 1.4 },
+            center: { x: 0, y: 0, z: 0.3 }
+          },
+          aspectmode: 'manual',
+          aspectratio: { x: 1, y: 1, z: 0.6 },
+          bgcolor: 'rgba(240, 248, 255, 0.1)'
+        },
+        title: {
+          text: `3D Sun Path Analysis - ${period.charAt(0).toUpperCase() + period.slice(1)} | Latitude: ${latitude.toFixed(1)}°`,
+          font: { size: 18, family: 'Arial, sans-serif', color: '#2c3e50' },
+          x: 0.5
+        },
+        showlegend: true,
+        legend: {
+          orientation: 'v',
+          x: 0.02,
+          y: 0.98,
+          bgcolor: 'rgba(255, 255, 255, 0.8)',
+          bordercolor: 'rgba(0, 0, 0, 0.2)',
+          borderwidth: 1
+        },
+        margin: { t: 80, b: 60, l: 60, r: 60 },
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)'
+      };
+
+      // Clear existing plot first, then create new one (like other Plotly charts)
+      Plotly.purge('sunpath-3d-chart');
+      Plotly.newPlot('sunpath-3d-chart', traces, layout, {responsive: true, displayModeBar: true});
+    }
+
+    function calculateAdvancedSunPaths(latitude, period) {
+      const paths = [];
+      const dates = getPeriodDates(period);
+      
+      dates.forEach(date => {
+        const path = { 
+          x: [], y: [], z: [], times: [], intensity: [], customData: [], 
+          name: date.name 
+        };
+        
+        for (let hour = 5; hour <= 19; hour += 0.5) {
+          const solarPos = calculateSolarPosition(latitude, date.dayOfYear, hour);
+          if (solarPos.elevation > 0) {
+            const coords = sphericalToCartesian(solarPos.azimuth, solarPos.elevation, 100);
+            const intensity = calculateSolarIntensity(solarPos.elevation, hour);
+            
+            path.x.push(coords.x);
+            path.y.push(coords.y);
+            path.z.push(coords.z);
+            path.times.push(formatTime(hour));
+            path.intensity.push(intensity);
+            path.customData.push([solarPos.azimuth, intensity]);
+          }
+        }
+        
+        if (path.x.length > 0) {
+          paths.push(path);
+        }
+      });
+      
+      return paths;
+    }
+
+    function calculateSolarIntensity(elevation, hour) {
+      // Calculate realistic solar intensity based on elevation and time
+      const elevationFactor = Math.sin(elevation * Math.PI / 180);
+      const timeFactor = 1 - Math.abs(hour - 12) / 7; // Peak at noon
+      return Math.max(0, elevationFactor * timeFactor);
+    }
+
+    function formatTime(hour) {
+      const h = Math.floor(hour);
+      const m = Math.round((hour - h) * 60);
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    }
+
+    function getFacadeCoordinates(orientation) {
+      // Define 3D coordinates for building facades
+      switch (orientation) {
+        case 'N':
+          return {
+            x: [-20, 20, 20, -20],
+            y: [15, 15, 15, 15],
+            z: [0, 0, 25, 25],
+            i: [0, 2], j: [1, 3], k: [2, 0]
+          };
+        case 'S':
+          return {
+            x: [-20, 20, 20, -20],
+            y: [-15, -15, -15, -15],
+            z: [0, 0, 25, 25],
+            i: [0, 2], j: [1, 3], k: [2, 0]
+          };
+        case 'E':
+          return {
+            x: [20, 20, 20, 20],
+            y: [-15, 15, 15, -15],
+            z: [0, 0, 25, 25],
+            i: [0, 2], j: [1, 3], k: [2, 0]
+          };
+        case 'W':
+          return {
+            x: [-20, -20, -20, -20],
+            y: [-15, 15, 15, -15],
+            z: [0, 0, 25, 25],
+            i: [0, 2], j: [1, 3], k: [2, 0]
+          };
+        default:
+          return { x: [], y: [], z: [], i: [], j: [], k: [] };
+      }
+    }
+
+    function createAdvancedBuildingGeometry() {
+      const traces = [];
+      
+      // Main building structure with realistic proportions
+      const buildingBase = {
+        type: 'mesh3d',
+        x: [-25, 25, 25, -25, -25, 25, 25, -25],
+        y: [-20, -20, 20, 20, -20, -20, 20, 20],
+        z: [0, 0, 0, 0, 35, 35, 35, 35],
+        i: [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+        j: [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+        k: [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+        color: 'lightgray',
+        opacity: 0.6,
+        name: 'Building Structure',
+        showlegend: false
+      };
+      traces.push(buildingBase);
+
+      // Color-coded facades with realistic solar analysis
+      const facadeConfigs = [
+        { name: 'South Facade', color: '#E74C3C', coords: getFacadeCoordinates('S'), gain: 'High' },
+        { name: 'North Facade', color: '#3498DB', coords: getFacadeCoordinates('N'), gain: 'Low' },
+        { name: 'East Facade', color: '#F39C12', coords: getFacadeCoordinates('E'), gain: 'Medium' },
+        { name: 'West Facade', color: '#FF8C00', coords: getFacadeCoordinates('W'), gain: 'Medium-High' }
+      ];
+
+      facadeConfigs.forEach(facade => {
+        traces.push({
+          type: 'mesh3d',
+          x: facade.coords.x,
+          y: facade.coords.y,
+          z: facade.coords.z,
+          i: facade.coords.i,
+          j: facade.coords.j,
+          k: facade.coords.k,
+          color: facade.color,
+          opacity: 0.8,
+          name: facade.name,
+          hovertemplate: `<b>${facade.name}</b><br>Solar Gain: ${facade.gain}<extra></extra>`
+        });
+      });
+
+      // Add building shadow plane
+      traces.push({
+        type: 'mesh3d',
+        x: [-40, 40, 40, -40],
+        y: [-35, -35, 35, 35],
+        z: [0, 0, 0, 0],
+        i: [0, 2],
+        j: [1, 3],
+        k: [2, 0],
+        color: 'rgba(100, 100, 100, 0.2)',
+        opacity: 0.3,
+        name: 'Ground Plane',
+        showlegend: false
+      });
+
+      return traces;
+    }
+
+    function createAdvancedSkyDome() {
+      const traces = [];
+      
+      // Create sky dome hemisphere with elevation rings
+      for (let elevation = 15; elevation <= 75; elevation += 15) {
+        const ringPoints = [];
+        for (let azimuth = 0; azimuth < 360; azimuth += 15) {
+          const coords = sphericalToCartesian(azimuth, elevation, 110);
+          ringPoints.push(coords);
+        }
+        
+        traces.push({
+          type: 'scatter3d',
+          mode: 'markers',
+          x: ringPoints.map(p => p.x),
+          y: ringPoints.map(p => p.y),
+          z: ringPoints.map(p => p.z),
+          marker: {
+            size: 2,
+            color: `rgba(150, 150, 150, ${0.3 + elevation/150})`
+          },
+          name: `${elevation}° Elevation`,
+          showlegend: false,
+          hoverinfo: 'skip'
+        });
+      }
+
+      // Add cardinal direction markers
+      const cardinalDirs = [
+        { name: 'N', azimuth: 0, color: '#3498DB' },
+        { name: 'E', azimuth: 90, color: '#F39C12' },
+        { name: 'S', azimuth: 180, color: '#E74C3C' },
+        { name: 'W', azimuth: 270, color: '#9B59B6' }
+      ];
+
+      cardinalDirs.forEach(dir => {
+        const coords = sphericalToCartesian(dir.azimuth, 30, 115);
+        traces.push({
+          type: 'scatter3d',
+          mode: 'markers+text',
+          x: [coords.x],
+          y: [coords.y], 
+          z: [coords.z],
+          marker: {
+            size: 12,
+            color: dir.color,
+            symbol: 'diamond'
+          },
+          text: [dir.name],
+          textposition: 'middle center',
+          textfont: { color: 'white', size: 14, family: 'Arial Black' },
+          name: `${dir.name} Direction`,
+          showlegend: false
+        });
+      });
+
+      return traces;
+    }
+
+    function createSolarIntensitySurface(latitude) {
+      // Create a surface showing solar intensity distribution
+      const azimuthRange = [];
+      const elevationRange = [];
+      const intensityMatrix = [];
+
+      for (let az = 0; az <= 360; az += 30) {
+        azimuthRange.push(az);
+      }
+      
+      for (let el = 0; el <= 90; el += 15) {
+        elevationRange.push(el);
+      }
+
+      elevationRange.forEach(elevation => {
+        const row = [];
+        azimuthRange.forEach(azimuth => {
+          const intensity = calculateSolarIntensity(elevation, 12); // Noon intensity
+          row.push(intensity);
+        });
+        intensityMatrix.push(row);
+      });
+
+      // Convert to 3D coordinates
+      const x = [], y = [], z = [];
+      
+      elevationRange.forEach((elevation, i) => {
+        azimuthRange.forEach((azimuth, j) => {
+          const coords = sphericalToCartesian(azimuth, elevation, 90 + intensityMatrix[i][j] * 20);
+          x.push(coords.x);
+          y.push(coords.y);
+          z.push(coords.z);
+        });
+      });
+
+      return null; // Disable for now to avoid complexity
+    }
+
+    function calculateSunPaths(latitude, period) {
+      const paths = [];
+      const dates = getPeriodDates(period);
+      
+      dates.forEach(date => {
+        const path = { x: [], y: [], z: [], times: [], name: date.name };
+        
+        for (let hour = 6; hour <= 18; hour++) {
+          const solarPos = calculateSolarPosition(latitude, date.dayOfYear, hour);
+          if (solarPos.elevation > 0) {
+            const coords = sphericalToCartesian(solarPos.azimuth, solarPos.elevation, 80);
+            path.x.push(coords.x);
+            path.y.push(coords.y);
+            path.z.push(coords.z);
+            path.times.push(`${hour}:00`);
+          }
+        }
+        
+        if (path.x.length > 0) {
+          paths.push(path);
+        }
+      });
+      
+      return paths;
+    }
+
+    function getPeriodDates(period) {
+      const dates = [];
+      
+      if (period === 'annual') {
+        // Show solstices and equinoxes
+        dates.push(
+          { name: 'Winter Solstice', dayOfYear: 355 },
+          { name: 'Spring Equinox', dayOfYear: 80 },
+          { name: 'Summer Solstice', dayOfYear: 172 },
+          { name: 'Fall Equinox', dayOfYear: 266 }
+        );
+      } else if (period === 'winter') {
+        dates.push({ name: 'Winter', dayOfYear: 355 });
+      } else if (period === 'spring') {
+        dates.push({ name: 'Spring', dayOfYear: 80 });
+      } else if (period === 'summer') {
+        dates.push({ name: 'Summer', dayOfYear: 172 });
+      } else if (period === 'fall') {
+        dates.push({ name: 'Fall', dayOfYear: 266 });
+      } else {
+        // Monthly periods
+        const monthDays = {
+          'january': 15, 'february': 45, 'march': 74, 'april': 105,
+          'may': 135, 'june': 166, 'july': 196, 'august': 227,
+          'september': 258, 'october': 288, 'november': 319, 'december': 349
+        };
+        if (monthDays[period]) {
+          dates.push({ name: period.charAt(0).toUpperCase() + period.slice(1), dayOfYear: monthDays[period] });
+        }
+      }
+      
+      return dates;
+    }
+
+    function calculateSolarPosition(latitude, dayOfYear, hour) {
+      // Simplified solar position calculation
+      const declination = 23.45 * Math.sin((360 * (284 + dayOfYear) / 365) * Math.PI / 180);
+      const hourAngle = 15 * (hour - 12);
+      
+      const latRad = latitude * Math.PI / 180;
+      const declRad = declination * Math.PI / 180;
+      const hourRad = hourAngle * Math.PI / 180;
+      
+      const elevation = Math.asin(
+        Math.sin(latRad) * Math.sin(declRad) + 
+        Math.cos(latRad) * Math.cos(declRad) * Math.cos(hourRad)
+      ) * 180 / Math.PI;
+      
+      const azimuth = Math.atan2(
+        Math.sin(hourRad),
+        Math.cos(hourRad) * Math.sin(latRad) - Math.tan(declRad) * Math.cos(latRad)
+      ) * 180 / Math.PI + 180;
+      
+      return { elevation, azimuth };
+    }
+
+    function sphericalToCartesian(azimuth, elevation, radius) {
+      const azRad = azimuth * Math.PI / 180;
+      const elRad = elevation * Math.PI / 180;
+      
+      return {
+        x: radius * Math.cos(elRad) * Math.sin(azRad),
+        y: radius * Math.cos(elRad) * Math.cos(azRad),
+        z: radius * Math.sin(elRad)
+      };
+    }
+
+    function createBuildingGeometry() {
+      // Create a simple building model similar to the reference image
+      const traces = [];
+      
+      // Main building (gray)
+      traces.push({
+        type: 'mesh3d',
+        x: [-20, 20, 20, -20, -20, 20, 20, -20],
+        y: [-15, -15, 15, 15, -15, -15, 15, 15],
+        z: [0, 0, 0, 0, 30, 30, 30, 30],
+        i: [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+        j: [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+        k: [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+        color: 'lightgray',
+        opacity: 0.8,
+        name: 'Main Building'
+      });
+      
+      // Colored facade analysis (overlay with colors indicating solar performance)
+      // South facade (red/orange - high solar gain)
+      traces.push({
+        type: 'mesh3d',
+        x: [-20, 20, 20, -20],
+        y: [-15, -15, -15, -15],
+        z: [0, 0, 30, 30],
+        i: [0, 2],
+        j: [1, 3],
+        k: [2, 0],
+        color: 'red',
+        opacity: 0.6,
+        name: 'South Facade (High Solar)',
+        hovertemplate: 'South Facade<br>Solar Gain: High<extra></extra>'
+      });
+      
+      // North facade (blue - low solar gain)
+      traces.push({
+        type: 'mesh3d',
+        x: [-20, 20, 20, -20],
+        y: [15, 15, 15, 15],
+        z: [0, 0, 30, 30],
+        i: [0, 2],
+        j: [1, 3],
+        k: [2, 0],
+        color: 'blue',
+        opacity: 0.6,
+        name: 'North Facade (Low Solar)',
+        hovertemplate: 'North Facade<br>Solar Gain: Low<extra></extra>'
+      });
+      
+      // East facade (yellow - medium solar gain)
+      traces.push({
+        type: 'mesh3d',
+        x: [20, 20, 20, 20],
+        y: [-15, 15, 15, -15],
+        z: [0, 0, 30, 30],
+        i: [0, 2],
+        j: [1, 3],
+        k: [2, 0],
+        color: 'orange',
+        opacity: 0.6,
+        name: 'East Facade (Medium Solar)',
+        hovertemplate: 'East Facade<br>Solar Gain: Medium<extra></extra>'
+      });
+      
+      // West facade (orange - medium solar gain)
+      traces.push({
+        type: 'mesh3d',
+        x: [-20, -20, -20, -20],
+        y: [-15, 15, 15, -15],
+        z: [0, 0, 30, 30],
+        i: [0, 2],
+        j: [1, 3],
+        k: [2, 0],
+        color: 'orange',
+        opacity: 0.6,
+        name: 'West Facade (Medium Solar)',
+        hovertemplate: 'West Facade<br>Solar Gain: Medium<extra></extra>'
+      });
+      
+      return traces;
+    }
+
+    function createSkyDomeWireframe() {
+      // Create wireframe hemisphere for reference
+      const points = [];
+      const lines = [];
+      
+      // Generate hemisphere wireframe
+      for (let elevation = 10; elevation <= 90; elevation += 20) {
+        const ring = [];
+        for (let azimuth = 0; azimuth < 360; azimuth += 15) {
+          const coords = sphericalToCartesian(azimuth, elevation, 85);
+          ring.push(coords);
+        }
+        points.push(...ring);
+      }
+      
+      return {
+        type: 'scatter3d',
+        mode: 'markers',
+        x: points.map(p => p.x),
+        y: points.map(p => p.y),
+        z: points.map(p => p.z),
+        marker: {
+          size: 1,
+          color: 'rgba(150, 150, 150, 0.3)'
+        },
+        name: 'Sky Dome',
+        showlegend: false
+      };
+    }
+
+    function createBuildingFacadeModel(solarMetrics, latitude) {
+      // Create a 3D building model showing facade performance
+      const orientations = ['N', 'E', 'S', 'W'];
+      const facadeData = [];
+      
+      orientations.forEach(orientation => {
+        const solarGain = solarMetrics[orientation].mean;
+        const priority = getSolarPriority(solarGain);
+        const color = getPriorityColor(priority);
+        
+        facadeData.push({
+          orientation,
+          solarGain: solarGain.toFixed(1),
+          priority,
+          color
+        });
+      });
+      
+      // Create 3D building model with color-coded facades
+      const traces = createColorCodedBuilding(facadeData);
+      
+      const layout = {
+        scene: {
+          xaxis: { title: 'East-West' },
+          yaxis: { title: 'North-South' },
+          zaxis: { title: 'Height' },
+          camera: {
+            eye: { x: 1.2, y: 1.2, z: 0.8 }
+          }
+        },
+        title: {
+          text: 'Building Facade Solar Performance Analysis',
+          font: { size: 14 }
+        },
+        margin: { t: 40, b: 40, l: 40, r: 40 }
+      };
+      
+
+    }
+
+    function getSolarPriority(solarGain) {
+      if (solarGain > 300) return 'critical';
+      if (solarGain > 200) return 'high';
+      if (solarGain > 100) return 'medium';
+      return 'low';
+    }
+
+    function getPriorityColor(priority) {
+      const colors = {
+        'critical': '#8B0000', // Dark Red
+        'high': '#E74C3C',     // Red
+        'medium': '#FF8C00',   // Orange
+        'low': '#2E86C1'       // Blue
+      };
+      return colors[priority] || '#6c757d';
+    }
+
+    function createColorCodedBuilding(facadeData) {
+      const traces = [];
+      
+      // Building base
+      traces.push({
+        type: 'mesh3d',
+        x: [-20, 20, 20, -20, -20, 20, 20, -20],
+        y: [-15, -15, 15, 15, -15, -15, 15, 15],
+        z: [0, 0, 0, 0, 25, 25, 25, 25],
+        i: [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2],
+        j: [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3],
+        k: [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6],
+        color: 'lightgray',
+        opacity: 0.5,
+        showlegend: false
+      });
+      
+      // Add color-coded facades
+      facadeData.forEach((facade, index) => {
+        const coords = getFacadeCoordinates(facade.orientation);
+        traces.push({
+          type: 'mesh3d',
+          x: coords.x,
+          y: coords.y,
+          z: coords.z,
+          i: coords.i,
+          j: coords.j,
+          k: coords.k,
+          color: facade.color,
+          opacity: 0.8,
+          name: `${facade.orientation} Facade`,
+          hovertemplate: `${facade.orientation} Facade<br>Solar Gain: ${facade.solarGain} W/m²<br>Priority: ${facade.priority}<extra></extra>`
+        });
+      });
+      
+      return traces;
+    }
+
+
+
+
+    
+    
+
+
+
+    
+
+    function updateDaylightingMetrics(solarData, latitude, irradianceMetrics, illuminanceMetrics, daylightMetrics) {
+      if (!solarData || solarData.length === 0) {
+        console.log('No solar data available for daylighting metrics');
+        return;
+      }
+      
+      // Calculate key daylighting metrics using hemisphere-aware orientation factors
+      const daylightThreshold = 200 / 120; // 200 lux converted to W/m²
+      
+      // Use optimal orientation factor for accurate daylighting calculations
+      let optimalFactor = 1.0; // Default
+      if (weatherData && weatherData.location) {
+        const latitude = weatherData.location.latitude;
+        if (latitude > 0) {
+          optimalFactor = getOrientationFactor(180); // South for Northern Hemisphere
+        } else {
+          optimalFactor = getOrientationFactor(0);   // North for Southern Hemisphere
+        }
+      }
+      
+      // Apply hemisphere-aware optimal orientation factor to solar data
+      const orientedSolarData = solarData.map(val => val * optimalFactor);
+      const daylightHours = orientedSolarData.filter(val => val > daylightThreshold).length;
+      const peakIlluminance = Math.max(...orientedSolarData) * 120; // Convert to lux
+      
+      // Find optimal orientation based on hemisphere and actual irradiance data
+      let optimalOrientation = 'South-facing';
+      let maxIrradiance = 0;
+      
+      // FIXED: Proper hemisphere-aware optimal orientation calculation
+      if (irradianceMetrics && typeof irradianceMetrics === 'object') {
+        Object.keys(irradianceMetrics).forEach(orientation => {
+          const orientationName = getFullOrientationName(orientation);
+          if (irradianceMetrics[orientation] && irradianceMetrics[orientation].mean > maxIrradiance) {
+            maxIrradiance = irradianceMetrics[orientation].mean;
+            optimalOrientation = orientationName + '-facing';
+          }
+        });
+        
+        // Override with hemisphere logic if solar calculations are insufficient (similar values)
+        const orientationValues = Object.values(irradianceMetrics).map(m => m.mean);
+        const maxValue = Math.max(...orientationValues);
+        const minValue = Math.min(...orientationValues);
+        const valueRange = maxValue - minValue;
+        
+        // If all orientations have very similar values (less than 20% difference), use hemisphere logic
+        if (valueRange / maxValue < 0.2) {
+          console.log('Solar calculations insufficient, using hemisphere logic for optimal orientation');
+          if (Math.abs(latitude) < 5) {
+            optimalOrientation = 'Variable (Equatorial)';
+          } else if (latitude > 0) {
+            optimalOrientation = 'South-facing'; // Northern Hemisphere
+          } else {
+            optimalOrientation = 'North-facing'; // Southern Hemisphere
+          }
+        }
+      } else {
+        // Fallback based on latitude if metrics not available
+        if (Math.abs(latitude) < 5) {
+          optimalOrientation = 'Variable (Equatorial)';
+        } else if (latitude > 0) {
+          optimalOrientation = 'South-facing'; // Northern Hemisphere
+        } else {
+          optimalOrientation = 'North-facing'; // Southern Hemisphere
+        }
+      }
+      
+      // Calculate annual solar gain potential using optimal orientation
+      const annualSolarGain = orientedSolarData.reduce((a, b) => a + b, 0) / 1000; // kWh/m²
+      
+      // Update display with proper unit handling
+      const annualDaylightElement = document.getElementById('annual-daylight-hours');
+      const peakIlluminanceElement = document.getElementById('peak-illuminance');
+      const optimalOrientationElement = document.getElementById('optimal-orientation');
+      const solarGainElement = document.getElementById('solar-gain-potential');
+      
+      if (annualDaylightElement) annualDaylightElement.textContent = daylightHours.toLocaleString();
+      if (peakIlluminanceElement) peakIlluminanceElement.textContent = 
+        currentUnits === 'SI' ? 
+          `${Math.round(peakIlluminance).toLocaleString()} lux` : 
+          `${Math.round(peakIlluminance / 10.764).toLocaleString()} fc`;
+      if (optimalOrientationElement) optimalOrientationElement.textContent = optimalOrientation;
+      if (solarGainElement) solarGainElement.textContent = 
+        currentUnits === 'SI' ? 
+          `${Math.round(annualSolarGain)} kWh/m²` : 
+          `${Math.round(annualSolarGain * 0.317)} kBtu/ft²`;
+          
+      console.log('=== DAYLIGHTING HEMISPHERE DEBUG ===');
+      console.log('Latitude:', latitude);
+      console.log('Hemisphere:', latitude > 0 ? 'Northern' : 'Southern');
+      console.log('Optimal Orientation Factor:', optimalFactor.toFixed(2));
+      console.log('Raw Daylight Hours:', solarData.filter(val => val > daylightThreshold).length);
+      console.log('Oriented Daylight Hours:', daylightHours);
+      console.log('Raw Peak Solar:', Math.max(...solarData).toFixed(1), 'W/m²');
+      console.log('Oriented Peak Solar:', Math.max(...orientedSolarData).toFixed(1), 'W/m²');
+      console.log('Irradiance Metrics Available:', !!irradianceMetrics);
+      if (irradianceMetrics) {
+        const orientationValues = Object.values(irradianceMetrics).map(m => m.mean);
+        const maxValue = Math.max(...orientationValues);
+        const minValue = Math.min(...orientationValues);
+        const valueRange = maxValue - minValue;
+        console.log('Orientation Values:', orientationValues.map(v => v.toFixed(1)));
+        console.log('Value Range:', valueRange.toFixed(1), 'Max:', maxValue.toFixed(1), 'Min:', minValue.toFixed(1));
+        console.log('Range Percentage:', ((valueRange / maxValue) * 100).toFixed(1) + '%');
+        console.log('Using Hemisphere Logic:', (valueRange / maxValue) < 0.2);
+      }
+      console.log('Final Optimal Orientation:', optimalOrientation);
+      console.log('=== END HEMISPHERE DEBUG ===');
+      
+      console.log('Daylighting metrics updated:', {
+        daylightHours,
+        peakIlluminance: Math.round(peakIlluminance),
+        optimalOrientation,
+        annualSolarGain: Math.round(annualSolarGain),
+        latitude: latitude,
+        hemisphere: latitude > 0 ? 'Northern' : 'Southern',
+        maxIrradiance: maxIrradiance.toFixed(1)
+      });
+    }
+
+    function getFullOrientationName(abbrev) {
+      const names = {
+        'N': 'North', 'NE': 'Northeast', 'E': 'East', 'SE': 'Southeast',
+        'S': 'South', 'SW': 'Southwest', 'W': 'West', 'NW': 'Northwest'
+      };
+      return names[abbrev] || abbrev;
     }
   </script>
 </body>
