@@ -6610,11 +6610,13 @@
         neutralTraits.push("🌡️ **Moderate Climate**: Balanced thermal conditions requiring seasonal HVAC optimization and adaptive building controls");
       }
       
-      // Temperature variability
-      if (tempStats.stdDev < 5) {
-        goodTraits.push("📊 **Stable Temperature**: Low temperature variation provides predictable conditions year-round");
+      // Temperature variability - focus on day-to-day predictability
+      if (tempStats.stdDev < 8) {
+        goodTraits.push("📊 **Stable Temperature**: Consistent daily patterns provide predictable conditions for system design");
       } else if (tempStats.stdDev > 15) {
-        badTraits.push("📊 **High Temperature Variability**: Large temperature swings create challenging design conditions");
+        badTraits.push("📊 **High Temperature Variability**: Unpredictable temperature swings create challenging design conditions");
+      } else {
+        neutralTraits.push("📊 **Moderate Temperature Variation**: Some daily temperature fluctuation requiring adaptive HVAC controls");
       }
       
       // Humidity assessment
