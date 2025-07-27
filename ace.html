@@ -9601,16 +9601,16 @@
       if (window.signOut && window.firebaseAuth) {
         try {
           await window.signOut(window.firebaseAuth);
-          // Redirect back to login page after successful logout
-          window.location.href = 'index.html';
+          // Redirect back to root domain (login page) after successful logout
+          window.location.href = '/';
         } catch (error) {
           console.error('Logout error:', error);
-          // Even if logout fails, redirect to login page
-          window.location.href = 'index.html';
+          // Even if logout fails, redirect to root domain
+          window.location.href = '/';
         }
       } else {
-        // If Firebase not available, still redirect to login page
-        window.location.href = 'index.html';
+        // If Firebase not available, still redirect to root domain
+        window.location.href = '/';
       }
     }
 
