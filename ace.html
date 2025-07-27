@@ -72,11 +72,11 @@
       }
     }
     
-    // Force authentication overlay to show immediately
-    setTimeout(() => {
-      console.log('Forcing auth overlay display');
-      showAuthOverlay();
-    }, 100);
+    // Skip forcing auth overlay since users come from login page
+    // setTimeout(() => {
+    //   console.log('Forcing auth overlay display');
+    //   showAuthOverlay();
+    // }, 100);
     
     try {
       firebase.initializeApp(firebaseConfig);
