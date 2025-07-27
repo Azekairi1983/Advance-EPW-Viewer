@@ -3,16 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Climate Engine (ACE)</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <title>ACE - Authentication Required</title>
   
   <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+    }
+    
+    .auth-card {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .auth-header h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    
+    .auth-header p {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    
+    .form-toggle {
+      display: flex;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+    
+    .form-toggle button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .form-toggle button.active {
+      background: #007bff;
+      color: white;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e1e1e1;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+    
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .auth-submit:hover {
+      background: #0056b3;
+    }
+    
+    .auth-submit:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .auth-message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .ace-footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e1e1e1;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>ACE</h1>
+        <p>Advanced Climate Engine</p>
+      </div>
+      
+      <div class="form-toggle">
+        <button type="button" id="signinTab" class="active" onclick="switchTab('signin')">Sign In</button>
+        <button type="button" id="signupTab" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+      
+      <form id="authForm">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
+        </div>
+        
+        <button type="submit" class="auth-submit" id="authSubmit">Sign In</button>
+      </form>
+      
+      <div id="authMessage"></div>
+      
+      <div class="ace-footer">
+        <p>Professional climate analysis for sustainable building design</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
     // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDCPLODfmk0K9N3pLp9p2fb7humG2smuGY",
@@ -23,1089 +195,60 @@
       appId: "1:752191906651:web:b9c8f74fcdb5da5f73f07e",
       measurementId: "G-Y5CDVM876W"
     };
-    
+
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    
-    // Make auth available globally
-    window.firebaseAuth = auth;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-    window.signOut = signOut;
-    window.onAuthStateChanged = onAuthStateChanged;
-  </script>
-  
-  <!-- Visualization Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
-  <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
-  
-  <style>
-    :root {
-      --primary: #0070f3;
-      --primary-light: #3291ff;
-      --primary-dark: #0051a5;
-      --secondary: #7928ca;
-      --secondary-light: #a855f7;
-      --accent: #ff0080;
-      --accent-light: #ff4081;
-      --success: #00d924;
-      --warning: #f5a623;
-      --danger: #e00;
-      --background: #fafafa;
-      --surface: #ffffff;
-      --border: #eaeaea;
-      --text-primary: #000000;
-      --text-secondary: #666666;
-      --text-muted: #999999;
-      --shadow-small: 0 2px 4px rgba(0,0,0,0.1);
-      --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
-      --shadow-large: 0 8px 30px rgba(0,0,0,0.12);
-      --radius: 8px;
-      --radius-large: 12px;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-      background: var(--background);
-      padding: 24px;
-      color: var(--text-primary);
-      line-height: 1.5;
-      margin: 0;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    /* Authentication Overlay */
-    #authOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--background);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    #authOverlay.hidden {
-      display: none;
-    }
-    
-    .auth-container {
-      background: var(--surface);
-      padding: 40px;
-      border-radius: var(--radius-large);
-      box-shadow: var(--shadow-large);
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid var(--border);
-    }
-    
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .auth-logo .logo {
-      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
-      color: white;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 20px;
-      margin: 0 auto 15px;
-      box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-    }
-    
-    .auth-logo h1 {
-      margin: 0 0 5px 0;
-      font-size: 24px;
-      color: var(--text-primary);
-    }
-    
-    .auth-logo .subtitle {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin: 0;
-    }
-    
-    .auth-form-group {
-      margin-bottom: 20px;
-    }
-    
-    .auth-form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    
-    .auth-form-group input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 16px;
-      transition: border-color 0.2s;
-      box-sizing: border-box;
-    }
-    
-    .auth-form-group input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    
-    .auth-btn {
-      width: 100%;
-      padding: 12px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      margin-bottom: 15px;
-    }
-    
-    .auth-btn:hover {
-      background: var(--primary-dark);
-    }
-    
-    .auth-btn:disabled {
-      background: var(--text-secondary);
-      cursor: not-allowed;
-    }
-    
-    .auth-toggle {
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-    
-    .auth-toggle-link {
-      color: var(--primary);
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    
-    .auth-toggle-link:hover {
-      color: var(--primary-dark);
-    }
-    
-    .auth-message {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      text-align: center;
-    }
-    
-    .auth-message.error {
-      background: #fee;
-      color: var(--danger);
-      border: 1px solid #fcc;
-    }
-    
-    .auth-message.success {
-      background: #efe;
-      color: var(--success);
-      border: 1px solid #cfc;
-    }
-    
-    /* Main App Styles (copy from klimakoiq_static.html) */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    
-    .header-content {
-      flex: 1;
-    }
-    
-    .user-welcome {
-      color: rgba(255,255,255,0.9);
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-    }
-    
-    .logout-btn {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-      margin-left: 15px;
-    }
-    
-    .logout-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-    
-    .unit-toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    
-    .unit-toggle {
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 25px;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-    
-    .unit-toggle button {
-      background: transparent;
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      margin: 0;
-    }
-    
-    .unit-toggle button.active {
-      background: rgba(255, 255, 255, 0.9);
-      color: var(--primary-dark);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-    
-    .unit-toggle button:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .unit-label {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-    
-    /* ACE Tool Interface Styling */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    
-    .header-content {
-      flex: 1;
-    }
-    
-    .logout-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      margin-left: 15px;
-    }
-    
-    .logout-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-    
-    .user-welcome {
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    
-    button:hover {
-      background: var(--primary-dark);
-    }
-    
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    
-    button.secondary {
-      background: var(--secondary);
-    }
-    
-    button.accent {
-      background: var(--accent);
-    }
-    
-    .tabs {
-      display: flex;
-      background: white;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      overflow-x: auto;
-    }
-    
-    .tab {
-      padding: 15px 20px;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    
-    .tab:hover {
-      background: rgba(37, 99, 235, 0.05);
-      color: var(--primary);
-    }
-    
-    .tab.active {
-      border-bottom-color: var(--primary);
-      color: var(--primary);
-      background: rgba(37, 99, 235, 0.05);
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      margin-bottom: 20px;
-    }
-    
-    .two-column {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .stat-card {
-      background: var(--light);
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-      border: 1px solid var(--border);
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-    
-    .stat-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-    
-    .chart-wrapper {
-      height: 400px;
-      margin: 20px 0;
-      position: relative;
-    }
-    
-    .controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin: 15px 0;
-      flex-wrap: wrap;
-    }
-    
-    .controls-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 10px 0;
-    }
-    
-    .controls label {
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    
-    input[type="number"], input[type="range"], select {
-      padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    
-    input[type="file"] {
-      margin: 10px;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: white;
-    }
-    
-    .climate-zone-card {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    
-    .climate-zone-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .climate-zone-description {
-      font-size: 1rem;
-      opacity: 0.9;
-      margin-bottom: 15px;
-    }
-    
-    .daylighting-controls {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    
-    .daylighting-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin: 20px 0;
-    }
-    
-    .polar-chart-container, .sunpath-container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .heatmap-controls, .windrose-controls {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    #heatmap-container, #windrose-container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    @media (max-width: 768px) {
-      .two-column {
-        grid-template-columns: 1fr;
-      }
-      
-      .daylighting-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .tabs {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 5px;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      button {
-        width: 100%;
-        margin-bottom: 10px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Authentication Overlay -->
-  <div id="authOverlay">
-    <div class="auth-container">
-      <div class="auth-logo">
-        <div class="logo">ACE</div>
-        <h1>Advanced Climate Engine</h1>
-        <p class="subtitle">Professional EPW Climate Analysis Tool</p>
-      </div>
-      
-      <form id="authForm">
-        <div class="auth-form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" required>
-        </div>
-        
-        <div class="auth-form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required>
-        </div>
-        
-        <button type="submit" class="auth-btn" id="authSubmit">Sign In</button>
-        
-        <div class="auth-toggle">
-          <span id="authToggleText">Don't have an account?</span>
-          <span class="auth-toggle-link" id="authToggleLink">Sign up here</span>
-        </div>
-        
-        <div id="authMessage"></div>
-      </form>
-    </div>
-  </div>
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-  <!-- Main Application (hidden until authenticated) -->
-  <div id="mainApp" style="display: none;">
-    <div class="container">
-      <header>
-        <div class="header-content">
-          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-            <div style="background: linear-gradient(45deg, #007bff, #0056b3); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; box-shadow: 0 4px 8px rgba(0,123,255,0.3);">
-              ACE
-            </div>
-            <div>
-              <h2 style="margin: 0; color: #2c3e50;">Advanced Climate Engine</h2>
-              <p style="margin: 5px 0 0 0; color: #495057; font-style: italic; font-size: 0.9rem; font-weight: 500;">The ultimate tool for EPW-based climate analysis, design, and visualization</p>
-            </div>
-          </div>
-          <div class="user-welcome" id="userWelcome">Welcome!</div>
-          <h3 id="weatherFileInfo">Weather File: Not Loaded</h3>
-        </div>
-        <div style="display: flex; align-items: center;">
-          <div class="unit-toggle-container">
-            <span class="unit-label">Units:</span>
-            <div class="unit-toggle">
-              <button id="siButton" onclick="window.toggleToSI();">S.I.</button>
-              <button id="imperialButton" class="active" onclick="window.toggleToImperial();">Imperial</button>
-            </div>
-          </div>
-          <button class="logout-btn" id="logoutButton">Logout</button>
-        </div>
-      </header>
-
-      <!-- File Upload Section -->
-      <div id="uploadSection" style="border: 2px dashed #999; padding: 30px; margin-bottom: 20px; text-align: center; background: white; border-radius: 10px; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
-        <p>Drag & Drop your EPW file here or use the button below:</p>
-        <input type="file" id="fileInput" accept=".epw"><br>
-        <label><strong>Select Weather Parameter:</strong></label><br>
-        <select id="parameterSelect" disabled></select><br>
-        <div class="button-group">
-          <button id="downloadSelectedCSV" disabled>Download Selected Parameter</button>
-          <button id="downloadAllCSV" disabled>Download All Parameters</button>
-          <button id="downloadBinCSV" disabled>Download Selected Parameter Bins</button>
-          <button id="downloadReport" class="accent" disabled>Download Text Report</button>
-          <button id="downloadPDFReport" class="accent" disabled>Download PDF Report</button>
-        </div>
-      </div>
-
-      <!-- Complete ACE Interface -->
-      <div class="tabs">
-        <div class="tab active" data-tab="timeseries">Time Series</div>
-        <div class="tab" data-tab="histogram">Histogram</div>
-        <div class="tab" data-tab="psychro">Psychrometric</div>
-        <div class="tab" data-tab="climate">Climate Analysis</div>
-        <div class="tab" data-tab="hdd-cdd">HDD/CDD</div>
-        <div class="tab" data-tab="advanced">Advanced Metrics</div>
-        <div class="tab" data-tab="water">Water/Condensate</div>
-        <div class="tab" data-tab="daylighting">Daylighting Analysis</div>
-        <div class="tab" data-tab="heatmaps">Heat Maps</div>
-        <div class="tab" data-tab="windrose">Wind Rose</div>
-      </div>
-
-      <div id="timeseries" class="tab-content card active">
-        <div class="chart-wrapper">
-          <canvas id="weatherChart"></canvas>
-        </div>
-        <div class="controls">
-          <button id="resetZoom">Reset Zoom</button>
-          <button id="toggleDaily">Toggle Daily/Hourly</button>
-          <button id="toggleMonthly">Toggle Monthly View</button>
-        </div>
-      </div>
-
-      <div id="histogram" class="tab-content card">
-        <div class="chart-wrapper">
-          <canvas id="histogramChart"></canvas>
-        </div>
-        <div class="controls">
-          <label for="binCount">Bin Count:</label>
-          <input type="range" id="binCount" min="5" max="50" value="20">
-          <span id="binCountValue">20</span>
-        </div>
-      </div>
-
-      <div id="psychro" class="tab-content card">
-        <div id="chart" style="width:100%;height:600px;"></div>
-        <div class="controls">
-          <button id="toggleComfortZone" class="secondary">Toggle Comfort Zone</button>
-          <button id="toggleHumidityLines" class="secondary">Toggle Humidity Lines</button>
-        </div>
-      </div>
-
-      <div id="climate" class="tab-content card">
-        <div class="climate-zone-card">
-          <div class="climate-zone-title" id="ashrae-zone">ASHRAE Climate Zone: Loading...</div>
-          <div class="climate-zone-description" id="zone-description">Loading climate zone information...</div>
-          <div id="climate-badges"></div>
-        </div>
-        
-        <div class="two-column">
-          <div class="card">
-            <h4>Temperature Analysis</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="avg-temp">-</div>
-                <div class="stat-label" id="avg-temp-label">Annual Average Temperature (°C)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="max-temp">-</div>
-                <div class="stat-label" id="max-temp-label">Maximum Temperature (°C)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="min-temp">-</div>
-                <div class="stat-label" id="min-temp-label">Minimum Temperature (°C)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="temp-range">-</div>
-                <div class="stat-label" id="temp-range-label">Annual Temperature Range (°C)</div>
-              </div>
-            </div>
-            
-            <h4>Humidity Analysis</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="avg-rh">-</div>
-                <div class="stat-label">Average Relative Humidity (%)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="high-humidity-hours">-</div>
-                <div class="stat-label">Hours > 80% RH</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="low-humidity-hours">-</div>
-                <div class="stat-label">Hours < 30% RH</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="card">
-            <h4>Solar Radiation Analysis</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="annual-solar">-</div>
-                <div class="stat-label" id="annual-solar-label">Annual Solar Radiation (kWh/m²)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="peak-solar">-</div>
-                <div class="stat-label" id="peak-solar-label">Peak Solar Radiation (W/m²)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="solar-hours">-</div>
-                <div class="stat-label">Hours with Solar > 100 W/m²</div>
-              </div>
-            </div>
-            
-            <h4>Wind Analysis</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="avg-wind">-</div>
-                <div class="stat-label" id="avg-wind-label">Average Wind Speed (m/s)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="max-wind">-</div>
-                <div class="stat-label" id="max-wind-label">Maximum Wind Speed (m/s)</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="prevailing-wind">-</div>
-                <div class="stat-label">Prevailing Wind Direction</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="hdd-cdd" class="tab-content card">
-        <div class="two-column">
-          <div class="card">
-            <h4>Heating Degree Days (HDD)</h4>
-            <div class="controls-group">
-              <label for="hddBase">Base Temperature:</label>
-              <input type="number" id="hddBase" value="18.3" step="0.1">
-              <span id="hdd-base-unit">°C</span>
-            </div>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="annual-hdd">-</div>
-                <div class="stat-label" id="annual-hdd-label">Annual HDD</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="monthly-hdd-max">-</div>
-                <div class="stat-label">Peak Monthly HDD</div>
-              </div>
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="hddChart"></canvas>
-            </div>
-          </div>
-          
-          <div class="card">
-            <h4>Cooling Degree Days (CDD)</h4>
-            <div class="controls-group">
-              <label for="cddBase">Base Temperature:</label>
-              <input type="number" id="cddBase" value="18.3" step="0.1">
-              <span id="cdd-base-unit">°C</span>
-            </div>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="annual-cdd">-</div>
-                <div class="stat-label" id="annual-cdd-label">Annual CDD</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="monthly-cdd-max">-</div>
-                <div class="stat-label">Peak Monthly CDD</div>
-              </div>
-            </div>
-            <div class="chart-wrapper">
-              <canvas id="cddChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="advanced" class="tab-content card">
-        <div class="two-column">
-          <div class="card">
-            <h4>Thermal Comfort Metrics</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="comfort-hours">-</div>
-                <div class="stat-label">Hours in Comfort Zone</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="overheating-hours">-</div>
-                <div class="stat-label">Overheating Hours</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="underheating-hours">-</div>
-                <div class="stat-label">Underheating Hours</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="card">
-            <h4>Extreme Conditions</h4>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="extreme-heat-hours">-</div>
-                <div class="stat-label" id="extreme-heat-label">Hours > 35°C</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="extreme-cold-hours">-</div>
-                <div class="stat-label" id="extreme-cold-label">Hours < 0°C</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="extreme-humidity-hours">-</div>
-                <div class="stat-label">Hours > 80% RH</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="water" class="tab-content card">
-        <h4>Condensate Water Analysis</h4>
-        <p>Calculate condensate water production from HVAC cooling coils based on airflow and weather conditions.</p>
-        
-        <div class="two-column">
-          <div class="card">
-            <h5>Input Parameters</h5>
-            <div class="controls-group">
-              <label for="airflow-input">Airflow Rate:</label>
-              <input type="number" id="airflow-input" value="1000" min="1" step="1">
-              <select id="airflow-units">
-                <option value="cfm">CFM (ft³/min)</option>
-                <option value="cms">m³/s</option>
-                <option value="cmh">m³/h</option>
-              </select>
-            </div>
-            
-            <div class="controls-group">
-              <label for="supply-temp">Supply Air Temperature:</label>
-              <input type="number" id="supply-temp" value="55" step="0.1">
-              <span id="supply-temp-unit">°F</span>
-            </div>
-            
-            <button id="calculate-condensate" class="secondary">Calculate Condensate</button>
-          </div>
-          
-          <div class="card">
-            <h5>Annual Condensate Summary</h5>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="annual-condensate">-</div>
-                <div class="stat-label">Annual Total</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="peak-condensate-rate">-</div>
-                <div class="stat-label">Peak Rate</div>
-              </div>
-            </div>
-            
-            <h5>Monthly Condensate Production</h5>
-            <div class="chart-wrapper">
-              <canvas id="condensateChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="daylighting" class="tab-content card">
-        <h3>Daylighting Analysis & Solar Design</h3>
-        
-        <div class="daylighting-controls">
-          <div class="controls-group">
-            <label for="daylighting-period">Analysis Period:</label>
-            <select id="daylighting-period" onchange="updateDaylightingAnalysis()">
-              <option value="annual">Annual</option>
-              <option value="winter">Winter (DJF)</option>
-              <option value="spring">Spring (MAM)</option>
-              <option value="summer">Summer (JJA)</option>
-              <option value="fall">Fall (SON)</option>
-            </select>
-          </div>
-          
-          <div class="controls-group">
-            <label for="analysis-metric">Solar Metric:</label>
-            <select id="analysis-metric" onchange="updateDaylightingAnalysis()">
-              <option value="irradiance">Solar Irradiance (W/m²)</option>
-              <option value="illuminance">Illuminance (lux)</option>
-              <option value="daylight">Daylight Availability (%)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="daylighting-grid">
-          <div class="polar-chart-container">
-            <h4>Solar Resource Polar Analysis</h4>
-            <div id="solar-polar-chart" style="width: 100%; height: 700px;"></div>
-          </div>
-          
-          <div class="sunpath-container">
-            <h4>3D Sun Path Analysis</h4>
-            <div id="sunpath-3d-chart" style="width: 100%; height: 700px;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="heatmaps" class="tab-content card">
-        <div class="heatmap-controls">
-          <h4>Climate Heat Maps - Temporal Pattern Analysis</h4>
-          <div class="controls-group">
-            <label for="heatmapParameter">Climate Variable:</label>
-            <select id="heatmapParameter">
-              <option value="temperature">Temperature</option>
-              <option value="humidity">Relative Humidity</option>
-              <option value="solar">Solar Radiation</option>
-              <option value="wind">Wind Speed</option>
-            </select>
-          </div>
-        </div>
-        <div id="heatmap-container">
-          <div id="heatmap-chart" style="width:100%;height:600px;"></div>
-        </div>
-      </div>
-
-      <div id="windrose" class="tab-content card">
-        <div class="windrose-controls">
-          <h4>Wind Rose Analysis - Wind Patterns & Building Orientation</h4>
-          <div class="controls-group">
-            <label for="windrosePeriod">Analysis Period:</label>
-            <select id="windrosePeriod">
-              <option value="annual">Annual (All Year)</option>
-              <option value="january">January</option>
-              <option value="february">February</option>
-              <option value="march">March</option>
-              <option value="april">April</option>
-              <option value="may">May</option>
-              <option value="june">June</option>
-              <option value="july">July</option>
-              <option value="august">August</option>
-              <option value="september">September</option>
-              <option value="october">October</option>
-              <option value="november">November</option>
-              <option value="december">December</option>
-            </select>
-          </div>
-        </div>
-        <div id="windrose-container">
-          <div id="windrose-chart" style="width:100%;height:600px;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Authentication state management
     let isSignUp = false;
-    let currentUser = null;
 
-    // Initialize authentication
-    document.addEventListener('DOMContentLoaded', function() {
-      initializeAuth();
+    // Authentication state observer
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('User authenticated:', user.email);
+        // Redirect to ACE tool
+        window.location.href = './ace.html';
+      }
     });
 
-    function initializeAuth() {
-      const authForm = document.getElementById('authForm');
+    function switchTab(tab) {
+      const signinTab = document.getElementById('signinTab');
+      const signupTab = document.getElementById('signupTab');
       const authSubmit = document.getElementById('authSubmit');
-      const authToggleText = document.getElementById('authToggleText');
-      const authToggleLink = document.getElementById('authToggleLink');
-      const authMessage = document.getElementById('authMessage');
-      const logoutButton = document.getElementById('logoutButton');
-
-      // Toggle between sign in and sign up
-      authToggleLink.addEventListener('click', function() {
-        isSignUp = !isSignUp;
-        if (isSignUp) {
-          authSubmit.textContent = 'Sign Up';
-          authToggleText.textContent = 'Already have an account?';
-          authToggleLink.textContent = 'Sign in here';
-        } else {
-          authSubmit.textContent = 'Sign In';
-          authToggleText.textContent = "Don't have an account?";
-          authToggleLink.textContent = 'Sign up here';
-        }
-        authMessage.innerHTML = '';
-      });
-
-      // Handle form submission
-      authForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleAuth();
-      });
-
-      // Handle logout
-      logoutButton.addEventListener('click', function() {
-        handleLogout();
-      });
-
-      // Check for existing authentication
-      if (window.onAuthStateChanged && window.firebaseAuth) {
-        window.onAuthStateChanged(window.firebaseAuth, function(user) {
-          if (user) {
-            currentUser = user;
-            showMainApp();
-          } else {
-            currentUser = null;
-            showAuthOverlay();
-          }
-        });
+      
+      if (tab === 'signin') {
+        isSignUp = false;
+        signinTab.classList.add('active');
+        signupTab.classList.remove('active');
+        authSubmit.textContent = 'Sign In';
       } else {
-        // Fallback: show configuration message
-        showConfigurationMessage();
+        isSignUp = true;
+        signinTab.classList.remove('active');
+        signupTab.classList.add('active');
+        authSubmit.textContent = 'Sign Up';
       }
+      
+      // Clear any messages
+      document.getElementById('authMessage').innerHTML = '';
     }
 
-    async function handleAuth() {
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       const authMessage = document.getElementById('authMessage');
       const authSubmit = document.getElementById('authSubmit');
-
-      if (!window.firebaseAuth) {
-        showConfigurationMessage();
-        return;
-      }
-
+      
       authSubmit.disabled = true;
       authSubmit.textContent = isSignUp ? 'Creating Account...' : 'Signing In...';
 
       try {
         if (isSignUp) {
-          await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+          await auth.createUserWithEmailAndPassword(email, password);
           authMessage.innerHTML = '<div class="auth-message success">Account created successfully!</div>';
         } else {
-          await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+          await auth.signInWithEmailAndPassword(email, password);
           authMessage.innerHTML = '<div class="auth-message success">Signed in successfully!</div>';
         }
       } catch (error) {
@@ -1116,592 +259,11 @@
       }
     }
 
-    async function handleLogout() {
-      if (window.signOut && window.firebaseAuth) {
-        try {
-          await window.signOut(window.firebaseAuth);
-        } catch (error) {
-          console.error('Logout error:', error);
-        }
-      }
-    }
-
-    function showMainApp() {
-      document.getElementById('authOverlay').classList.add('hidden');
-      document.getElementById('mainApp').style.display = 'block';
-      
-      if (currentUser) {
-        const userWelcome = document.getElementById('userWelcome');
-        userWelcome.textContent = `Welcome, ${currentUser.email}!`;
-      }
-      
-      // Initialize the complete ACE tool
-      initializeACETool();
-    }
-    
-    function initializeACETool() {
-      // Initialize all ACE functionality after authentication
-      populateParameterSelect();
-      setupEventListeners();
-      initializeTabSystem();
-      initializeUnitSystem();
-    }
-    
-    // Add complete ACE functionality from static version
-    let weatherData = null;
-    let currentParameter = 'Dry Bulb Temperature';
-    let currentUnits = 'Imperial'; // Default to Imperial
-    let weatherChart = null;
-    let histogramChart = null;
-    let hddChart = null;
-    let cddChart = null;
-    let psychroChart = null;
-    let globalClimateData = null;
-    
-    const epwParameters = {
-      'Dry Bulb Temperature': { index: 6, unit: 'temperature' },
-      'Dew Point Temperature': { index: 7, unit: 'temperature' },
-      'Relative Humidity': { index: 8, unit: 'percentage' },
-      'Atmospheric Pressure': { index: 9, unit: 'pressure' },
-      'Global Horizontal Radiation': { index: 13, unit: 'solarRadiation' },
-      'Direct Normal Radiation': { index: 14, unit: 'solarRadiation' },
-      'Diffuse Horizontal Radiation': { index: 15, unit: 'solarRadiation' },
-      'Wind Direction': { index: 20, unit: 'angle' },
-      'Wind Speed': { index: 21, unit: 'windSpeed' },
-      'Total Sky Cover': { index: 22, unit: 'tenths' },
-      'Visibility': { index: 24, unit: 'distance' },
-      'Precipitable Water': { index: 28, unit: 'distance' },
-      'Liquid Precipitation Depth': { index: 33, unit: 'distance' }
-    };
-    
-    const unitLabels = {
-      'SI': {
-        'temperature': '°C',
-        'percentage': '%',
-        'pressure': 'Pa',
-        'solarRadiation': 'W/m²',
-        'angle': '°',
-        'windSpeed': 'm/s',
-        'tenths': 'tenths',
-        'distance': 'mm'
-      },
-      'Imperial': {
-        'temperature': '°F',
-        'percentage': '%',
-        'pressure': 'inHg',
-        'solarRadiation': 'Btu/h·ft²',
-        'angle': '°',
-        'windSpeed': 'mph',
-        'tenths': 'tenths',
-        'distance': 'in'
-      }
-    };
-    
-    function populateParameterSelect() {
-      const select = document.getElementById('parameterSelect');
-      if (!select) return;
-      
-      select.innerHTML = '';
-      Object.keys(epwParameters).forEach(param => {
-        const option = document.createElement('option');
-        option.value = param;
-        option.textContent = param;
-        select.appendChild(option);
-      });
-      select.value = currentParameter;
-    }
-    
-    function setupEventListeners() {
-      // File input
-      const fileInput = document.getElementById('fileInput');
-      if (fileInput) {
-        fileInput.addEventListener('change', handleFileSelect);
-      }
-      
-      // Parameter select
-      const paramSelect = document.getElementById('parameterSelect');
-      if (paramSelect) {
-        paramSelect.addEventListener('change', function() {
-          currentParameter = this.value;
-          updateCharts();
-        });
-      }
-      
-      // Chart controls
-      const resetZoom = document.getElementById('resetZoom');
-      if (resetZoom) {
-        resetZoom.addEventListener('click', function() {
-          if (weatherChart) {
-            weatherChart.resetZoom();
-          }
-        });
-      }
-    }
-    
-    function initializeTabSystem() {
-      const tabs = document.querySelectorAll('.tab');
-      const tabContents = document.querySelectorAll('.tab-content');
-      
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const targetTab = this.getAttribute('data-tab');
-          
-          // Remove active class from all tabs and contents
-          tabs.forEach(t => t.classList.remove('active'));
-          tabContents.forEach(content => content.classList.remove('active'));
-          
-          // Add active class to clicked tab and corresponding content
-          this.classList.add('active');
-          const targetContent = document.getElementById(targetTab);
-          if (targetContent) {
-            targetContent.classList.add('active');
-          }
-        });
-      });
-    }
-    
-    function initializeUnitSystem() {
-      const siButton = document.getElementById('siButton');
-      const imperialButton = document.getElementById('imperialButton');
-      
-      // Set up unit toggle functionality
-      window.toggleToSI = function() {
-        currentUnits = 'SI';
-        siButton.classList.add('active');
-        imperialButton.classList.remove('active');
-        updateAllDisplays();
-      };
-      
-      window.toggleToImperial = function() {
-        currentUnits = 'Imperial';
-        imperialButton.classList.add('active');
-        siButton.classList.remove('active');
-        updateAllDisplays();
-      };
-    }
-    
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        handleFile(file);
-      }
-    }
-    
-    function handleFile(file) {
-      if (!file.name.toLowerCase().endsWith('.epw')) {
-        alert('Please select a valid EPW file.');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          parseEPWFile(e.target.result, file.name);
-        } catch (error) {
-          alert('Error parsing EPW file: ' + error.message);
-        }
-      };
-      reader.readAsText(file);
-    }
-    
-    function parseEPWFile(content, filename) {
-      const lines = content.split('\n');
-      
-      // Parse header information
-      const locationLine = lines[0].split(',');
-      const location = {
-        city: locationLine[1],
-        state: locationLine[2],
-        country: locationLine[3],
-        latitude: parseFloat(locationLine[6]),
-        longitude: parseFloat(locationLine[7]),
-        timezone: parseFloat(locationLine[8]),
-        elevation: parseFloat(locationLine[9])
-      };
-      
-      // Parse weather data (skip header lines)
-      const dataLines = lines.slice(8).filter(line => line.trim() && line.split(',').length > 30);
-      
-      const data = dataLines.map(line => {
-        const values = line.split(',');
-        return {
-          month: parseInt(values[1]),
-          day: parseInt(values[2]),
-          hour: parseInt(values[3]),
-          minute: parseInt(values[4]),
-          dryBulbTemp: parseFloat(values[6]) || 0,
-          dewPointTemp: parseFloat(values[7]) || 0,
-          relativeHumidity: parseFloat(values[8]) || 0,
-          atmosphericPressure: parseFloat(values[9]) || 0,
-          globalHorizontalRadiation: parseFloat(values[13]) || 0,
-          directNormalRadiation: parseFloat(values[14]) || 0,
-          diffuseHorizontalRadiation: parseFloat(values[15]) || 0,
-          windDirection: parseFloat(values[20]) || 0,
-          windSpeed: parseFloat(values[21]) || 0,
-          totalSkyCover: parseFloat(values[22]) || 0,
-          visibility: parseFloat(values[24]) || 0,
-          precipitableWater: parseFloat(values[28]) || 0,
-          liquidPrecipitationDepth: parseFloat(values[33]) || 0
-        };
-      });
-      
-      weatherData = {
-        location: location,
-        data: data,
-        filename: filename
-      };
-      
-      // Update UI
-      const weatherFileInfo = document.getElementById('weatherFileInfo');
-      if (weatherFileInfo) {
-        weatherFileInfo.textContent = `Weather File: ${filename} - ${location.city}, ${location.state}, ${location.country}`;
-      }
-      
-      // Enable controls
-      const controls = ['parameterSelect', 'downloadSelectedCSV', 'downloadAllCSV', 'downloadBinCSV', 'downloadReport', 'downloadPDFReport'];
-      controls.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) element.disabled = false;
-      });
-      
-      updateAllDisplays();
-    }
-    
-    function updateAllDisplays() {
-      if (!weatherData) return;
-      updateCharts();
-      updateClimateAnalysis();
-    }
-    
-    function updateCharts() {
-      if (!weatherData) return;
-      updateTimeSeriesChart();
-      updateHistogram();
-    }
-    
-    function updateTimeSeriesChart() {
-      const canvas = document.getElementById('weatherChart');
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      
-      if (weatherChart) {
-        weatherChart.destroy();
-      }
-      
-      const paramInfo = epwParameters[currentParameter];
-      if (!paramInfo) return;
-      
-      const data = getParameterData(currentParameter);
-      const labels = weatherData.data.map((d, i) => `${d.month}/${d.day} ${d.hour}:00`);
-      
-      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
-      
-      weatherChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: `${currentParameter} ${unitLabel}`,
-            data: data,
-            borderColor: 'rgb(37, 99, 235)',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-            borderWidth: 1,
-            pointRadius: 0,
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Time'
-              }
-            },
-            y: {
-              title: {
-                display: true,
-                text: `${currentParameter} (${unitLabel})`
-              }
-            }
-          },
-          plugins: {
-            zoom: {
-              zoom: {
-                wheel: {
-                  enabled: true,
-                },
-                pinch: {
-                  enabled: true
-                },
-                mode: 'x',
-              },
-              pan: {
-                enabled: true,
-                mode: 'x',
-              }
-            }
-          }
-        }
-      });
-    }
-    
-    function updateHistogram() {
-      const canvas = document.getElementById('histogramChart');
-      if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      
-      if (histogramChart) {
-        histogramChart.destroy();
-      }
-      
-      const data = getParameterData(currentParameter);
-      const binCount = 20;
-      const min = Math.min(...data);
-      const max = Math.max(...data);
-      const binWidth = (max - min) / binCount;
-      
-      const bins = Array(binCount).fill(0);
-      const binLabels = [];
-      
-      for (let i = 0; i < binCount; i++) {
-        binLabels.push((min + i * binWidth).toFixed(1));
-      }
-      
-      data.forEach(value => {
-        const binIndex = Math.min(Math.floor((value - min) / binWidth), binCount - 1);
-        bins[binIndex]++;
-      });
-      
-      const paramInfo = epwParameters[currentParameter];
-      const unitLabel = paramInfo.unit ? unitLabels[currentUnits][paramInfo.unit] : '';
-      
-      histogramChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: binLabels,
-          datasets: [{
-            label: 'Frequency',
-            data: bins,
-            backgroundColor: 'rgba(37, 99, 235, 0.7)',
-            borderColor: 'rgb(37, 99, 235)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: `${currentParameter} (${unitLabel})`
-              }
-            },
-            y: {
-              title: {
-                display: true,
-                text: 'Frequency'
-              }
-            }
-          }
-        }
-      });
-    }
-    
-    function getParameterData(parameter) {
-      if (!weatherData || !epwParameters[parameter]) return [];
-      
-      const paramInfo = epwParameters[parameter];
-      return weatherData.data.map(d => {
-        let value;
-        switch (parameter) {
-          case 'Dry Bulb Temperature':
-            value = d.dryBulbTemp;
-            break;
-          case 'Dew Point Temperature':
-            value = d.dewPointTemp;
-            break;
-          case 'Relative Humidity':
-            value = d.relativeHumidity;
-            break;
-          case 'Atmospheric Pressure':
-            value = d.atmosphericPressure;
-            break;
-          case 'Global Horizontal Radiation':
-            value = d.globalHorizontalRadiation;
-            break;
-          case 'Direct Normal Radiation':
-            value = d.directNormalRadiation;
-            break;
-          case 'Diffuse Horizontal Radiation':
-            value = d.diffuseHorizontalRadiation;
-            break;
-          case 'Wind Direction':
-            value = d.windDirection;
-            break;
-          case 'Wind Speed':
-            value = d.windSpeed;
-            break;
-          case 'Total Sky Cover':
-            value = d.totalSkyCover;
-            break;
-          case 'Visibility':
-            value = d.visibility;
-            break;
-          case 'Precipitable Water':
-            value = d.precipitableWater;
-            break;
-          case 'Liquid Precipitation Depth':
-            value = d.liquidPrecipitationDepth;
-            break;
-          default:
-            value = 0;
-        }
-        
-        // Convert units if needed
-        if (paramInfo.unit) {
-          value = convertValue(value, paramInfo.unit, 'SI');
-        }
-        
-        return value;
-      });
-    }
-    
-    function convertValue(value, unit, targetSystem) {
-      if (currentUnits === targetSystem) return value;
-      
-      switch (unit) {
-        case 'temperature':
-          return currentUnits === 'SI' ? value : (value * 9/5) + 32;
-        case 'pressure':
-          return currentUnits === 'SI' ? value : value * 0.000295299830714;
-        case 'solarRadiation':
-          return currentUnits === 'SI' ? value : value * 0.316998;
-        case 'windSpeed':
-          return currentUnits === 'SI' ? value : value * 2.237;
-        case 'distance':
-          return currentUnits === 'SI' ? value : value * 0.0393701;
-        default:
-          return value;
-      }
-    }
-    
-    function updateClimateAnalysis() {
-      if (!weatherData) return;
-      
-      // Basic temperature analysis
-      const temps = weatherData.data.map(d => d.dryBulbTemp);
-      const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
-      const maxTemp = Math.max(...temps);
-      const minTemp = Math.min(...temps);
-      const tempRange = maxTemp - minTemp;
-      
-      // Update temperature displays
-      updateElementText('avg-temp', convertValue(avgTemp, 'temperature', 'SI').toFixed(1));
-      updateElementText('max-temp', convertValue(maxTemp, 'temperature', 'SI').toFixed(1));
-      updateElementText('min-temp', convertValue(minTemp, 'temperature', 'SI').toFixed(1));
-      updateElementText('temp-range', convertValue(tempRange, 'temperature', 'SI').toFixed(1));
-      
-      // Update humidity analysis
-      const humidity = weatherData.data.map(d => d.relativeHumidity);
-      const avgRH = humidity.reduce((a, b) => a + b, 0) / humidity.length;
-      const highHumidityHours = humidity.filter(h => h > 80).length;
-      const lowHumidityHours = humidity.filter(h => h < 30).length;
-      
-      updateElementText('avg-rh', avgRH.toFixed(1));
-      updateElementText('high-humidity-hours', highHumidityHours);
-      updateElementText('low-humidity-hours', lowHumidityHours);
-      
-      // Update solar analysis
-      const solar = weatherData.data.map(d => d.globalHorizontalRadiation);
-      const annualSolar = solar.reduce((a, b) => a + b, 0) / 1000; // Convert to kWh/m²
-      const peakSolar = Math.max(...solar);
-      const solarHours = solar.filter(s => s > 100).length;
-      
-      updateElementText('annual-solar', convertValue(annualSolar, 'solarRadiation', 'SI').toFixed(0));
-      updateElementText('peak-solar', convertValue(peakSolar, 'solarRadiation', 'SI').toFixed(0));
-      updateElementText('solar-hours', solarHours);
-      
-      // Update wind analysis
-      const windSpeeds = weatherData.data.map(d => d.windSpeed);
-      const avgWind = windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length;
-      const maxWind = Math.max(...windSpeeds);
-      
-      updateElementText('avg-wind', convertValue(avgWind, 'windSpeed', 'SI').toFixed(1));
-      updateElementText('max-wind', convertValue(maxWind, 'windSpeed', 'SI').toFixed(1));
-      updateElementText('prevailing-wind', 'SW'); // Simplified for now
-    }
-    
-    function updateElementText(id, text) {
-      const element = document.getElementById(id);
-      if (element) {
-        element.textContent = text;
-      }
-    }
-
-    function showAuthOverlay() {
-      document.getElementById('authOverlay').classList.remove('hidden');
-      document.getElementById('mainApp').style.display = 'none';
-    }
-
-    function showConfigurationMessage() {
-      const authMessage = document.getElementById('authMessage');
-      authMessage.innerHTML = `
-        <div class="auth-message error">
-          <strong>Firebase Configuration Required</strong><br>
-          Please configure Firebase Authentication to enable user management.
-          <br><br>
-          <a href="#" onclick="showInstructions()" style="color: var(--primary);">View Setup Instructions</a>
-        </div>
-      `;
-    }
-
-    function showInstructions() {
-      alert(`Firebase Setup Instructions:
-
-1. Go to https://console.firebase.google.com/
-2. Create a new project or select existing project
-3. Enable Authentication > Email/Password
-4. Get your Firebase config from Project Settings
-5. Replace the firebaseConfig object in this HTML file
-6. Add your domain to authorized domains in Firebase
-
-Your domain: ${window.location.hostname}`);
-    }
-
-    function loadACEInterface() {
-      // This is where you would load the full ACE interface
-      // For now, we'll show a placeholder
-      const aceInterface = document.getElementById('aceInterface');
-      aceInterface.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-          <h3>🎉 Authentication Successful!</h3>
-          <p>Welcome to the Advanced Climate Engine. The full climate analysis interface would be loaded here.</p>
-          <p><strong>Next Steps:</strong></p>
-          <ol style="text-align: left; max-width: 500px; margin: 0 auto;">
-            <li>Configure Firebase Authentication</li>
-            <li>Copy the full ACE interface from klimakoiq_static.html</li>
-            <li>Replace this placeholder section</li>
-          </ol>
-        </div>
-      `;
-    }
-
-    // Placeholder unit toggle functions
-    window.toggleToSI = function() {
-      document.getElementById('siButton').classList.add('active');
-      document.getElementById('imperialButton').classList.remove('active');
-    };
-
-    window.toggleToImperial = function() {
-      document.getElementById('siButton').classList.remove('active');
-      document.getElementById('imperialButton').classList.add('active');
-    };
+    // Initialize form
+    document.addEventListener('DOMContentLoaded', function() {
+      const authForm = document.getElementById('authForm');
+      authForm.addEventListener('submit', handleAuthSubmit);
+    });
   </script>
 </body>
 </html>
