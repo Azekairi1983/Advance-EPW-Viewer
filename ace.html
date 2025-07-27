@@ -78,29 +78,65 @@
     //   showAuthOverlay();
     // }, 100);
     
-    try {
-      firebase.initializeApp(firebaseConfig);
-      window.firebaseAuth = firebase.auth();
-      window.createUserWithEmailAndPassword = firebase.auth().createUserWithEmailAndPassword.bind(firebase.auth());
-      window.signInWithEmailAndPassword = firebase.auth().signInWithEmailAndPassword.bind(firebase.auth());
-      window.signOut = firebase.auth().signOut.bind(firebase.auth());
-
-      // Authentication state listener
-      firebase.auth().onAuthStateChanged(function(user) {
-        currentUser = user;
-        if (user) {
-          console.log('User authenticated:', user.email);
-          setTimeout(() => showMainApp(), 500);
-        } else {
-          console.log('User not authenticated');
-          showAuthOverlay();
+    // Wait for Firebase SDK to load before initializing
+    function initializeFirebase() {
+      try {
+        // Check if Firebase SDK is loaded
+        if (typeof firebase === 'undefined') {
+          console.error('Firebase SDK not loaded');
+          setTimeout(initializeFirebase, 100);
+          return;
         }
-      });
-      
-      console.log('Firebase initialized successfully');
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      showAuthOverlay();
+        
+        console.log('Firebase SDK loaded, initializing...');
+        firebase.initializeApp(firebaseConfig);
+        
+        // Ensure Firebase Auth is properly set
+        window.firebaseAuth = firebase.auth();
+        
+        // Double-check initialization
+        if (!window.firebaseAuth) {
+          console.error('Failed to initialize Firebase Auth');
+          throw new Error('Firebase Auth initialization failed');
+        }
+        
+        console.log('Firebase Auth initialized:', !!window.firebaseAuth);
+        
+        // Fix Firebase auth function binding
+        window.createUserWithEmailAndPassword = function(auth, email, password) {
+          return firebase.auth().createUserWithEmailAndPassword(email, password);
+        };
+        window.signInWithEmailAndPassword = function(auth, email, password) {
+          return firebase.auth().signInWithEmailAndPassword(email, password);
+        };
+        window.signOut = function(auth) {
+          return firebase.auth().signOut();
+        };
+
+        // Authentication state listener
+        firebase.auth().onAuthStateChanged(function(user) {
+          currentUser = user;
+          if (user) {
+            console.log('User authenticated:', user.email);
+            setTimeout(() => showMainApp(), 500);
+          } else {
+            console.log('User not authenticated');
+            showAuthOverlay();
+          }
+        });
+        
+        console.log('Firebase initialized successfully');
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showAuthOverlay();
+      }
+    }
+    
+    // Initialize Firebase when DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeFirebase);
+    } else {
+      initializeFirebase();
     }
   </script>
   <style>
@@ -9525,8 +9561,20 @@
       const authMessage = document.getElementById('authMessage');
       const authSubmit = document.getElementById('authSubmit');
       
-      if (!window.firebaseAuth) {
-        authMessage.innerHTML = '<div class="auth-message error">Firebase not initialized. Please check your configuration.</div>';
+      if (!window.firebaseAuth || !firebase || !firebase.auth) {
+        console.error('Firebase auth check failed:', {
+          firebaseAuth: !!window.firebaseAuth,
+          firebase: !!firebase,
+          firebaseAuthMethod: !!(firebase && firebase.auth)
+        });
+        authMessage.innerHTML = '<div class="auth-message error">Authentication system loading. Please wait a moment and try again.</div>';
+        // Retry initialization if needed
+        setTimeout(() => {
+          if (typeof firebase !== 'undefined' && firebase.auth) {
+            window.firebaseAuth = firebase.auth();
+            console.log('Firebase auth retry successful');
+          }
+        }, 1000);
         return;
       }
 
@@ -9553,9 +9601,16 @@
       if (window.signOut && window.firebaseAuth) {
         try {
           await window.signOut(window.firebaseAuth);
+          // Redirect back to login page after successful logout
+          window.location.href = 'index.html';
         } catch (error) {
           console.error('Logout error:', error);
+          // Even if logout fails, redirect to login page
+          window.location.href = 'index.html';
         }
+      } else {
+        // If Firebase not available, still redirect to login page
+        window.location.href = 'index.html';
       }
     }
 
