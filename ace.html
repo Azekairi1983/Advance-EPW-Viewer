@@ -9602,14 +9602,17 @@
         try {
           await window.signOut(window.firebaseAuth);
           // Redirect back to root domain (login page) after successful logout
+          console.log('Logout successful, redirecting to root domain');
           window.location.href = '/';
         } catch (error) {
           console.error('Logout error:', error);
           // Even if logout fails, redirect to root domain
+          console.log('Logout error occurred, redirecting to root domain');
           window.location.href = '/';
         }
       } else {
         // If Firebase not available, still redirect to root domain
+        console.log('Firebase not available, redirecting to root domain');
         window.location.href = '/';
       }
     }
